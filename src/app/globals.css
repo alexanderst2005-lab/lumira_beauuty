@@ -74,7 +74,8 @@ html {
 
 body {
   overflow-x: hidden;
-  background: var(--color-bg);
+  background: linear-gradient(135deg, var(--color-bg) 0%, var(--color-rose-50) 100%);
+  background-attachment: fixed;
   color: var(--color-txt);
 }
 
