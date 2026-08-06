@@ -24,6 +24,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
   const [isLocalFav, setIsLocalFav] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const handleFavoriteToggle = () => {
     toggleFavorite(product);
@@ -41,6 +42,8 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
     setTimeout(() => setIsAdded(false), 2000);
   };
 
+  const displayImages = product.images || [product.image];
+
   return (
     <div className="min-h-screen bg-bg">
       {/* Botón de retroceso */}
@@ -56,44 +59,68 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
-          {/* Imagen del Producto */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="relative aspect-[4/5] sm:aspect-square w-full rounded-2xl overflow-hidden bg-white border border-border-light shadow-sm"
-          >
-            <Image
-              src={product.image}
-              alt={product.name}
-              fill
-              className="object-contain p-8 sm:p-12 mix-blend-multiply"
-              priority
-              sizes="(max-width: 1024px) 100vw, 50vw"
-            />
-            {/* Fallback decorativo */}
-            <div className="absolute inset-0 flex items-center justify-center text-9xl opacity-10 pointer-events-none">
-              ✨
-            </div>
-
-            {/* Favorite Button Minimalista */}
-            <button
-              onClick={handleFavoriteToggle}
-              className="absolute top-6 right-6 z-20 p-2 bg-transparent transition-transform duration-300 hover:scale-110"
-              aria-label={isLocalFav ? "Quitar de favoritos" : "Agregar a favoritos"}
+          {/* Galería del Producto */}
+          <div className="flex flex-col gap-4">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="relative aspect-[4/5] sm:aspect-square w-full rounded-2xl overflow-hidden bg-white border border-border-light shadow-sm"
             >
-              <motion.div
-                animate={isLocalFav ? { scale: [1, 1.2, 1] } : { scale: 1 }}
-                transition={{ duration: 0.3 }}
+              <Image
+                src={displayImages[currentImageIndex]}
+                alt={product.name}
+                fill
+                className="object-contain p-8 sm:p-12 mix-blend-multiply transition-opacity duration-300"
+                priority
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
+              {/* Fallback decorativo */}
+              <div className="absolute inset-0 flex items-center justify-center text-9xl opacity-10 pointer-events-none">
+                ✨
+              </div>
+
+              {/* Favorite Button Minimalista */}
+              <button
+                onClick={handleFavoriteToggle}
+                className="absolute top-6 right-6 z-20 p-2 bg-transparent transition-transform duration-300 hover:scale-110"
+                aria-label={isLocalFav ? "Quitar de favoritos" : "Agregar a favoritos"}
               >
-                <Heart 
-                  strokeWidth={1.5}
-                  className={`w-6 h-6 sm:w-7 sm:h-7 transition-colors duration-300 ${
-                    isLocalFav ? 'fill-primary text-primary' : 'text-txt-secondary hover:text-txt'
-                  }`} 
-                />
-              </motion.div>
-            </button>
-          </motion.div>
+                <motion.div
+                  animate={isLocalFav ? { scale: [1, 1.2, 1] } : { scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Heart 
+                    strokeWidth={1.5}
+                    className={`w-6 h-6 sm:w-7 sm:h-7 transition-colors duration-300 ${
+                      isLocalFav ? 'fill-primary text-primary' : 'text-txt-secondary hover:text-txt'
+                    }`} 
+                  />
+                </motion.div>
+              </button>
+            </motion.div>
+
+            {/* Thumbnails */}
+            {displayImages.length > 1 && (
+              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                {displayImages.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentImageIndex(idx)}
+                    className={`relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all duration-200 ${
+                      currentImageIndex === idx ? 'border-primary' : 'border-transparent opacity-60 hover:opacity-100'
+                    }`}
+                  >
+                    <Image
+                      src={img}
+                      alt={`Vista ${idx + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
         {/* Información del Producto */}
         <motion.div

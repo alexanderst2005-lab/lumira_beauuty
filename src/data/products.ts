@@ -15,9 +15,9 @@ export const products: Product[] = [
   // ==========================================
   // PESTAÑAS PUNTO A PUNTO
   // ==========================================
-  { id: 'ppp-001', name: 'Pestañas punto a punto varios volúmenes', description: 'Ideales para crear un efecto natural o de mayor volumen.', fullDescription: 'Ideales para crear un efecto natural o de mayor volumen según tu estilo.', price: 22000, category: 'pestanas-punto-a-punto', image: '/images/products/placeholder.webp' },
-  { id: 'ppp-002', name: 'Pestañas 60D+80D+100D', description: 'Kit con diferentes volúmenes para un acabado personalizado.', fullDescription: 'Kit con diferentes volúmenes para lograr un acabado personalizado y profesional.', price: 22000, category: 'pestanas-punto-a-punto', image: '/images/products/placeholder.webp' },
-  { id: 'ppp-003', name: 'Pestañas ojo de gato 40D', description: 'Diseño efecto ojo de gato que alarga visualmente la mirada.', fullDescription: 'Diseño efecto ojo de gato que alarga visualmente la mirada con un acabado elegante.', price: 8000, category: 'pestanas-punto-a-punto', image: '/images/products/placeholder.webp' },
+  { id: 'ppp-001', name: 'Pestañas punto a punto varios volúmenes', description: 'Ideales para crear un efecto natural o de mayor volumen.', fullDescription: 'Ideales para crear un efecto natural o de mayor volumen según tu estilo.', price: 22000, category: 'pestanas-punto-a-punto', image: '/images/products/pestanas-punto-a-punto-varios.jpg' },
+  { id: 'ppp-002', name: 'Pestañas 60D+80D+100D', description: 'Kit con diferentes volúmenes para un acabado personalizado.', fullDescription: 'Kit con diferentes volúmenes para lograr un acabado personalizado y profesional.', price: 22000, category: 'pestanas-punto-a-punto', image: '/images/products/pestanas-60-80-100.jpg' },
+  { id: 'ppp-003', name: 'Pestañas ojo de gato 40D', description: 'Diseño efecto ojo de gato que alarga visualmente la mirada.', fullDescription: 'Diseño efecto ojo de gato que alarga visualmente la mirada con un acabado elegante.', price: 8000, category: 'pestanas-punto-a-punto', image: '/images/products/pestanas-40d.jpg' },
 
   // ==========================================
   // PESTAÑAS ENTERAS
@@ -41,7 +41,7 @@ export const products: Product[] = [
   // ==========================================
   // MAKEUP
   // ==========================================
-  { id: 'mk-001', name: 'Corrector Anik (varios tonos)', description: 'Corrector de alta cobertura con acabado natural.', fullDescription: 'Corrector de alta cobertura con acabado natural para unificar el tono de la piel.', price: 20000, category: 'makeup', image: '/images/products/placeholder.webp' },
+  { id: 'mk-001', name: 'Corrector Anik (varios tonos)', description: 'Corrector de alta cobertura con acabado natural.', fullDescription: 'Corrector de alta cobertura con acabado natural para unificar el tono de la piel.', price: 20000, category: 'makeup', image: '/images/products/corrector-anik-1.png', images: ['/images/products/corrector-anik-1.png', '/images/products/corrector-anik-2.jpg'] },
   { id: 'mk-002', name: 'Correctores Bloomshell', description: 'Corrector líquido de excelente cobertura.', fullDescription: 'Corrector líquido de excelente cobertura para un maquillaje impecable.', price: 20000, category: 'makeup', image: '/images/products/placeholder.webp' },
   { id: 'mk-003', name: 'Mini Correctores Bloomshell', description: 'Versión compacta, ideal para llevar en el bolso.', fullDescription: 'Versión compacta, ideal para llevar en el bolso o de viaje.', price: 13000, category: 'makeup', image: '/images/products/placeholder.webp' },
   { id: 'mk-004', name: 'Tinta Osito', description: 'Tinta multifuncional para labios y mejillas.', fullDescription: 'Tinta multifuncional para labios y mejillas con acabado natural.', price: 7000, category: 'makeup', image: '/images/products/placeholder.webp' },
