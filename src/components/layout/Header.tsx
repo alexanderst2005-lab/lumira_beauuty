@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, Menu, Search, X } from 'lucide-react';
+import { ShoppingCart, Menu, Search, X, Heart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { useFavorites } from '@/context/FavoritesContext';
 import MobileMenu from './MobileMenu';
 
 export default function Header() {
   const { itemCount, setIsCartOpen } = useCart();
+  const { favoritesCount, setIsFavoritesOpen } = useFavorites();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -84,6 +86,21 @@ export default function Header() {
               >
                 <Search className="w-5 h-5 text-text" />
               </Link>
+
+              {/* Favorites */}
+              <button
+                onClick={() => setIsFavoritesOpen(true)}
+                className="relative p-2 rounded-full hover:bg-secondary-100 transition-all duration-200 group"
+                aria-label="Favoritos"
+                id="favorites-button"
+              >
+                <Heart className="w-5 h-5 sm:w-6 sm:h-6 text-text group-hover:text-primary transition-colors duration-200" />
+                {favoritesCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center animate-pulse-soft">
+                    {favoritesCount}
+                  </span>
+                )}
+              </button>
 
               {/* Cart */}
               <button

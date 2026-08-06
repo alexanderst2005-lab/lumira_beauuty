@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Heart } from 'lucide-react';
 import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
+import { useFavorites } from '@/context/FavoritesContext';
 import { formatPrice } from '@/utils/whatsapp';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ProductCardProps {
   product: Product;
@@ -15,8 +17,25 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const [isAdding, setIsAdding] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const isFav = isFavorite(product.id);
+
+  const handleFavoriteToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleFavorite(product);
+    if (!isFav) {
+      toast.success('Agregado a tus favoritos ❤️', {
+        icon: '❤️'
+      });
+    } else {
+      toast('Eliminado de tus favoritos', {
+        icon: '💔'
+      });
+    }
+  };
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -49,7 +68,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       id={`product-${product.id}`}
     >
       {/* Imagen centrada y contenedor premium */}
-      <div className="product-image-container aspect-square flex items-center justify-center p-4">
+      <div className="product-image-container aspect-square flex items-center justify-center p-4 relative">
         <div className="relative w-full h-full">
           <Image
             src={product.image}
@@ -67,6 +86,26 @@ export default function ProductCard({ product }: ProductCardProps) {
             ✨
           </div>
         </div>
+
+        {/* Favorite Button */}
+        <button
+          onClick={handleFavoriteToggle}
+          className={`absolute top-3 right-3 z-20 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 hover:scale-110 shadow-sm ${
+            isFav 
+              ? 'bg-white/90 text-primary border border-primary/20 shadow-primary/20' 
+              : 'bg-white/60 text-txt-secondary/60 border border-white hover:text-primary hover:bg-white/90'
+          }`}
+          aria-label={isFav ? "Quitar de favoritos" : "Agregar a favoritos"}
+        >
+          <motion.div
+            animate={isFav ? { scale: [1, 1.2, 1] } : { scale: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Heart 
+              className={`w-5 h-5 transition-colors duration-300 ${isFav ? 'fill-primary' : ''}`} 
+            />
+          </motion.div>
+        </button>
       </div>
 
       {/* Contenido (Nombre, Descripción corta, Precio, Qty, Botón) */}

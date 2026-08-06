@@ -3,13 +3,15 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, ShoppingCart, Check } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Check, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
+import { useFavorites } from '@/context/FavoritesContext';
 import { formatPrice } from '@/utils/whatsapp';
 import QuantitySelector from './QuantitySelector';
 import ProductCard from '@/components/catalog/ProductCard';
+import { toast } from 'sonner';
 
 interface ProductDetailProps {
   product: Product;
@@ -18,8 +20,20 @@ interface ProductDetailProps {
 
 export default function ProductDetail({ product, relatedProducts }: ProductDetailProps) {
   const { addToCart } = useCart();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
+  
+  const isFav = isFavorite(product.id);
+
+  const handleFavoriteToggle = () => {
+    toggleFavorite(product);
+    if (!isFav) {
+      toast.success('Agregado a tus favoritos ❤️', { icon: '❤️' });
+    } else {
+      toast('Eliminado de tus favoritos', { icon: '💔' });
+    }
+  };
 
   const handleAddToCart = () => {
     addToCart(product, quantity);
@@ -61,6 +75,26 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
           <div className="absolute inset-0 flex items-center justify-center text-9xl opacity-10 pointer-events-none">
             ✨
           </div>
+
+          {/* Favorite Button */}
+          <button
+            onClick={handleFavoriteToggle}
+            className={`absolute top-6 right-6 z-20 p-3.5 rounded-full backdrop-blur-md transition-all duration-300 hover:scale-110 shadow-md ${
+              isFav 
+                ? 'bg-white/90 text-primary border border-primary/20 shadow-primary/20' 
+                : 'bg-white/70 text-txt-secondary/60 border border-white hover:text-primary hover:bg-white'
+            }`}
+            aria-label={isFav ? "Quitar de favoritos" : "Agregar a favoritos"}
+          >
+            <motion.div
+              animate={isFav ? { scale: [1, 1.2, 1] } : { scale: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Heart 
+                className={`w-7 h-7 transition-colors duration-300 ${isFav ? 'fill-primary' : ''}`} 
+              />
+            </motion.div>
+          </button>
         </motion.div>
 
         {/* Información del Producto */}
