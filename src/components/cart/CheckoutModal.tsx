@@ -45,15 +45,19 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
     const STORE_NUMBER = '573011675661'; // Este número se configurará posteriormente
     
-    let text = `Hola, quiero realizar el siguiente pedido:\n\n`;
-    text += `*Productos:*\n`;
+    let text = `Hola, quiero realizar el siguiente pedido:\n`;
+    text += `Productos:\n`;
     items.forEach((item) => {
-      text += `- ${item.product.name} × ${item.quantity} — ${formatPrice(item.product.price * item.quantity)}\n`;
+      text += `• ${item.product.name}\n`;
+      if (item.selectedTone) {
+        text += `  - Tono: ${item.selectedTone.name}\n`;
+      }
+      text += `  - Cantidad: ${item.quantity}\n`;
+      text += `  - Precio: ${formatPrice(item.product.price * item.quantity)}\n`;
     });
     
-    text += `\n*Total del pedido:* ${formatPrice(total)}\n\n`;
-    
-    text += `*Datos del cliente*\n`;
+    text += `Total del pedido: ${formatPrice(total)}\n`;
+    text += `Datos del cliente:\n`;
     text += `Nombre: ${formData.nombre}\n`;
     text += `WhatsApp: ${formData.whatsapp}\n`;
     text += `Ciudad: ${formData.ciudad}\n`;
@@ -61,8 +65,6 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     if (formData.barrio) text += `Barrio: ${formData.barrio}\n`;
     if (formData.referencia) text += `Referencia: ${formData.referencia}\n`;
     if (formData.observaciones) text += `Observaciones: ${formData.observaciones}\n`;
-    
-    text += `\nGracias.`;
 
     const encodedText = encodeURIComponent(text);
     const url = `https://wa.me/${STORE_NUMBER}?text=${encodedText}`;
