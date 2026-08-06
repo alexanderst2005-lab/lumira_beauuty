@@ -192,17 +192,17 @@ export default function HeroBanner() {
         {/* Navigation Arrows */}
         <button
           onClick={prev}
-          className="absolute left-1 sm:left-6 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full bg-white/10 sm:bg-white/20 backdrop-blur-sm sm:backdrop-blur-md hover:bg-white/50 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-110 z-20 border border-white/20 sm:border-white/30"
+          className="absolute left-0 sm:left-6 top-1/2 -translate-y-1/2 p-4 sm:p-3 rounded-full bg-transparent sm:bg-white/20 backdrop-blur-none sm:backdrop-blur-md hover:bg-white/10 sm:hover:bg-white/50 shadow-none sm:shadow-sm hover:shadow-md transition-all duration-300 sm:hover:scale-110 z-20 border border-transparent sm:border-white/30"
           aria-label="Anterior"
         >
-          <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-txt/70" />
+          <ChevronLeft className="w-6 h-6 sm:w-5 sm:h-5 text-txt/30 sm:text-txt/70 drop-shadow-sm" />
         </button>
         <button
           onClick={next}
-          className="absolute right-1 sm:right-6 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full bg-white/10 sm:bg-white/20 backdrop-blur-sm sm:backdrop-blur-md hover:bg-white/50 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-110 z-20 border border-white/20 sm:border-white/30"
+          className="absolute right-0 sm:right-6 top-1/2 -translate-y-1/2 p-4 sm:p-3 rounded-full bg-transparent sm:bg-white/20 backdrop-blur-none sm:backdrop-blur-md hover:bg-white/10 sm:hover:bg-white/50 shadow-none sm:shadow-sm hover:shadow-md transition-all duration-300 sm:hover:scale-110 z-20 border border-transparent sm:border-white/30"
           aria-label="Siguiente"
         >
-          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-txt/70" />
+          <ChevronRight className="w-6 h-6 sm:w-5 sm:h-5 text-txt/30 sm:text-txt/70 drop-shadow-sm" />
         </button>
 
         {/* Dots */}
