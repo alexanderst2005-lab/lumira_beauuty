@@ -69,7 +69,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     const encodedText = encodeURIComponent(text);
     const url = `https://wa.me/${STORE_NUMBER}?text=${encodedText}`;
     
-    window.open(url, '_blank');
+    window.location.href = url;
   };
 
   return (
