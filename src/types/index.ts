@@ -16,6 +16,7 @@ export interface Product {
   category: Category;
   image: string;
   images?: string[];
+  tones?: string[];
 }
 
 export interface CartItem {

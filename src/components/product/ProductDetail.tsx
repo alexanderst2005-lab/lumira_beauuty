@@ -25,6 +25,36 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
   const [isAdded, setIsAdded] = useState(false);
   const [isLocalFav, setIsLocalFav] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [selectedTone, setSelectedTone] = useState<string>(product.tones?.[0] || '');
+
+  // Swipe logic
+  const minSwipeDistance = 50;
+  
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEndHandler = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    const displayImages = product.images || [product.image];
+    if (isLeftSwipe && currentImageIndex < displayImages.length - 1) {
+      setCurrentImageIndex(prev => prev + 1);
+    }
+    if (isRightSwipe && currentImageIndex > 0) {
+      setCurrentImageIndex(prev => prev - 1);
+    }
+  };
 
   const handleFavoriteToggle = () => {
     toggleFavorite(product);
@@ -64,7 +94,10 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative aspect-[4/5] sm:aspect-square w-full rounded-2xl overflow-hidden bg-white border border-border-light shadow-sm"
+              className="relative aspect-[4/5] sm:aspect-square w-full rounded-2xl overflow-hidden bg-white border border-border-light shadow-sm touch-pan-y"
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEndHandler}
             >
               <Image
                 src={displayImages[currentImageIndex]}
@@ -78,6 +111,18 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
               <div className="absolute inset-0 flex items-center justify-center text-9xl opacity-10 pointer-events-none">
                 ✨
               </div>
+              
+              {/* Indicadores de swipe */}
+              {displayImages.length > 1 && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10 md:hidden">
+                  {displayImages.map((_, idx) => (
+                    <div 
+                      key={idx} 
+                      className={`h-1.5 rounded-full transition-all duration-300 ${currentImageIndex === idx ? 'w-4 bg-primary' : 'w-1.5 bg-border-light'}`}
+                    />
+                  ))}
+                </div>
+              )}
 
               {/* Favorite Button Minimalista */}
               <button
@@ -141,8 +186,34 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
             {formatPrice(product.price)}
           </div>
 
-          <div className="bg-white rounded-3xl p-6 border border-border-light shadow-lg shadow-primary/5 flex flex-col sm:flex-row items-center gap-6">
-            {/* Selector de Cantidad */}
+          <div className="bg-white rounded-3xl p-6 border border-border-light shadow-lg shadow-primary/5 flex flex-col gap-6">
+            
+            {/* Opciones de Tonos */}
+            {product.tones && product.tones.length > 0 && (
+              <div className="w-full">
+                <label className="block text-xs font-bold text-txt-secondary mb-3 uppercase tracking-wider">
+                  Tono seleccionado
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {product.tones.map((tone) => (
+                    <button
+                      key={tone}
+                      onClick={() => setSelectedTone(tone)}
+                      className={`px-3 py-2 text-sm rounded-xl border-2 transition-all duration-200 text-left ${
+                        selectedTone === tone
+                          ? 'border-primary bg-primary/5 text-primary font-semibold'
+                          : 'border-border-light text-txt-secondary hover:border-primary/30 hover:bg-bg'
+                      }`}
+                    >
+                      {tone}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row items-center gap-6">
+              {/* Selector de Cantidad */}
             <div className="w-full sm:w-auto">
               <label className="block text-xs font-bold text-txt-secondary mb-3 uppercase tracking-wider text-center sm:text-left">
                 Cantidad
@@ -173,6 +244,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
                 </>
               )}
             </button>
+            </div>
           </div>
         </motion.div>
         </div>
