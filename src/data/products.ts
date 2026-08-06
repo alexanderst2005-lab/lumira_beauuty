@@ -49,8 +49,18 @@ export const products: Product[] = [
     { name: '04. Ginger', hex: '#C68E58' },
     { name: '05. Golden Brown', hex: '#995C30' }
   ] },
-  { id: 'mk-002', name: 'Correctores Bloomshell', description: 'Corrector líquido de excelente cobertura.', fullDescription: 'Corrector líquido de excelente cobertura para un maquillaje impecable.', price: 20000, category: 'makeup', image: '/images/products/corrector-bloomshell-1.jpg', images: ['/images/products/corrector-bloomshell-1.jpg', '/images/products/corrector-bloomshell-2.jpg'] },
-  { id: 'mk-003', name: 'Mini Correctores Bloomshell', description: 'Versión compacta, ideal para llevar en el bolso.', fullDescription: 'Versión compacta, ideal para llevar en el bolso o de viaje.', price: 13000, category: 'makeup', image: '/images/products/mini-corrector-bloomshell-1.png', images: ['/images/products/mini-corrector-bloomshell-1.png', '/images/products/mini-corrector-bloomshell-2.jpg'] },
+  { id: 'mk-002', name: 'Correctores Bloomshell', description: 'Corrector líquido de excelente cobertura.', fullDescription: 'Corrector líquido de excelente cobertura para un maquillaje impecable.', price: 20000, category: 'makeup', image: '/images/products/corrector-bloomshell-1.jpg', images: ['/images/products/corrector-bloomshell-1.jpg', '/images/products/corrector-bloomshell-2.jpg'], tones: [
+    { name: '00', hex: '#F5EBE6' }, { name: '01', hex: '#EDDEC7' }, { name: '02', hex: '#E2CAAF' },
+    { name: '03', hex: '#D5B595' }, { name: '04', hex: '#C9A27F' }, { name: '4.5', hex: '#B58E6B' },
+    { name: '05', hex: '#AA7F56' }, { name: '5.5', hex: '#946A41' }, { name: '08', hex: '#6C4A2C' },
+    { name: '06', hex: '#DD7D59' }, { name: '07', hex: '#F3B2B1' }
+  ] },
+  { id: 'mk-003', name: 'Mini Correctores Bloomshell', description: 'Versión compacta, ideal para llevar en el bolso.', fullDescription: 'Versión compacta, ideal para llevar en el bolso o de viaje.', price: 13000, category: 'makeup', image: '/images/products/mini-corrector-bloomshell-1.png', images: ['/images/products/mini-corrector-bloomshell-1.png', '/images/products/mini-corrector-bloomshell-2.jpg'], tones: [
+    { name: '00', hex: '#F5EBE6' }, { name: '01', hex: '#EDDEC7' }, { name: '02', hex: '#E2CAAF' },
+    { name: '03', hex: '#D5B595' }, { name: '04', hex: '#C9A27F' }, { name: '4.5', hex: '#B58E6B' },
+    { name: '05', hex: '#AA7F56' }, { name: '5.5', hex: '#946A41' }, { name: '08', hex: '#6C4A2C' },
+    { name: '06', hex: '#DD7D59' }, { name: '07', hex: '#F3B2B1' }
+  ] },
   { id: 'mk-004', name: 'Tinta Osito', description: 'Tinta multifuncional para labios y mejillas.', fullDescription: 'Tinta multifuncional para labios y mejillas con acabado natural.', price: 7000, category: 'makeup', image: '/images/products/placeholder.webp' },
   { id: 'mk-005', name: 'Tinta Rimocoo', description: 'Tinta de larga duración con color intenso.', fullDescription: 'Tinta de larga duración con color intenso y ligero.', price: 6000, category: 'makeup', image: '/images/products/placeholder.webp' },
   { id: 'mk-006', name: 'Brillo Gloss con Color Plum', description: 'Gloss hidratante con un toque de color brillante.', fullDescription: 'Gloss hidratante con un toque de color brillante.', price: 6000, category: 'makeup', image: '/images/products/placeholder.webp' },
