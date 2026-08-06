@@ -15,9 +15,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface ProductCardProps {
   product: Product;
+  priority?: boolean;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, priority = false }: ProductCardProps) {
   const router = useRouter();
   const { addToCart } = useCart();
   const { toggleFavorite } = useFavorites();
@@ -85,6 +86,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             alt={product.name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            priority={priority}
             className="object-contain transition-transform duration-700 group-hover:scale-105 mix-blend-multiply"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
