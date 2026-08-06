@@ -90,7 +90,7 @@ export default function CartDrawer() {
 
               {/* Summary */}
               {items.length > 0 && (
-                <div className="border-t border-border p-5 space-y-3 bg-secondary-100/20">
+                <div className="border-t border-border p-4 space-y-2 bg-secondary-100/20 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
                   <div className="flex justify-between text-sm">
                     <span className="text-txt-secondary">Subtotal</span>
                     <span className="font-medium font-sans">{formatPrice(subtotal)}</span>
@@ -100,19 +100,19 @@ export default function CartDrawer() {
                     <span className="text-primary font-sans">{formatPrice(total)}</span>
                   </div>
 
-                  <div className="pt-2 flex flex-col gap-2">
+                  <div className="pt-1 flex flex-col gap-2">
                     <button
                       onClick={handleFinishOrder}
-                      className="w-full py-3.5 bg-primary hover:bg-primary-dark text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-95 shadow-lg shadow-primary/25 flex items-center justify-center gap-2 text-base font-sans"
+                      className="w-full py-2.5 bg-primary hover:bg-primary-dark text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-95 shadow-lg shadow-primary/25 flex items-center justify-center gap-2 text-base font-sans"
                       id="finish-order"
                     >
                       Finalizar pedido
-                      <ArrowRight className="w-5 h-5" />
+                      <ArrowRight className="w-4 h-4" />
                     </button>
                     
                     <button
                       onClick={() => setIsCartOpen(false)}
-                      className="w-full py-3 bg-white border border-border hover:border-primary/50 text-txt-secondary hover:text-txt font-semibold rounded-xl transition-colors flex items-center justify-center font-sans"
+                      className="w-full py-2 bg-white border border-border hover:border-primary/50 text-txt-secondary hover:text-txt font-semibold rounded-xl transition-colors flex items-center justify-center font-sans text-sm"
                     >
                       Seguir comprando
                     </button>
@@ -120,7 +120,7 @@ export default function CartDrawer() {
 
                   <button
                     onClick={clearCart}
-                    className="w-full py-2 mt-2 text-sm text-txt-secondary hover:text-red-500 font-medium transition-colors font-sans"
+                    className="w-full py-1 mt-1 text-xs text-txt-secondary/70 hover:text-red-500 font-medium transition-colors font-sans"
                   >
                     Vaciar carrito
                   </button>

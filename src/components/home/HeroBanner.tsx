@@ -192,14 +192,14 @@ export default function HeroBanner() {
         {/* Navigation Arrows */}
         <button
           onClick={prev}
-          className="absolute left-1 sm:left-6 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/50 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-110 z-20 border border-white/30"
+          className="absolute left-1 sm:left-6 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full bg-white/10 sm:bg-white/20 backdrop-blur-sm sm:backdrop-blur-md hover:bg-white/50 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-110 z-20 border border-white/20 sm:border-white/30"
           aria-label="Anterior"
         >
           <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-txt/70" />
         </button>
         <button
           onClick={next}
-          className="absolute right-1 sm:right-6 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/50 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-110 z-20 border border-white/30"
+          className="absolute right-1 sm:right-6 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full bg-white/10 sm:bg-white/20 backdrop-blur-sm sm:backdrop-blur-md hover:bg-white/50 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-110 z-20 border border-white/20 sm:border-white/30"
           aria-label="Siguiente"
         >
           <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-txt/70" />
