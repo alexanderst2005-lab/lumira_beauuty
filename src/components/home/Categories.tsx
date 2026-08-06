@@ -31,10 +31,11 @@ export default function Categories() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
               transition={{ duration: 0.4, delay: index * 0.06 }}
+              className="h-full"
             >
               <Link
                 href={`/catalogo?categoria=${cat.slug}`}
-                className="group block p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-secondary-100/50 to-white border border-border hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 transform hover:-translate-y-1 text-center"
+                className="group h-full flex flex-col items-center justify-center p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-secondary-100/50 to-white border border-border hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 transform hover:-translate-y-1 text-center"
                 id={`category-${cat.slug}`}
               >
                 <div className="text-3xl sm:text-4xl mb-3 transition-transform duration-300 group-hover:scale-110">
