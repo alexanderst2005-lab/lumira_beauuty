@@ -16,7 +16,7 @@ export const products: Product[] = [
   // PESTAÑAS PUNTO A PUNTO
   // ==========================================
   { id: 'ppp-001', name: 'Pestañas punto a punto varios volúmenes', description: 'Ideales para crear un efecto natural o de mayor volumen.', fullDescription: 'Ideales para crear un efecto natural o de mayor volumen según tu estilo.', price: 22000, category: 'pestanas-punto-a-punto', image: '/images/products/placeholder.webp' },
-  { id: 'ppp-002', name: '60D+80D+100D', description: 'Kit con diferentes volúmenes para un acabado personalizado.', fullDescription: 'Kit con diferentes volúmenes para lograr un acabado personalizado y profesional.', price: 22000, category: 'pestanas-punto-a-punto', image: '/images/products/placeholder.webp' },
+  { id: 'ppp-002', name: 'Pestañas 60D+80D+100D', description: 'Kit con diferentes volúmenes para un acabado personalizado.', fullDescription: 'Kit con diferentes volúmenes para lograr un acabado personalizado y profesional.', price: 22000, category: 'pestanas-punto-a-punto', image: '/images/products/placeholder.webp' },
   { id: 'ppp-003', name: 'Pestañas ojo de gato 40D', description: 'Diseño efecto ojo de gato que alarga visualmente la mirada.', fullDescription: 'Diseño efecto ojo de gato que alarga visualmente la mirada con un acabado elegante.', price: 8000, category: 'pestanas-punto-a-punto', image: '/images/products/placeholder.webp' },
 
   // ==========================================
