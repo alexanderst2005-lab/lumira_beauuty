@@ -54,52 +54,47 @@ export default function Footer() {
           {/* Contact */}
           <div>
             <h3 className="font-heading font-semibold text-txt mb-4 text-sm uppercase tracking-wider">
-              Contacto
+              Síguenos
             </h3>
-            <ul className="space-y-3">
-              <li>
-                <a
-                  href="https://wa.me/573011675661"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-txt-secondary hover:text-primary transition-colors duration-200 inline-flex items-center gap-2 font-sans"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  WhatsApp
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://www.instagram.com/lumira_beauuty?igsh=eHkzbWJkM3Mxbm10"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-txt-secondary hover:text-primary transition-colors duration-200 inline-flex items-center gap-2 font-sans"
-                >
-                  <Camera className="w-4 h-4" />
-                  Instagram
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://www.tiktok.com/@lumira_beauuty?_t=ZS-90RZGJ7JNiM&fbclid=PAZnRzaATg1uZwZG9mAmV4dG4DYWVtAjExAHNydGMGYXBwX2lkDzEyNDAyNDU3NDI4NzQxNAABp_CTKJ_LLj_YlwQOCGerLO366uygjs4G-a5Hw7SlaqyFf16VMfoDBdknL-RY_aem_rQdUGoevQFKF6pJFBzfAlQ"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-txt-secondary hover:text-primary transition-colors duration-200 inline-flex items-center gap-2 font-sans"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  TikTok
-                </a>
-              </li>
-              <li>
-                <a
-                  href="mailto:contacto@lumirabeauty.com"
-                  className="text-sm text-txt-secondary hover:text-primary transition-colors duration-200 inline-flex items-center gap-2 font-sans"
-                >
-                  <Mail className="w-4 h-4" />
-                  contacto@lumirabeauty.com
-                </a>
-              </li>
-            </ul>
+            <div className="flex items-center gap-4">
+              <a
+                href="https://www.instagram.com/lumira_beauuty?igsh=eHkzbWJkM3Mxbm10"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-11 h-11 rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-white flex items-center justify-center transition-all duration-300"
+                aria-label="Instagram"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+              </a>
+              <a
+                href="https://wa.me/573011675661"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-11 h-11 rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-white flex items-center justify-center transition-all duration-300"
+                aria-label="WhatsApp"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              </a>
+              <a
+                href="https://www.tiktok.com/@lumira_beauuty?_t=ZS-90RZGJ7JNiM&fbclid=PAZnRzaATg1uZwZG9mAmV4dG4DYWVtAjExAHNydGMGYXBwX2lkDzEyNDAyNDU3NDI4NzQxNAABp_CTKJ_LLj_YlwQOCGerLO366uygjs4G-a5Hw7SlaqyFf16VMfoDBdknL-RY_aem_rQdUGoevQFKF6pJFBzfAlQ"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-11 h-11 rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-white flex items-center justify-center transition-all duration-300"
+                aria-label="TikTok"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
+              </a>
+            </div>
+
+            <div className="mt-6">
+              <a
+                href="mailto:contacto@lumirabeauty.com"
+                className="text-sm text-txt-secondary hover:text-primary transition-colors duration-200 inline-flex items-center gap-2 font-sans"
+              >
+                <Mail className="w-4 h-4" />
+                contacto@lumirabeauty.com
+              </a>
+            </div>
           </div>
 
           {/* Info */}
