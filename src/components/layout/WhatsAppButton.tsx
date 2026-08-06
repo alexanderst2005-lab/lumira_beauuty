@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 
 export default function WhatsAppButton() {
   const [isVisible, setIsVisible] = useState(false);
-  const STORE_NUMBER = '573000000000'; // Mismo número de la tienda
+  const STORE_NUMBER = '573011675661'; // Mismo número de la tienda
   const DEFAULT_MESSAGE = '¡Hola! Me gustaría recibir más información sobre sus productos en Lumira Beauty. ✨';
 
   useEffect(() => {

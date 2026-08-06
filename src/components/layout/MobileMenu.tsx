@@ -14,7 +14,7 @@ const menuItems = [
   { href: '/', label: 'Inicio', icon: Home },
   { href: '/catalogo', label: 'Catálogo', icon: ShoppingBag },
   { href: '/contacto', label: 'Contacto', icon: MessageCircle },
-  { href: 'https://wa.me/573000000000', label: 'WhatsApp', icon: Phone, external: true },
+  { href: 'https://wa.me/573011675661', label: 'WhatsApp', icon: Phone, external: true },
 ];
 
 export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {

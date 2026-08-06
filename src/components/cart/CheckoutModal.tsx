@@ -43,7 +43,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
       return;
     }
 
-    const STORE_NUMBER = '573000000000'; // Este número se configurará posteriormente
+    const STORE_NUMBER = '573011675661'; // Este número se configurará posteriormente
     
     let text = `Hola, quiero realizar el siguiente pedido:\n\n`;
     text += `*Productos:*\n`;

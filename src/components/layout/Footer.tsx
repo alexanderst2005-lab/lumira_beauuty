@@ -59,7 +59,7 @@ export default function Footer() {
             <ul className="space-y-3">
               <li>
                 <a
-                  href="https://wa.me/573000000000"
+                  href="https://wa.me/573011675661"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm text-txt-secondary hover:text-primary transition-colors duration-200 inline-flex items-center gap-2 font-sans"
@@ -70,7 +70,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="https://instagram.com/lumirabeauty"
+                  href="https://www.instagram.com/lumira_beauuty?igsh=eHkzbWJkM3Mxbm10"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm text-txt-secondary hover:text-primary transition-colors duration-200 inline-flex items-center gap-2 font-sans"
@@ -81,7 +81,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="https://tiktok.com/@lumirabeauty"
+                  href="https://www.tiktok.com/@lumira_beauuty?_t=ZS-90RZGJ7JNiM&fbclid=PAZnRzaATg1uZwZG9mAmV4dG4DYWVtAjExAHNydGMGYXBwX2lkDzEyNDAyNDU3NDI4NzQxNAABp_CTKJ_LLj_YlwQOCGerLO366uygjs4G-a5Hw7SlaqyFf16VMfoDBdknL-RY_aem_rQdUGoevQFKF6pJFBzfAlQ"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm text-txt-secondary hover:text-primary transition-colors duration-200 inline-flex items-center gap-2 font-sans"

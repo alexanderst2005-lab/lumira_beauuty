@@ -1,6 +1,6 @@
 import { CartItem } from '@/types';
 
-const WHATSAPP_NUMBER = '573000000000'; // Reemplaza con el número real
+const WHATSAPP_NUMBER = '573011675661'; // Reemplaza con el número real
 
 export function formatPrice(price: number): string {
   return new Intl.NumberFormat('es-CO', {
