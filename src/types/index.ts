@@ -7,6 +7,11 @@ export type Category =
   | 'productos-cabello'
   | 'accesorios';
 
+export interface Tone {
+  name: string;
+  hex: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -16,12 +21,14 @@ export interface Product {
   category: Category;
   image: string;
   images?: string[];
-  tones?: string[];
+  tones?: Tone[];
 }
 
 export interface CartItem {
+  id: string; // Unique cart item ID: productId + selectedTone (if any)
   product: Product;
   quantity: number;
+  selectedTone?: Tone;
 }
 
 export interface CategoryInfo {

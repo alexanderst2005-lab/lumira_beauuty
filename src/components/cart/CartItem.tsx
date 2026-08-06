@@ -38,6 +38,11 @@ export default function CartItem({ item }: CartItemProps) {
         <h4 className="text-sm font-semibold text-text line-clamp-1">
           {item.product.name}
         </h4>
+        {item.selectedTone && (
+          <p className="text-xs text-txt-secondary mt-0.5">
+            Tono: <span className="font-medium text-txt">{item.selectedTone.name}</span>
+          </p>
+        )}
         <p className="text-sm font-bold text-primary mt-0.5">
           {formatPrice(item.product.price)}
         </p>
@@ -46,7 +51,7 @@ export default function CartItem({ item }: CartItemProps) {
           {/* Quantity Controls */}
           <div className="flex items-center gap-1">
             <button
-              onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+              onClick={() => updateQuantity(item.id, item.quantity - 1)}
               className="w-7 h-7 rounded-full bg-white border border-border flex items-center justify-center hover:border-primary/30 hover:text-primary transition-colors"
               aria-label="Disminuir cantidad"
             >
@@ -54,7 +59,7 @@ export default function CartItem({ item }: CartItemProps) {
             </button>
             <span className="w-8 text-center text-sm font-semibold">{item.quantity}</span>
             <button
-              onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+              onClick={() => updateQuantity(item.id, item.quantity + 1)}
               className="w-7 h-7 rounded-full bg-white border border-border flex items-center justify-center hover:border-primary/30 hover:text-primary transition-colors"
               aria-label="Aumentar cantidad"
             >
@@ -64,7 +69,7 @@ export default function CartItem({ item }: CartItemProps) {
 
           {/* Remove */}
           <button
-            onClick={() => removeFromCart(item.product.id)}
+            onClick={() => removeFromCart(item.id)}
             className="p-1.5 rounded-full hover:bg-red-50 text-text-light hover:text-red-500 transition-colors"
             aria-label={`Eliminar ${item.product.name}`}
           >

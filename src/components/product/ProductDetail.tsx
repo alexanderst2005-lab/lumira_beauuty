@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, ShoppingCart, Check, Heart } from 'lucide-react';
+import { Heart, ShoppingCart, ArrowLeft, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Product } from '@/types';
+import { Product, Tone } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { useFavorites } from '@/context/FavoritesContext';
 import { formatPrice } from '@/utils/whatsapp';
@@ -27,7 +27,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  const [selectedTone, setSelectedTone] = useState<string>(product.tones?.[0] || '');
+  const [selectedTone, setSelectedTone] = useState<Tone | null>(null);
 
   // Swipe logic
   const minSwipeDistance = 50;
@@ -67,7 +67,11 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
   };
 
   const handleAddToCart = () => {
-    addToCart(product, quantity);
+    if (product.tones && product.tones.length > 0 && !selectedTone) {
+      toast.error('Selecciona un tono antes de agregar este producto al carrito.', { icon: '🎨' });
+      return;
+    }
+    addToCart(product, quantity, selectedTone || undefined);
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
   };
@@ -192,21 +196,22 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
             {product.tones && product.tones.length > 0 && (
               <div className="w-full">
                 <label className="block text-xs font-bold text-txt-secondary mb-3 uppercase tracking-wider">
-                  Tono seleccionado
+                  Tono seleccionado: <span className="text-txt font-semibold">{selectedTone ? selectedTone.name : 'Ninguno'}</span>
                 </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <div className="flex flex-wrap gap-3">
                   {product.tones.map((tone) => (
                     <button
-                      key={tone}
+                      key={tone.name}
                       onClick={() => setSelectedTone(tone)}
-                      className={`px-3 py-2 text-sm rounded-xl border-2 transition-all duration-200 text-left ${
-                        selectedTone === tone
-                          ? 'border-primary bg-primary/5 text-primary font-semibold'
-                          : 'border-border-light text-txt-secondary hover:border-primary/30 hover:bg-bg'
+                      className={`w-10 h-10 rounded-full border-2 transition-all duration-200 shadow-sm hover:scale-110 ${
+                        selectedTone?.name === tone.name
+                          ? 'border-primary ring-2 ring-primary/20 scale-110'
+                          : 'border-border hover:border-txt-secondary'
                       }`}
-                    >
-                      {tone}
-                    </button>
+                      style={{ backgroundColor: tone.hex }}
+                      aria-label={`Seleccionar tono ${tone.name}`}
+                      title={tone.name}
+                    />
                   ))}
                 </div>
               </div>

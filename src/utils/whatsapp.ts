@@ -13,8 +13,14 @@ export function formatPrice(price: number): string {
 
 export function generateWhatsAppMessage(items: CartItem[], total: number): string {
   const productLines = items
-    .map((item) => `• ${item.product.name} x${item.quantity}`)
-    .join('\n');
+    .map((item) => {
+      let line = `• ${item.product.name}\n  * Cantidad: ${item.quantity}\n  * Precio: ${formatPrice(item.product.price * item.quantity)}`;
+      if (item.selectedTone) {
+        line = `• ${item.product.name}\n  * Tono: ${item.selectedTone.name}\n  * Cantidad: ${item.quantity}\n  * Precio: ${formatPrice(item.product.price * item.quantity)}`;
+      }
+      return line;
+    })
+    .join('\n\n');
 
   const message = `Hola, quiero realizar el siguiente pedido:\n\n${productLines}\n\nTotal: ${formatPrice(total)}`;
 

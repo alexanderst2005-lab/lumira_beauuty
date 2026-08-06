@@ -41,7 +41,14 @@ export const products: Product[] = [
   // ==========================================
   // MAKEUP
   // ==========================================
-  { id: 'mk-001', name: 'Corrector Anik (varios tonos)', description: 'Corrector de alta cobertura con acabado natural.', fullDescription: 'Corrector de alta cobertura con acabado natural para unificar el tono de la piel.', price: 20000, category: 'makeup', image: '/images/products/corrector-anik-1.png', images: ['/images/products/corrector-anik-1.png', '/images/products/corrector-anik-2.jpg'], tones: ['00. Snow', '01. Bone', '02. Radiant', '03. Honey', '04. Ginger', '05. Golden Brown'] },
+  { id: 'mk-001', name: 'Corrector Anik (varios tonos)', description: 'Corrector de alta cobertura con acabado natural.', fullDescription: 'Corrector de alta cobertura con acabado natural para unificar el tono de la piel.', price: 20000, category: 'makeup', image: '/images/products/corrector-anik-1.png', images: ['/images/products/corrector-anik-1.png', '/images/products/corrector-anik-2.jpg'], tones: [
+    { name: '00. Snow', hex: '#FFF2E6' },
+    { name: '01. Bone', hex: '#F7E1D7' },
+    { name: '02. Radiant', hex: '#EED3AE' },
+    { name: '03. Honey', hex: '#D6A675' },
+    { name: '04. Ginger', hex: '#C68E58' },
+    { name: '05. Golden Brown', hex: '#995C30' }
+  ] },
   { id: 'mk-002', name: 'Correctores Bloomshell', description: 'Corrector líquido de excelente cobertura.', fullDescription: 'Corrector líquido de excelente cobertura para un maquillaje impecable.', price: 20000, category: 'makeup', image: '/images/products/placeholder.webp' },
   { id: 'mk-003', name: 'Mini Correctores Bloomshell', description: 'Versión compacta, ideal para llevar en el bolso.', fullDescription: 'Versión compacta, ideal para llevar en el bolso o de viaje.', price: 13000, category: 'makeup', image: '/images/products/placeholder.webp' },
   { id: 'mk-004', name: 'Tinta Osito', description: 'Tinta multifuncional para labios y mejillas.', fullDescription: 'Tinta multifuncional para labios y mejillas con acabado natural.', price: 7000, category: 'makeup', image: '/images/products/placeholder.webp' },

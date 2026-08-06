@@ -5,9 +5,9 @@ import { Product, CartItem } from '@/types';
 
 interface CartContextType {
   items: CartItem[];
-  addToCart: (product: Product, quantity?: number) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  addToCart: (product: Product, quantity?: number, selectedTone?: { name: string; hex: string }) => void;
+  removeFromCart: (cartItemId: string) => void;
+  updateQuantity: (cartItemId: string, quantity: number) => void;
   clearCart: () => void;
   itemCount: number;
   subtotal: number;
@@ -43,32 +43,33 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, isLoaded]);
 
-  const addToCart = useCallback((product: Product, quantity = 1) => {
+  const addToCart = useCallback((product: Product, quantity = 1, selectedTone?: { name: string; hex: string }) => {
     setItems((prev) => {
-      const existing = prev.find((item) => item.product.id === product.id);
+      const cartItemId = selectedTone ? `${product.id}-${selectedTone.name}` : product.id;
+      const existing = prev.find((item) => item.id === cartItemId);
       if (existing) {
         return prev.map((item) =>
-          item.product.id === product.id
+          item.id === cartItemId
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       }
-      return [...prev, { product, quantity }];
+      return [...prev, { id: cartItemId, product, quantity, selectedTone }];
     });
   }, []);
 
-  const removeFromCart = useCallback((productId: string) => {
-    setItems((prev) => prev.filter((item) => item.product.id !== productId));
+  const removeFromCart = useCallback((cartItemId: string) => {
+    setItems((prev) => prev.filter((item) => item.id !== cartItemId));
   }, []);
 
-  const updateQuantity = useCallback((productId: string, quantity: number) => {
+  const updateQuantity = useCallback((cartItemId: string, quantity: number) => {
     if (quantity <= 0) {
-      setItems((prev) => prev.filter((item) => item.product.id !== productId));
+      setItems((prev) => prev.filter((item) => item.id !== cartItemId));
       return;
     }
     setItems((prev) =>
       prev.map((item) =>
-        item.product.id === productId ? { ...item, quantity } : item
+        item.id === cartItemId ? { ...item, quantity } : item
       )
     );
   }, []);
