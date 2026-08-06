@@ -6,12 +6,13 @@ import { motion } from 'framer-motion';
 import { getProductsByCategory, searchProducts } from '@/data/products';
 import Filters from '@/components/catalog/Filters';
 import ProductGrid from '@/components/catalog/ProductGrid';
-import { Search } from 'lucide-react';
+import { Search, ChevronDown } from 'lucide-react';
 
 function CatalogoContent() {
   const searchParams = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState('todos');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('');
 
   // Leer parámetros de URL al montar el componente
   useEffect(() => {
@@ -22,13 +23,23 @@ function CatalogoContent() {
     if (buscar) setSearchQuery(buscar);
   }, [searchParams]);
 
-  // Filtrar productos por categoría o búsqueda
+  // Filtrar y ordenar productos
   const filteredProducts = useMemo(() => {
+    let result = [];
     if (searchQuery.trim() !== '') {
-      return searchProducts(searchQuery.trim());
+      result = searchProducts(searchQuery.trim());
+    } else {
+      result = getProductsByCategory(selectedCategory);
     }
-    return getProductsByCategory(selectedCategory);
-  }, [selectedCategory, searchQuery]);
+
+    if (sortOrder === 'asc') {
+      result = [...result].sort((a, b) => a.price - b.price);
+    } else if (sortOrder === 'desc') {
+      result = [...result].sort((a, b) => b.price - a.price);
+    }
+
+    return result;
+  }, [selectedCategory, searchQuery, sortOrder]);
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
@@ -81,7 +92,7 @@ function CatalogoContent() {
         />
       </motion.div>
 
-      {/* Grid de Productos */}
+      {/* Grid de Productos y Ordenamiento */}
       <motion.div
         id="productos-grid"
         initial={{ opacity: 0 }}
@@ -89,6 +100,24 @@ function CatalogoContent() {
         transition={{ duration: 0.5, delay: 0.2 }}
         className="scroll-mt-32 pt-4 min-h-[50vh]"
       >
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 px-2">
+          <p className="text-txt-secondary text-sm font-medium mb-4 sm:mb-0">
+            {filteredProducts.length} productos
+          </p>
+          
+          <div className="relative group">
+            <select
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc' | '')}
+              className="appearance-none bg-white border border-border hover:border-primary/50 rounded-full pl-5 pr-12 py-2.5 text-sm font-medium text-txt focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 cursor-pointer shadow-sm transition-all"
+            >
+              <option value="">Ordenar por</option>
+              <option value="asc">Precio: menor a mayor</option>
+              <option value="desc">Precio: mayor a menor</option>
+            </select>
+            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-txt-secondary pointer-events-none transition-transform group-hover:text-primary" />
+          </div>
+        </div>
         {filteredProducts.length > 0 ? (
           <ProductGrid products={filteredProducts} />
         ) : (
