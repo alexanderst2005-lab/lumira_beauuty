@@ -5,12 +5,14 @@ import { X, Heart, ShoppingCart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useFavorites } from '@/context/FavoritesContext';
 import { useCart } from '@/context/CartContext';
 import { formatPrice } from '@/utils/whatsapp';
 import { toast } from 'sonner';
 
 export default function FavoritesDrawer() {
+  const router = useRouter();
   const { favorites, isFavoritesOpen, setIsFavoritesOpen, toggleFavorite, clearFavorites } = useFavorites();
   const { addToCart } = useCart();
 
@@ -26,6 +28,11 @@ export default function FavoritesDrawer() {
   }, [isFavoritesOpen]);
 
   const handleAddToCart = (product: any) => {
+    if (product.tones && product.tones.length > 0) {
+      setIsFavoritesOpen(false);
+      router.push(`/producto/${product.id}`);
+      return;
+    }
     addToCart(product, 1);
     toast.success('Producto agregado al carrito ✅');
   };

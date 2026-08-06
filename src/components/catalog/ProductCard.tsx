@@ -1,5 +1,7 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingCart, Heart } from 'lucide-react';
@@ -16,6 +18,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+  const router = useRouter();
   const { addToCart } = useCart();
   const { toggleFavorite } = useFavorites();
   const [isAdding, setIsAdding] = useState(false);
@@ -41,6 +44,12 @@ export default function ProductCard({ product }: ProductCardProps) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (product.tones && product.tones.length > 0) {
+      router.push(`/producto/${product.id}`);
+      return;
+    }
+
     setIsAdding(true);
     addToCart(product, quantity);
     toast.success('Producto agregado al carrito ✅');
