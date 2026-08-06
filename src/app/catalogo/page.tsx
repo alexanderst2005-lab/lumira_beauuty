@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { getProductsByCategory, searchProducts } from '@/data/products';
@@ -8,7 +8,7 @@ import Filters from '@/components/catalog/Filters';
 import ProductGrid from '@/components/catalog/ProductGrid';
 import { Search } from 'lucide-react';
 
-export default function CatalogoPage() {
+function CatalogoContent() {
   const searchParams = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState('todos');
   const [searchQuery, setSearchQuery] = useState('');
@@ -104,5 +104,18 @@ export default function CatalogoPage() {
         )}
       </motion.div>
     </div>
+  );
+}
+
+export default function CatalogoPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-[50vh] flex flex-col items-center justify-center text-txt-secondary font-medium">
+        <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin mb-4" />
+        Cargando catálogo...
+      </div>
+    }>
+      <CatalogoContent />
+    </Suspense>
   );
 }
