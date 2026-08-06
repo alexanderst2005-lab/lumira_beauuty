@@ -4,9 +4,48 @@ import { motion } from 'framer-motion';
 import { products } from '@/data/products';
 import ProductCard from '@/components/catalog/ProductCard';
 
+const getDiverseFeaturedProducts = (productsList: typeof products, count: number) => {
+  const byCategory: Record<string, typeof products> = {};
+  
+  // Group products by category
+  productsList.forEach(p => {
+    if (!byCategory[p.category]) byCategory[p.category] = [];
+    byCategory[p.category].push(p);
+  });
+
+  const categories = Object.keys(byCategory);
+  const featured: typeof products = [];
+  const usedIds = new Set<string>();
+  
+  let lastCat = '';
+
+  while (featured.length < count && categories.length > 0) {
+    // Find next category different from the last one
+    let catIndex = categories.findIndex(c => c !== lastCat);
+    if (catIndex === -1) catIndex = 0; // fallback if only one category remains
+    
+    const cat = categories[catIndex];
+    // Find first unused product in this category
+    const available = byCategory[cat].filter(p => !usedIds.has(p.id));
+    
+    if (available.length > 0) {
+      const p = available[0];
+      featured.push(p);
+      usedIds.add(p.id);
+      lastCat = cat;
+      // Rotate the used category to the end of the list
+      categories.push(categories.splice(catIndex, 1)[0]);
+    } else {
+      // No more products in this category, remove it
+      categories.splice(catIndex, 1);
+    }
+  }
+
+  return featured;
+};
+
 export default function FeaturedProducts() {
-  // Show first 8 products as featured
-  const featured = products.slice(0, 8);
+  const featured = getDiverseFeaturedProducts(products, 8);
 
   return (
     <section className="py-16 sm:py-20 bg-gradient-to-b from-white to-secondary-100/30" id="featured">
