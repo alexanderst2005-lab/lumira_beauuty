@@ -20,15 +20,15 @@ interface ProductDetailProps {
 
 export default function ProductDetail({ product, relatedProducts }: ProductDetailProps) {
   const { addToCart } = useCart();
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { toggleFavorite } = useFavorites();
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
-  
-  const isFav = isFavorite(product.id);
+  const [isLocalFav, setIsLocalFav] = useState(false);
 
   const handleFavoriteToggle = () => {
     toggleFavorite(product);
-    if (!isFav) {
+    setIsLocalFav(!isLocalFav);
+    if (!isLocalFav) {
       toast.success('Agregado a tus favoritos ❤️', { icon: '❤️' });
     } else {
       toast('Eliminado de tus favoritos', { icon: '💔' });
@@ -42,60 +42,58 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
-      {/* Botón Volver */}
-      <Link
-        href="/catalogo"
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-border-light text-sm text-txt-secondary hover:text-primary hover:border-primary/30 shadow-sm hover:shadow-md transition-all duration-300 mb-10 group"
-      >
-        <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-        Volver al catálogo
-      </Link>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16 mb-20 items-center">
-        {/* Imagen del Producto */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="relative aspect-square rounded-[2rem] overflow-hidden bg-gradient-to-br from-[#FFF5F9] to-[#FFE6F0] border border-white shadow-xl shadow-primary/5"
+    <div className="min-h-screen bg-bg">
+      {/* Botón de retroceso */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+        <Link 
+          href="/catalogo" 
+          className="inline-flex items-center gap-2 text-txt-secondary hover:text-primary transition-colors text-sm font-medium"
         >
-          <Image
-            src={product.image}
-            alt={product.name}
-            fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-contain p-8 drop-shadow-2xl hover:scale-105 transition-transform duration-700"
-            priority
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-            }}
-          />
-          <div className="absolute inset-0 flex items-center justify-center text-9xl opacity-10 pointer-events-none">
-            ✨
-          </div>
+          <ArrowLeft className="w-4 h-4" />
+          Volver al catálogo
+        </Link>
+      </div>
 
-          {/* Favorite Button */}
-          <button
-            onClick={handleFavoriteToggle}
-            className={`absolute top-6 right-6 z-20 p-3.5 rounded-full backdrop-blur-md transition-all duration-300 hover:scale-110 shadow-md ${
-              isFav 
-                ? 'bg-white/90 text-primary border border-primary/20 shadow-primary/20' 
-                : 'bg-white/70 text-txt-secondary/60 border border-white hover:text-primary hover:bg-white'
-            }`}
-            aria-label={isFav ? "Quitar de favoritos" : "Agregar a favoritos"}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
+          {/* Imagen del Producto */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative aspect-[4/5] sm:aspect-square w-full rounded-2xl overflow-hidden bg-white border border-border-light shadow-sm"
           >
-            <motion.div
-              animate={isFav ? { scale: [1, 1.2, 1] } : { scale: 1 }}
-              transition={{ duration: 0.3 }}
+            <Image
+              src={product.image}
+              alt={product.name}
+              fill
+              className="object-contain p-8 sm:p-12 mix-blend-multiply"
+              priority
+              sizes="(max-width: 1024px) 100vw, 50vw"
+            />
+            {/* Fallback decorativo */}
+            <div className="absolute inset-0 flex items-center justify-center text-9xl opacity-10 pointer-events-none">
+              ✨
+            </div>
+
+            {/* Favorite Button Minimalista */}
+            <button
+              onClick={handleFavoriteToggle}
+              className="absolute top-6 right-6 z-20 p-2 bg-transparent transition-transform duration-300 hover:scale-110"
+              aria-label={isLocalFav ? "Quitar de favoritos" : "Agregar a favoritos"}
             >
-              <Heart 
-                className={`w-7 h-7 transition-colors duration-300 ${isFav ? 'fill-primary' : ''}`} 
-              />
-            </motion.div>
-          </button>
-        </motion.div>
+              <motion.div
+                animate={isLocalFav ? { scale: [1, 1.2, 1] } : { scale: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Heart 
+                  strokeWidth={1.5}
+                  className={`w-6 h-6 sm:w-7 sm:h-7 transition-colors duration-300 ${
+                    isLocalFav ? 'fill-primary text-primary' : 'text-txt-secondary hover:text-txt'
+                  }`} 
+                />
+              </motion.div>
+            </button>
+          </motion.div>
 
         {/* Información del Producto */}
         <motion.div
@@ -150,6 +148,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
             </button>
           </div>
         </motion.div>
+        </div>
       </div>
 
       {/* Productos Relacionados */}

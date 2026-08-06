@@ -17,16 +17,17 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { toggleFavorite } = useFavorites();
   const [isAdding, setIsAdding] = useState(false);
   const [quantity, setQuantity] = useState(1);
-  const isFav = isFavorite(product.id);
+  const [isLocalFav, setIsLocalFav] = useState(false);
 
   const handleFavoriteToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     toggleFavorite(product);
-    if (!isFav) {
+    setIsLocalFav(!isLocalFav);
+    if (!isLocalFav) {
       toast.success('Agregado a tus favoritos ❤️', {
         icon: '❤️'
       });
@@ -64,98 +65,72 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <Link
       href={`/producto/${product.id}`}
-      className="card-premium block group flex flex-col h-full"
+      className="card-premium block group flex flex-col h-full bg-white"
       id={`product-${product.id}`}
     >
-      {/* Imagen centrada y contenedor premium */}
-      <div className="product-image-container aspect-square flex items-center justify-center p-4 relative">
+      {/* Imagen limpia */}
+      <div className="product-image-container aspect-square flex items-center justify-center p-6 relative bg-white">
         <div className="relative w-full h-full">
           <Image
             src={product.image}
             alt={product.name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-contain transition-transform duration-500 group-hover:scale-110 drop-shadow-md"
+            className="object-contain transition-transform duration-700 group-hover:scale-105 mix-blend-multiply"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.style.display = 'none';
             }}
           />
-          {/* Fallback decorativo */}
-          <div className="absolute inset-0 flex items-center justify-center text-5xl opacity-10">
-            ✨
-          </div>
         </div>
 
-        {/* Favorite Button */}
+        {/* Favorite Button Minimalista */}
         <button
           onClick={handleFavoriteToggle}
-          className={`absolute top-3 right-3 z-20 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 hover:scale-110 shadow-sm ${
-            isFav 
-              ? 'bg-white/90 text-primary border border-primary/20 shadow-primary/20' 
-              : 'bg-white/60 text-txt-secondary/60 border border-white hover:text-primary hover:bg-white/90'
-          }`}
-          aria-label={isFav ? "Quitar de favoritos" : "Agregar a favoritos"}
+          className="absolute top-4 right-4 z-20 p-2 bg-transparent transition-transform duration-300 hover:scale-110"
+          aria-label={isLocalFav ? "Quitar de favoritos" : "Agregar a favoritos"}
         >
           <motion.div
-            animate={isFav ? { scale: [1, 1.2, 1] } : { scale: 1 }}
+            animate={isLocalFav ? { scale: [1, 1.2, 1] } : { scale: 1 }}
             transition={{ duration: 0.3 }}
           >
             <Heart 
-              className={`w-5 h-5 transition-colors duration-300 ${isFav ? 'fill-primary' : ''}`} 
+              strokeWidth={1.5}
+              className={`w-5 h-5 transition-colors duration-300 ${
+                isLocalFav ? 'fill-primary text-primary' : 'text-txt-secondary hover:text-txt'
+              }`} 
             />
           </motion.div>
         </button>
       </div>
 
-      {/* Contenido (Nombre, Descripción corta, Precio, Qty, Botón) */}
-      <div className="p-5 sm:p-6 flex flex-col gap-5 bg-white z-10 relative flex-1">
-        <div className="space-y-1.5 text-center flex-1">
-          <h3 className="font-heading font-bold text-sm sm:text-base text-txt line-clamp-2 group-hover:text-primary transition-colors duration-200">
+      {/* Contenido Minimalista */}
+      <div className="p-4 sm:p-5 flex flex-col gap-4 bg-white z-10 flex-1 border-t border-border-light">
+        <div className="space-y-1 flex-1">
+          <h3 className="font-sans font-medium text-sm sm:text-base text-txt line-clamp-2 group-hover:text-primary transition-colors duration-200">
             {product.name}
           </h3>
-          <p className="text-xs sm:text-sm text-txt-secondary/90 line-clamp-2 leading-relaxed">
+          <p className="text-xs text-txt-secondary/70 line-clamp-1">
             {product.description}
           </p>
         </div>
         
-        <div className="text-lg sm:text-xl font-bold text-primary text-center">
-          {formatPrice(product.price)}
-        </div>
-
-        <div className="flex flex-col gap-3 mt-auto">
-          {/* Selector de cantidad siempre visible */}
-          <div className="w-full flex items-center justify-between bg-secondary-100/40 rounded-full p-1 border border-primary/10">
-            <button
-              onClick={handleDecrease}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-white text-txt shadow-sm hover:text-primary transition-colors"
-              aria-label="Disminuir"
-            >
-              -
-            </button>
-            <span className="font-semibold text-txt w-8 text-center">{quantity}</span>
-            <button
-              onClick={handleIncrease}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-white text-txt shadow-sm hover:text-primary transition-colors"
-              aria-label="Aumentar"
-            >
-              +
-            </button>
+        <div className="flex items-center justify-between mt-auto">
+          <div className="text-base sm:text-lg font-semibold text-txt">
+            {formatPrice(product.price)}
           </div>
-
-          {/* Botón de agregar */}
+          
           <button
             onClick={handleAddToCart}
             disabled={isAdding}
-            className={`w-full py-2.5 rounded-full flex items-center justify-center gap-2 font-semibold text-sm transition-all duration-300 ${
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
               isAdding
-                ? 'bg-green-500 text-white shadow-lg shadow-green-500/25 scale-95'
-                : 'bg-primary text-white hover:bg-primary-dark hover:shadow-lg hover:shadow-primary/30 active:scale-95'
+                ? 'bg-green-500 text-white scale-95'
+                : 'bg-txt text-white hover:bg-txt-secondary hover:shadow-md active:scale-95'
             }`}
             aria-label={`Agregar ${product.name} al carrito`}
           >
             <ShoppingCart className="w-4 h-4" />
-            <span>{isAdding ? '¡Agregado!' : 'Agregar'}</span>
           </button>
         </div>
       </div>

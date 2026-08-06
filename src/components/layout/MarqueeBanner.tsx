@@ -1,27 +1,26 @@
 'use client';
 
 export default function MarqueeBanner() {
-  const brands = [
-    { emoji: '🌸', name: 'BLOOMSHELL' },
-    { emoji: '✨', name: 'ANIK' },
-    { emoji: '💖', name: 'BIOAQUA' },
-    { emoji: '🌷', name: 'TRENDY' },
-    { emoji: '💕', name: 'PURPURE' },
+  const messages = [
+    "ENVÍOS A TODO EL PAÍS",
+    "PAGO CONTRA ENTREGA",
+    "CALIDAD PREMIUM",
+    "ATENCIÓN PERSONALIZADA"
   ];
 
-  // Double the brands for seamless loop
-  const allBrands = [...brands, ...brands, ...brands, ...brands];
+  // Double the messages for seamless loop
+  const allMessages = [...messages, ...messages, ...messages, ...messages];
 
   return (
-    <div className="bg-secondary-100 py-2 marquee-container">
+    <div className="bg-primary py-2 marquee-container">
       <div className="marquee-content">
-        {allBrands.map((brand, index) => (
+        {allMessages.map((msg, index) => (
           <span
             key={index}
-            className="inline-flex items-center gap-2 mx-8 text-sm font-medium text-primary-dark tracking-wider"
+            className="inline-flex items-center gap-6 mx-6 text-[11px] sm:text-xs font-semibold text-white tracking-[0.2em]"
           >
-            <span className="text-base">{brand.emoji}</span>
-            <span className="font-heading font-semibold">{brand.name}</span>
+            <span>{msg}</span>
+            <span className="text-white/60 text-[8px]">•</span>
           </span>
         ))}
       </div>
