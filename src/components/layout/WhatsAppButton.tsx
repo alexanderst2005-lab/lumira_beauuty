@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 
 export default function WhatsAppButton({ config }: { config?: any }) {
   const [isVisible, setIsVisible] = useState(false);
-  const STORE_NUMBER = config?.whatsapp ? config.whatsapp.replace(/\D/g, '') : '573011675661'; // Mismo número de la tienda
+  const STORE_NUMBER = '573011675661';
   const DEFAULT_MESSAGE = '¡Hola! Me gustaría recibir más información sobre sus productos en Lumira Beauty. ✨';
 
   useEffect(() => {
