@@ -4,6 +4,15 @@ import { notFound } from 'next/navigation';
 import { getAllProductsFromNotion } from '@/data/notion';
 import ProductDetail from '@/components/product/ProductDetail';
 
+export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  const products = await getAllProductsFromNotion();
+  return products.map((product) => ({
+    id: product.id,
+  }));
+}
+
 export default async function ProductoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   

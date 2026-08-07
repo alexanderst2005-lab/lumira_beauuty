@@ -117,7 +117,6 @@ export default function FavoritesDrawer() {
                         alt={product.name}
                         fill
                         className="object-contain p-2 mix-blend-multiply"
-                        unoptimized={product.image.startsWith('http')}
                       />
                     </Link>
                     

@@ -29,7 +29,7 @@ export async function getAllProductsFromNotion(): Promise<Product[]> {
         body: JSON.stringify({
           start_cursor: nextCursor
         }),
-        cache: 'no-store'
+        next: { revalidate: 3600 }
       });
 
       if (!response.ok) {

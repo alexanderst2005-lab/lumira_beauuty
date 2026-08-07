@@ -110,7 +110,6 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
                 className="object-contain p-8 sm:p-12 mix-blend-multiply transition-opacity duration-300"
                 priority
                 sizes="(max-width: 1024px) 100vw, 50vw"
-                unoptimized={displayImages[currentImageIndex].startsWith('http')}
               />
               {/* Fallback decorativo */}
               <div className="absolute inset-0 flex items-center justify-center text-9xl opacity-10 pointer-events-none">
@@ -165,7 +164,6 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
                       alt={`Vista ${idx + 1}`}
                       fill
                       className="object-cover"
-                      unoptimized={img.startsWith('http')}
                     />
                   </button>
                 ))}

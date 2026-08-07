@@ -2,9 +2,7 @@ import { Suspense } from 'react';
 import { getAllProductsFromNotion } from '@/data/notion';
 import CatalogoClient from './CatalogoClient';
 
-export const dynamic = 'force-dynamic';
-// O alternativamente, usar revalidate = 10;
-// export const revalidate = 10;
+export const revalidate = 3600;
 
 export default async function CatalogoPage() {
   const products = await getAllProductsFromNotion();
