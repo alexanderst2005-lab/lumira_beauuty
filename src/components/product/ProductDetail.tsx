@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Heart, ShoppingCart, ArrowLeft, Check } from 'lucide-react';
+import { Heart, ShoppingCart, ArrowLeft, Check, Truck, CreditCard } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Product, Tone, ProductOptionValue } from '@/types';
 import { useCart } from '@/context/CartContext';
@@ -329,6 +329,33 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
               )}
             </button>
             </div>
+
+            {/* Opciones de entrega */}
+            <div className="mt-8 pt-6 border-t border-border/50">
+              <h4 className="text-sm font-bold text-txt mb-4 font-sans">Opciones de entrega:</h4>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 bg-secondary-50/50 rounded-xl p-3 border border-border/30">
+                  <div className="bg-gray-200/80 p-2.5 rounded-full flex-shrink-0">
+                    <Truck className="w-5 h-5 text-txt" />
+                  </div>
+                  <div className="text-sm font-sans flex flex-wrap gap-2 items-center">
+                    <span className="font-semibold text-txt">Contra Entrega</span>
+                    <span className="text-txt-secondary">Cali</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 bg-secondary-50/50 rounded-xl p-3 border border-border/30">
+                  <div className="bg-gray-200/80 p-2.5 rounded-full flex-shrink-0">
+                    <CreditCard className="w-5 h-5 text-txt" />
+                  </div>
+                  <div className="text-sm font-sans flex flex-wrap gap-2 items-center">
+                    <span className="font-semibold text-txt">Envíos Nacionales</span>
+                    <span className="text-txt-secondary">Colombia</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </motion.div>
         </div>
