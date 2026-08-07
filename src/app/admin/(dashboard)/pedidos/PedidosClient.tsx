@@ -166,8 +166,13 @@ export default function PedidosClient({ initialOrders }: { initialOrders: any[] 
     const productsList = order.products.split('\n').filter(Boolean).map((p: string) => {
       // Intenta separar cantidad de nombre si empieza por "Nx "
       const match = p.match(/^(\d+)x\s(.+)$/);
-      if (match) return [match[1], match[2]];
-      return ['1', p];
+      if (match) {
+        let desc = match[2];
+        // Si tiene variantes al final como (Tono: 03, Aroma: Fresa), lo pasamos a la siguiente línea en la misma celda
+        desc = desc.replace(/ \((.+?)\)$/, '\nVariantes: $1');
+        return [match[1], desc];
+      }
+      return ['-', p];
     });
     
     let currentY = 105;

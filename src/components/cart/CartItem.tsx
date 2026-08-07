@@ -43,6 +43,11 @@ export default function CartItem({ item }: CartItemProps) {
             Tono: <span className="font-medium text-txt">{item.selectedTone.name}</span>
           </p>
         )}
+        {item.selectedOptions && Object.entries(item.selectedOptions).map(([optName, optVal]) => (
+          <p key={optName} className="text-xs text-txt-secondary mt-0.5">
+            {optName}: <span className="font-medium text-txt">{optVal.name}</span>
+          </p>
+        ))}
         <p className="text-sm font-bold text-primary mt-0.5">
           {formatPrice(item.product.price)}
         </p>

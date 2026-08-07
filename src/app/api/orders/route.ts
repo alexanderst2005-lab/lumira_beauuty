@@ -12,12 +12,31 @@ export async function POST(request: Request) {
     const data = await request.json();
     const { formData, items, total } = data;
 
-    // Crear string de productos y tonos
-    const productsString = items.map((item: any) => `${item.quantity}x ${item.product.name}`).join('\n');
-    const tonesString = items
-      .filter((item: any) => item.selectedTone)
-      .map((item: any) => `${item.product.name}: ${item.selectedTone.name}`)
-      .join('\n');
+    // Crear string de productos consolidado con sus variantes en la misma línea
+    const productsString = items.map((item: any) => {
+      const variants: string[] = [];
+      if (item.selectedTone) variants.push(`Tono: ${item.selectedTone.name}`);
+      if (item.selectedOptions) {
+         Object.entries(item.selectedOptions).forEach(([optName, optVal]: [string, any]) => {
+            variants.push(`${optName}: ${optVal.name}`);
+         });
+      }
+      const variantText = variants.length > 0 ? ` (${variants.join(', ')})` : '';
+      return `${item.quantity}x ${item.product.name}${variantText}`;
+    }).join('\n');
+
+    // Mantener también tonesString para la columna Tones si es necesaria
+    const tonesString = items.map((item: any) => {
+      const variants: string[] = [];
+      if (item.selectedTone) variants.push(`Tono: ${item.selectedTone.name}`);
+      if (item.selectedOptions) {
+         Object.entries(item.selectedOptions).forEach(([optName, optVal]: [string, any]) => {
+            variants.push(`${optName}: ${optVal.name}`);
+         });
+      }
+      if (variants.length > 0) return `${item.product.name}: ${variants.join(', ')}`;
+      return null;
+    }).filter(Boolean).join('\n');
 
     // Generate Order Number
     const today = new Date();
