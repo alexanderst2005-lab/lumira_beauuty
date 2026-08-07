@@ -129,7 +129,7 @@ export default function HeroBanner({ config }: { config?: any }) {
             </motion.div>
 
             {/* Content */}
-            <div className="absolute inset-0 flex items-center">
+            <div className="absolute inset-0 flex items-center pb-16 sm:pb-0">
               <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 w-full">
                 <div className="max-w-2xl relative z-10">
                   {/* Badge */}
