@@ -8,8 +8,9 @@ import {
   Package, 
   Users, 
   LogOut,
-  X,
-  Warehouse
+  Users, 
+  LogOut,
+  X
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -19,10 +20,9 @@ interface AdminSidebarProps {
 }
 
 const navItems = [
-  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+  { name: 'Resumen del Día', href: '/admin', icon: LayoutDashboard },
   { name: 'Pedidos', href: '/admin/pedidos', icon: ShoppingBag },
   { name: 'Productos', href: '/admin/productos', icon: Package },
-  { name: 'Inventario', href: '/admin/inventario', icon: Warehouse },
   { name: 'Clientes', href: '/admin/clientes', icon: Users },
 ];
 

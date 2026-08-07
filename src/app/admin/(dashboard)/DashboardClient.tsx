@@ -7,12 +7,12 @@ import {
 } from 'recharts';
 import { format, subDays, isSameDay, startOfWeek, endOfWeek, isWithinInterval, startOfMonth, endOfMonth, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { TrendingUp, ShoppingBag, Package, AlertTriangle } from 'lucide-react';
+import { TrendingUp, ShoppingBag, Package, Users } from 'lucide-react';
 import { Product } from '@/types';
 import { formatPrice } from '@/utils/whatsapp';
 
 export default function DashboardClient({ initialOrders, initialProducts }: { initialOrders: any[], initialProducts: Product[] }) {
-  const [dateRange, setDateRange] = useState<'week' | 'month' | 'all'>('week');
+  const [dateRange, setDateRange] = useState<'today' | 'week' | 'month' | 'all'>('today');
 
   const stats = useMemo(() => {
     const now = new Date();
@@ -20,6 +20,9 @@ export default function DashboardClient({ initialOrders, initialProducts }: { in
     // Filter orders based on dateRange
     const filteredOrders = initialOrders.filter(order => {
       const orderDate = new Date(order.date);
+      if (dateRange === 'today') {
+        return isSameDay(orderDate, now);
+      }
       if (dateRange === 'week') {
         return isWithinInterval(orderDate, { start: startOfWeek(now, { weekStartsOn: 1 }), end: endOfWeek(now, { weekStartsOn: 1 }) });
       }
@@ -33,12 +36,14 @@ export default function DashboardClient({ initialOrders, initialProducts }: { in
     const totalSales = filteredOrders.reduce((sum, order) => sum + (order.total || 0), 0);
     const orderCount = filteredOrders.length;
     
-    // Low stock products (assuming stock is a property in the new schema, if not it will be undefined)
-    // For now, let's pretend any product with < 5 items is low stock.
-    const lowStockCount = initialProducts.filter(p => (p as any).stock !== undefined && (p as any).stock < 5 && (p as any).stock > 0).length;
-    const outOfStockCount = initialProducts.filter(p => (p as any).stock === 0).length;
+    // New customers in period
+    const uniqueWhatsapps = new Set(filteredOrders.map(o => o.whatsapp).filter(Boolean));
+    const newCustomersCount = uniqueWhatsapps.size;
+    
+    // New products (isNew flag)
+    const newProductsCount = initialProducts.filter(p => p.isNew).length;
 
-    return { totalSales, orderCount, lowStockCount, outOfStockCount };
+    return { totalSales, orderCount, newCustomersCount, newProductsCount };
   }, [initialOrders, initialProducts, dateRange]);
 
   // Chart data (Sales last 7 days)
@@ -60,8 +65,8 @@ export default function DashboardClient({ initialOrders, initialProducts }: { in
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold font-heading text-gray-900">Dashboard</h1>
-          <p className="text-gray-500 text-sm">Resumen de tu tienda online</p>
+          <h1 className="text-2xl font-bold font-heading text-gray-900">Resumen del Día</h1>
+          <p className="text-gray-500 text-sm">Monitorea el rendimiento actual de tu tienda</p>
         </div>
         
         <select 
@@ -69,6 +74,7 @@ export default function DashboardClient({ initialOrders, initialProducts }: { in
           onChange={(e) => setDateRange(e.target.value as any)}
           className="bg-white border border-gray-200 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-pink-500"
         >
+          <option value="today">Hoy</option>
           <option value="week">Esta semana</option>
           <option value="month">Este mes</option>
           <option value="all">Todo el tiempo</option>
@@ -103,23 +109,23 @@ export default function DashboardClient({ initialOrders, initialProducts }: { in
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-yellow-50 rounded-xl flex items-center justify-center">
-              <Package className="w-6 h-6 text-yellow-600" />
+              <Users className="w-6 h-6 text-yellow-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-500">Poco Stock</p>
-              <h3 className="text-xl font-bold text-gray-900">{stats.lowStockCount}</h3>
+              <p className="text-sm font-medium text-gray-500">Clientes</p>
+              <h3 className="text-xl font-bold text-gray-900">{stats.newCustomersCount}</h3>
             </div>
           </div>
         </div>
 
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center">
-              <AlertTriangle className="w-6 h-6 text-red-600" />
+            <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
+              <Package className="w-6 h-6 text-purple-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-500">Agotados</p>
-              <h3 className="text-xl font-bold text-gray-900">{stats.outOfStockCount}</h3>
+              <p className="text-sm font-medium text-gray-500">Productos Nuevos</p>
+              <h3 className="text-xl font-bold text-gray-900">{stats.newProductsCount}</h3>
             </div>
           </div>
         </div>

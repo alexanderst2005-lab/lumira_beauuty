@@ -89,7 +89,7 @@ export default function ClientesClient({ orders: initialOrders }: { orders: any[
             <button
               onClick={() => handleDelete(customer.whatsapp, customer.name)}
               disabled={deletingId === customer.whatsapp}
-              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
               title="Eliminar Cliente"
             >
               <Trash2 className="w-4 h-4" />
