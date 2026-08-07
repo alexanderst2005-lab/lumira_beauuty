@@ -78,8 +78,8 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
       className="card-premium block group flex flex-col h-full bg-white"
       id={`product-${product.id}`}
     >
-      {/* Imagen limpia */}
-      <div className="product-image-container aspect-square flex items-center justify-center p-6 relative bg-white">
+      {/* Imagen tipo cover (sin espacios blancos) */}
+      <div className="product-image-container aspect-[4/5] sm:aspect-square flex items-center justify-center relative bg-gray-50 overflow-hidden rounded-t-2xl">
         <div className="relative w-full h-full">
           <Image
             src={product.image}
@@ -87,7 +87,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             priority={priority}
-            className="object-contain transition-transform duration-700 group-hover:scale-105 mix-blend-multiply"
+            className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.style.display = 'none';
@@ -98,7 +98,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
         {/* Favorite Button Minimalista */}
         <button
           onClick={handleFavoriteToggle}
-          className="absolute top-4 right-4 z-20 p-2 bg-transparent transition-transform duration-300 hover:scale-110"
+          className="absolute top-4 right-4 z-20 p-2.5 bg-white/70 backdrop-blur-md rounded-full shadow-sm transition-all duration-300 hover:scale-110 hover:bg-white"
           aria-label={isLocalFav ? "Quitar de favoritos" : "Agregar a favoritos"}
         >
           <motion.div
