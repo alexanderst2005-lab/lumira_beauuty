@@ -45,11 +45,11 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
 
           {/* Menu Panel */}
           <motion.div
-            initial={{ x: '100%' }}
+            initial={{ x: '-100%' }}
             animate={{ x: 0 }}
-            exit={{ x: '100%' }}
+            exit={{ x: '-100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white z-[70] shadow-2xl"
+            className="fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white z-[70] shadow-2xl"
           >
             <div className="flex flex-col h-full">
               {/* Header */}
