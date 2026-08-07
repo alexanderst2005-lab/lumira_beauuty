@@ -49,19 +49,14 @@ export default function CartDrawer() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed top-0 right-0 h-full w-full sm:w-[420px] max-w-full bg-white z-[90] shadow-2xl flex flex-col"
+              className="fixed top-0 right-0 h-full w-full sm:w-[380px] max-w-full bg-white z-[90] shadow-2xl flex flex-col"
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-5 border-b border-border">
+              <div className="flex items-center justify-between p-4 border-b border-border">
                 <div className="flex items-center gap-2">
                   <ShoppingBag className="w-5 h-5 text-primary" />
-                  <h2 className="text-lg font-heading font-semibold">
-                    Carrito
-                    {itemCount > 0 && (
-                      <span className="ml-2 text-sm font-normal text-txt-secondary">
-                        ({itemCount} {itemCount === 1 ? 'producto' : 'productos'})
-                      </span>
-                    )}
+                  <h2 className="text-[15px] sm:text-base font-heading font-semibold uppercase tracking-wide">
+                    Tu carrito
                   </h2>
                 </div>
                 <button
@@ -74,7 +69,7 @@ export default function CartDrawer() {
               </div>
 
               {/* Items */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3 cart-scrollbar">
+              <div className="flex-1 overflow-y-auto p-3 space-y-2 cart-scrollbar">
                 {items.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-center py-16">
                     <div className="text-5xl mb-4">🛒</div>
@@ -90,20 +85,20 @@ export default function CartDrawer() {
 
               {/* Summary */}
               {items.length > 0 && (
-                <div className="border-t border-border p-4 space-y-2 bg-secondary-100/20 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
-                  <div className="flex justify-between text-sm">
+                <div className="border-t border-border p-3 space-y-1.5 bg-secondary-100/20 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
+                  <div className="flex justify-between text-xs">
                     <span className="text-txt-secondary">Subtotal</span>
                     <span className="font-medium font-sans">{formatPrice(subtotal)}</span>
                   </div>
-                  <div className="flex justify-between text-base font-bold text-txt">
+                  <div className="flex justify-between text-sm font-bold text-txt">
                     <span>Total</span>
                     <span className="text-primary font-sans">{formatPrice(total)}</span>
                   </div>
 
-                  <div className="pt-1 flex flex-col gap-2">
+                  <div className="pt-1 flex flex-col gap-1.5">
                     <button
                       onClick={handleFinishOrder}
-                      className="w-full py-2.5 bg-primary hover:bg-primary-dark text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-95 shadow-lg shadow-primary/25 flex items-center justify-center gap-2 text-base font-sans"
+                      className="w-full py-2 bg-primary hover:bg-primary-dark text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-95 shadow-lg shadow-primary/25 flex items-center justify-center gap-2 text-sm font-sans"
                       id="finish-order"
                     >
                       Finalizar pedido
@@ -112,7 +107,7 @@ export default function CartDrawer() {
                     
                     <button
                       onClick={() => setIsCartOpen(false)}
-                      className="w-full py-2 bg-white border border-border hover:border-primary/50 text-txt-secondary hover:text-txt font-semibold rounded-xl transition-colors flex items-center justify-center font-sans text-sm"
+                      className="w-full py-1.5 bg-white border border-border hover:border-primary/50 text-txt-secondary hover:text-txt font-semibold rounded-xl transition-colors flex items-center justify-center font-sans text-[11px] sm:text-xs"
                     >
                       Seguir comprando
                     </button>
@@ -120,7 +115,7 @@ export default function CartDrawer() {
 
                   <button
                     onClick={clearCart}
-                    className="w-full py-1 mt-1 text-xs text-txt-secondary/70 hover:text-red-500 font-medium transition-colors font-sans"
+                    className="w-full py-1 mt-0.5 text-[10px] text-txt-secondary/70 hover:text-red-500 font-medium transition-colors font-sans uppercase tracking-wider"
                   >
                     Vaciar carrito
                   </button>

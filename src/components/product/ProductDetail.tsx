@@ -131,7 +131,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
               <img
                 src={overrideImage || displayImages[currentImageIndex]}
                 alt={product.name}
-                className={`w-full h-auto object-cover transition-opacity duration-300 ${isOutOfStock ? 'grayscale opacity-60' : ''}`}
+                className={`max-w-full w-auto h-auto max-h-[400px] lg:max-h-[550px] object-contain transition-opacity duration-300 ${isOutOfStock ? 'grayscale opacity-60' : ''}`}
               />
               {/* Fallback decorativo */}
               <div className="absolute inset-0 flex items-center justify-center text-9xl opacity-10 pointer-events-none">
