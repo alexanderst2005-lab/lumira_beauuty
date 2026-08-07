@@ -340,15 +340,21 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-100px' }}
           transition={{ duration: 0.6 }}
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16"
         >
           <div className="text-center mb-10">
             <h2 className="text-2xl sm:text-3xl font-display font-bold text-txt">
               También te podría <span className="text-gradient">interesar</span>
             </h2>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {relatedProducts.slice(0, 4).map((p) => (
-              <ProductCard key={p.id} product={p} />
+          <div className="flex overflow-x-auto gap-4 sm:gap-6 lg:gap-8 pb-8 pt-2 px-4 -mx-4 sm:mx-0 sm:px-0 snap-x snap-mandatory scroll-smooth scrollbar-hide">
+            {relatedProducts.slice(0, 8).map((p) => (
+              <div 
+                key={p.id} 
+                className="min-w-[75vw] sm:min-w-[calc(50%-0.75rem)] lg:min-w-[calc(25%-1.5rem)] snap-center sm:snap-start flex-shrink-0 transition-transform duration-300 hover:-translate-y-1"
+              >
+                <ProductCard product={p} />
+              </div>
             ))}
           </div>
         </motion.section>
