@@ -83,7 +83,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
       id={`product-${product.id}`}
     >
       {/* Imagen tipo cover (sin espacios blancos) */}
-      <div className="product-image-container aspect-[4/5] sm:aspect-square flex items-center justify-center relative bg-gray-50 overflow-hidden rounded-t-2xl">
+      <div className="product-image-container aspect-square flex items-center justify-center relative bg-gray-50 overflow-hidden rounded-t-2xl">
         <div className="relative w-full h-full">
           <Image
             src={product.image}
@@ -135,7 +135,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
           >
             <Heart 
               strokeWidth={1.5}
-              className={`w-5 h-5 transition-colors duration-300 ${
+              className={`w-4 h-4 transition-colors duration-300 ${
                 isLocalFav ? 'fill-primary text-primary' : 'text-txt-secondary hover:text-txt'
               }`} 
             />
@@ -144,25 +144,25 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
       </div>
 
       {/* Contenido Minimalista */}
-      <div className="p-4 sm:p-5 flex flex-col gap-4 bg-white z-10 flex-1 border-t border-border-light">
-        <div className="space-y-1 flex-1">
-          <h3 className="font-sans font-medium text-sm sm:text-base text-txt line-clamp-2 group-hover:text-primary transition-colors duration-200">
+      <div className="p-3 sm:p-4 flex flex-col gap-2 sm:gap-3 bg-white z-10 flex-1 border-t border-border-light rounded-b-2xl">
+        <div className="space-y-0.5 flex-1">
+          <h3 className="font-sans font-medium text-xs sm:text-sm text-txt line-clamp-2 group-hover:text-primary transition-colors duration-200 leading-snug">
             {product.name}
           </h3>
-          <p className="text-xs text-txt-secondary/70 line-clamp-1">
+          <p className="text-[10px] sm:text-xs text-txt-secondary/70 line-clamp-1">
             {product.description}
           </p>
         </div>
         
-        <div className="flex items-center justify-between mt-auto">
-          <div className="text-base sm:text-lg font-semibold text-txt">
+        <div className="flex items-center justify-between mt-auto pt-1">
+          <div className="text-sm sm:text-base font-semibold text-txt">
             {formatPrice(product.price)}
           </div>
           
           <button
             onClick={isOutOfStock ? (e) => { e.preventDefault(); e.stopPropagation(); } : handleAddToCart}
             disabled={isAdding || isOutOfStock}
-            className={`h-10 px-4 rounded-full flex items-center justify-center transition-all duration-300 ${
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
               isOutOfStock
                 ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                 : isAdding
@@ -172,7 +172,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             aria-label={isOutOfStock ? 'Producto Agotado' : `Agregar ${product.name} al carrito`}
           >
             {isOutOfStock ? (
-              <span className="text-xs font-bold uppercase tracking-wider">Agotado</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider">Agotado</span>
             ) : (
               <ShoppingCart className="w-4 h-4" />
             )}

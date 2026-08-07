@@ -118,11 +118,11 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
           {/* Galería del Producto */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 max-w-sm sm:max-w-md lg:max-w-full mx-auto w-full">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative aspect-[4/5] sm:aspect-square w-full rounded-2xl overflow-hidden bg-white border border-border-light shadow-sm touch-pan-y"
+              className="relative aspect-square w-full rounded-2xl overflow-hidden bg-white border border-border-light shadow-sm touch-pan-y"
               onTouchStart={onTouchStart}
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEndHandler}
@@ -131,7 +131,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
                 src={overrideImage || displayImages[currentImageIndex]}
                 alt={product.name}
                 fill
-                className={`object-contain p-8 sm:p-12 mix-blend-multiply transition-opacity duration-300 ${isOutOfStock ? 'grayscale opacity-60' : ''}`}
+                className={`object-contain p-6 sm:p-8 lg:p-12 mix-blend-multiply transition-opacity duration-300 ${isOutOfStock ? 'grayscale opacity-60' : ''}`}
                 priority
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
@@ -221,19 +221,19 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
           transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
           className="flex flex-col justify-center"
         >
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-txt mb-4 leading-tight">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold text-txt mb-2 lg:mb-4 leading-tight">
             {product.name}
           </h1>
 
-          <p className="text-lg text-txt-secondary leading-relaxed mb-8">
+          <p className="text-base sm:text-lg text-txt-secondary leading-relaxed mb-6">
             {product.fullDescription}
           </p>
 
-          <div className="text-4xl sm:text-5xl font-display font-extrabold text-primary mb-10 drop-shadow-sm">
+          <div className="text-2xl sm:text-3xl lg:text-4xl font-display font-extrabold text-primary mb-8 drop-shadow-sm">
             {formatPrice(product.price)}
           </div>
 
-          <div className="bg-white rounded-3xl p-6 border border-border-light shadow-lg shadow-primary/5 flex flex-col gap-6">
+          <div className="bg-white rounded-3xl p-5 sm:p-6 border border-border-light shadow-sm flex flex-col gap-6">
             
             {/* Opciones de Tonos */}
             {product.tones && product.tones.length > 0 && (
@@ -347,11 +347,11 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
               También te podría <span className="text-gradient">interesar</span>
             </h2>
           </div>
-          <div className="flex overflow-x-auto gap-4 sm:gap-6 lg:gap-8 pb-8 pt-2 px-4 -mx-4 sm:mx-0 sm:px-0 snap-x snap-mandatory scroll-smooth scrollbar-hide">
+          <div className="flex overflow-x-auto gap-3 sm:gap-4 lg:gap-6 pb-6 pt-2 px-4 -mx-4 sm:mx-0 sm:px-0 snap-x snap-mandatory scroll-smooth scrollbar-hide">
             {relatedProducts.slice(0, 8).map((p) => (
               <div 
                 key={p.id} 
-                className="min-w-[75vw] sm:min-w-[calc(50%-0.75rem)] lg:min-w-[calc(25%-1.5rem)] snap-center sm:snap-start flex-shrink-0 transition-transform duration-300 hover:-translate-y-1"
+                className="min-w-[55vw] sm:min-w-[calc(33.333%-0.66rem)] lg:min-w-[calc(25%-1.125rem)] xl:min-w-[calc(20%-1.2rem)] snap-center sm:snap-start flex-shrink-0 transition-transform duration-300 hover:-translate-y-1"
               >
                 <ProductCard product={p} />
               </div>
