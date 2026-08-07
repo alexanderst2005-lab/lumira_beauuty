@@ -3,11 +3,8 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
   try {
     const { password } = await request.json();
-    const adminPassword = process.env.ADMIN_PASSWORD;
-
-    if (!adminPassword) {
-      return NextResponse.json({ error: 'Admin password not configured on server' }, { status: 500 });
-    }
+    // Usa la variable de entorno, y si no existe (porque no la configuraron en Vercel), usa "lumira2026"
+    const adminPassword = process.env.ADMIN_PASSWORD || 'lumira2026';
 
     if (password === adminPassword) {
       const response = NextResponse.json({ success: true });
