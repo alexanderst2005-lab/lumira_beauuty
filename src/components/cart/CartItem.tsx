@@ -23,6 +23,7 @@ export default function CartItem({ item }: CartItemProps) {
           fill
           sizes="80px"
           className="object-cover"
+          unoptimized={item.product.image.startsWith('http')}
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.style.display = 'none';

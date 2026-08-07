@@ -45,6 +45,19 @@ export async function getAllProductsFromNotion(): Promise<Product[]> {
 
     return allResults.map((page: any) => {
       const props = page.properties;
+      
+      let imageUrl = '/images/products/placeholder.webp';
+      if (props.Image?.type === 'files' && props.Image.files.length > 0) {
+        const fileObj = props.Image.files[0];
+        if (fileObj.type === 'file') {
+          imageUrl = fileObj.file.url;
+        } else if (fileObj.type === 'external') {
+          imageUrl = fileObj.external.url;
+        }
+      } else if (props.Image?.type === 'url' && props.Image.url) {
+        imageUrl = props.Image.url;
+      }
+
       return {
         id: props.Id?.rich_text[0]?.plain_text || page.id,
         name: props.Name?.title[0]?.plain_text || 'Sin nombre',
@@ -52,7 +65,7 @@ export async function getAllProductsFromNotion(): Promise<Product[]> {
         fullDescription: props.FullDescription?.rich_text[0]?.plain_text || '',
         price: props.Price?.number || 0,
         category: props.Category?.select?.name || 'todos',
-        image: props.Image?.url || '/images/products/placeholder.webp',
+        image: imageUrl,
       };
     });
   } catch (error) {
