@@ -13,6 +13,7 @@ export interface AdminNotification {
   message: string;
   read: boolean;
   link: string;
+  deleted?: boolean;
 }
 
 interface AdminDataContextProps {
@@ -21,6 +22,8 @@ interface AdminDataContextProps {
   notifications: AdminNotification[];
   markAsRead: (id: string) => void;
   markAllAsRead: () => void;
+  deleteNotification: (id: string) => void;
+  clearAllNotifications: () => void;
   isLoading: boolean;
   triggerRefresh: (isBackground?: boolean) => Promise<void>;
   initializeData: (orders: any[]) => void;
@@ -32,6 +35,8 @@ const AdminDataContext = createContext<AdminDataContextProps>({
   notifications: [],
   markAsRead: () => {},
   markAllAsRead: () => {},
+  deleteNotification: () => {},
+  clearAllNotifications: () => {},
   isLoading: true,
   triggerRefresh: async () => {},
   initializeData: () => {}
@@ -103,8 +108,11 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
         const fetchedOrders = data.orders || [];
         
         setOrders(currentOrders => {
+          // Asegurar que no haya duplicados en fetchedOrders por si Notion devuelve repetidos
+          const uniqueFetchedOrders = Array.from(new Map(fetchedOrders.map((o: any) => [o.id, o])).values()) as any[];
+          
           const oldOrderIds = new Set(currentOrders.map((o: any) => o.id));
-          const newOrdersAdded = fetchedOrders.filter((o: any) => !oldOrderIds.has(o.id));
+          const newOrdersAdded = uniqueFetchedOrders.filter((o: any) => !oldOrderIds.has(o.id));
           
           if (newOrdersAdded.length > 0 && currentOrders.length > 0) {
             const oldClientWhatsapps = new Set(currentOrders.map((o: any) => o.whatsapp).filter(Boolean));
@@ -150,7 +158,8 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
               return prevNotifs;
             });
           }
-          return fetchedOrders;
+          // Siempre retornamos la lista sin duplicados
+          return uniqueFetchedOrders;
         });
         
         setLastCheckTime(Date.now());
@@ -179,6 +188,15 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
   };
 
+  const deleteNotification = (id: string) => {
+    // En lugar de removerlo del array, lo marcamos como deleted para que no vuelva a generarse
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, deleted: true } : n));
+  };
+
+  const clearAllNotifications = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, deleted: true })));
+  };
+
   const initializeData = (initialOrders: any[]) => {
     if (orders.length === 0 && initialOrders.length > 0) {
       setOrders(initialOrders);
@@ -192,6 +210,8 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
       notifications,
       markAsRead,
       markAllAsRead,
+      deleteNotification,
+      clearAllNotifications,
       isLoading,
       triggerRefresh,
       initializeData

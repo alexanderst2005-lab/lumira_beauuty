@@ -12,11 +12,12 @@ interface AdminTopbarProps {
 }
 
 export default function AdminTopbar({ onOpenSidebar }: AdminTopbarProps) {
-  const { notifications, markAsRead, markAllAsRead } = useAdminData();
+  const { notifications, markAsRead, markAllAsRead, deleteNotification, clearAllNotifications } = useAdminData();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const activeNotifications = notifications.filter(n => !n.deleted);
+  const unreadCount = activeNotifications.filter(n => !n.read).length;
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -66,40 +67,73 @@ export default function AdminTopbar({ onOpenSidebar }: AdminTopbarProps) {
             <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
               <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                 <h3 className="font-semibold text-gray-800">Notificaciones</h3>
-                {unreadCount > 0 && (
-                  <button 
-                    onClick={() => markAllAsRead()}
-                    className="text-xs text-pink-600 hover:text-pink-700 font-medium flex items-center gap-1"
-                  >
-                    <Check className="w-3 h-3" />
-                    Marcar todo
-                  </button>
-                )}
+                <div className="flex gap-3">
+                  {unreadCount > 0 && (
+                    <button 
+                      onClick={() => markAllAsRead()}
+                      className="text-xs text-pink-600 hover:text-pink-700 font-medium flex items-center gap-1"
+                      title="Marcar todo como leído"
+                    >
+                      <Check className="w-3 h-3" />
+                    </button>
+                  )}
+                  {activeNotifications.length > 0 && (
+                    <button 
+                      onClick={() => {
+                        if (confirm('¿Estás seguro de eliminar todas las notificaciones?')) {
+                          clearAllNotifications();
+                        }
+                      }}
+                      className="text-xs text-red-500 hover:text-red-700 font-medium flex items-center gap-1"
+                      title="Eliminar todas"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
               </div>
               
               <div className="max-h-96 overflow-y-auto">
-                {notifications.length === 0 ? (
+                {activeNotifications.length === 0 ? (
                   <div className="p-8 text-center text-gray-500 text-sm">
                     No tienes notificaciones
                   </div>
                 ) : (
                   <div className="divide-y divide-gray-50">
-                    {notifications.map((notif) => (
+                    {activeNotifications.map((notif) => (
                       <div 
                         key={notif.id} 
-                        className={`p-4 transition-colors hover:bg-gray-50 ${!notif.read ? 'bg-pink-50/30' : ''}`}
-                        onClick={() => markAsRead(notif.id)}
+                        className={`p-4 transition-colors hover:bg-gray-50 group relative ${!notif.read ? 'bg-pink-50/30' : ''}`}
                       >
-                        <Link href={notif.link} onClick={() => setIsOpen(false)}>
-                          <div className="flex justify-between items-start mb-1">
-                            <span className="text-sm font-semibold text-gray-900">{notif.title}</span>
-                            {!notif.read && <span className="w-2 h-2 bg-pink-500 rounded-full mt-1"></span>}
-                          </div>
-                          <p className="text-sm text-gray-600 mb-2">{notif.message}</p>
-                          <span className="text-xs text-gray-400">
-                            {formatDistanceToNow(new Date(notif.date), { addSuffix: true, locale: es })}
-                          </span>
-                        </Link>
+                        <div 
+                          className="cursor-pointer pr-6" 
+                          onClick={() => {
+                            markAsRead(notif.id);
+                            setIsOpen(false);
+                          }}
+                        >
+                          <Link href={notif.link}>
+                            <div className="flex justify-between items-start mb-1">
+                              <span className="text-sm font-semibold text-gray-900">{notif.title}</span>
+                              {!notif.read && <span className="w-2 h-2 bg-pink-500 rounded-full mt-1"></span>}
+                            </div>
+                            <p className="text-sm text-gray-600 mb-2">{notif.message}</p>
+                            <span className="text-xs text-gray-400">
+                              {formatDistanceToNow(new Date(notif.date), { addSuffix: true, locale: es })}
+                            </span>
+                          </Link>
+                        </div>
+                        
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteNotification(notif.id);
+                          }}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all rounded-full hover:bg-red-50"
+                          title="Eliminar"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     ))}
                   </div>
