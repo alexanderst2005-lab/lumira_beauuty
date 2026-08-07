@@ -1,20 +1,28 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Search, UserCircle, MapPin, Trash2 } from 'lucide-react';
+import { useAdminData } from '@/components/admin/AdminDataContext';
 import { formatPrice } from '@/utils/whatsapp';
 import { toast } from 'sonner';
 
 export default function ClientesClient({ orders: initialOrders }: { orders: any[] }) {
+  const { orders: globalOrders, initializeData, triggerRefresh } = useAdminData();
   const [searchTerm, setSearchTerm] = useState('');
-  const [orders, setOrders] = useState(initialOrders);
+  const [localOrders, setLocalOrders] = useState(initialOrders);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    initializeData(initialOrders);
+  }, []);
+
+  const displayOrders = globalOrders.length > 0 ? globalOrders : localOrders;
 
   // Group orders by WhatsApp to form customers
   const customers = useMemo(() => {
     const map = new Map<string, any>();
     
-    for (const order of orders) {
+    for (const order of displayOrders) {
       if (!order.whatsapp) continue;
       
       if (map.has(order.whatsapp)) {
@@ -38,7 +46,7 @@ export default function ClientesClient({ orders: initialOrders }: { orders: any[
     }
     
     return Array.from(map.values()).sort((a, b) => b.totalSpent - a.totalSpent);
-  }, [orders]);
+  }, [displayOrders]);
 
   const filteredCustomers = customers.filter(c => 
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -51,7 +59,8 @@ export default function ClientesClient({ orders: initialOrders }: { orders: any[
     try {
       const res = await fetch(`/api/admin/clientes/${encodeURIComponent(whatsapp)}`, { method: 'DELETE' });
       if (res.ok) {
-        setOrders(orders.filter(o => o.whatsapp !== whatsapp));
+        setLocalOrders(localOrders.filter(o => o.whatsapp !== whatsapp));
+        await triggerRefresh(false);
         toast.success(`Cliente ${customerName} eliminado`);
       } else {
         toast.error('Error al eliminar');

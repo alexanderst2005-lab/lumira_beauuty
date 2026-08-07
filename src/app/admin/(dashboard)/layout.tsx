@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminTopbar from '@/components/admin/AdminTopbar';
+import { AdminDataProvider } from '@/components/admin/AdminDataContext';
 
 export default function AdminLayout({
   children,
@@ -12,11 +13,12 @@ export default function AdminLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden font-sans">
-      <AdminSidebar 
-        isOpen={isSidebarOpen} 
-        onClose={() => setIsSidebarOpen(false)} 
-      />
+    <AdminDataProvider>
+      <div className="flex h-screen bg-gray-50 overflow-hidden font-sans">
+        <AdminSidebar 
+          isOpen={isSidebarOpen} 
+          onClose={() => setIsSidebarOpen(false)} 
+        />
       
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <AdminTopbar onOpenSidebar={() => setIsSidebarOpen(true)} />
@@ -28,5 +30,6 @@ export default function AdminLayout({
         </main>
       </div>
     </div>
+    </AdminDataProvider>
   );
 }

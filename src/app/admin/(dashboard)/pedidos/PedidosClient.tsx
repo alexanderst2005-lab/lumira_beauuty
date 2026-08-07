@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Search, Printer, Trash2, FileText, MessageCircle } from 'lucide-react';
@@ -42,13 +42,23 @@ const getWhatsAppMessage = (order: any) => {
   }
 };
 
+import { useAdminData } from '@/components/admin/AdminDataContext';
+
 export default function PedidosClient({ initialOrders }: { initialOrders: any[] }) {
-  const [orders, setOrders] = useState(initialOrders);
+  const { orders: globalOrders, initializeData, triggerRefresh } = useAdminData();
+  const [localOrders, setLocalOrders] = useState(initialOrders);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('Todos');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-  const filteredOrders = orders.filter(order => {
+  useEffect(() => {
+    initializeData(initialOrders);
+  }, []);
+
+  // Use global orders if available (real-time), fallback to local orders (initial load)
+  const displayOrders = globalOrders.length > 0 ? globalOrders : localOrders;
+
+  const filteredOrders = displayOrders.filter(order => {
     const matchesSearch = 
       order.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
       order.whatsapp.includes(searchTerm) || 
@@ -63,15 +73,18 @@ export default function PedidosClient({ initialOrders }: { initialOrders: any[] 
       const res = await fetch(`/api/admin/pedidos/${orderId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus })
       });
 
-      if (res.ok) {
-        setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
-        toast.success('Estado actualizado');
-      } else {
-        toast.error('Error al actualizar el estado');
-      }
+      if (!res.ok) throw new Error('Error al actualizar');
+
+      // Optimistic update for local fallback
+      setLocalOrders(localOrders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+      
+      // Trigger global refresh to sync Context
+      await triggerRefresh(false);
+
+      toast.success(`Estado actualizado a ${newStatus}`);
     } catch (error) {
       toast.error('Error de conexión');
     } finally {
@@ -85,7 +98,10 @@ export default function PedidosClient({ initialOrders }: { initialOrders: any[] 
     try {
       const res = await fetch(`/api/admin/pedidos/${orderId}`, { method: 'DELETE' });
       if (res.ok) {
-        setOrders(orders.filter(o => o.id !== orderId));
+        // Optimistic update for local fallback
+        setLocalOrders(localOrders.filter(o => o.id !== orderId));
+        // Trigger global refresh to sync Context
+        await triggerRefresh(false);
         toast.success('Pedido eliminado');
       } else {
         toast.error('Error al eliminar');
