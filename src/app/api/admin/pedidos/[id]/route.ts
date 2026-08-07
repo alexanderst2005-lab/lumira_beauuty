@@ -57,13 +57,15 @@ export async function DELETE(
 
     let response;
     if (permanent) {
-      // Hard delete (Archive block)
-      response = await fetch(`https://api.notion.com/v1/blocks/${id}`, {
-        method: 'DELETE',
+      // Hard delete (Archive page in Notion)
+      response = await fetch(`https://api.notion.com/v1/pages/${id}`, {
+        method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${TOKEN}`,
+          'Content-Type': 'application/json',
           'Notion-Version': '2022-06-28'
-        }
+        },
+        body: JSON.stringify({ archived: true })
       });
     } else {
       // Soft delete (Mover a papelera)
