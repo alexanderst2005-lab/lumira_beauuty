@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Search, Printer, Trash2, FileText } from 'lucide-react';
+import { Search, Printer, Trash2, FileText, MessageCircle } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { formatPrice } from '@/utils/whatsapp';
@@ -229,6 +229,15 @@ export default function PedidosClient({ initialOrders }: { initialOrders: any[] 
                       </select>
                     </td>
                     <td className="py-4 px-6 text-right space-x-2">
+                      <a 
+                        href={`https://wa.me/${order.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Hola ${order.name}, recibimos tu pedido #${order.id.slice(0, 8).toUpperCase()}. Muy pronto comenzaremos a prepararlo.`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors inline-block"
+                        title="Enviar WhatsApp"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                      </a>
                       <button 
                         onClick={() => handleDownloadPDF(order)}
                         className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"

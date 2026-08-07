@@ -66,16 +66,28 @@ const slides = [
 
 const brands = ['BLOOMSHELL', 'BIOAQUA', 'ANIK', 'TRENDY', 'PURPURE'];
 
-export default function HeroBanner() {
+export default function HeroBanner({ config }: { config?: any }) {
   const [current, setCurrent] = useState(0);
 
+  // Override first slide with config if provided
+  const dynamicSlides = [...slides];
+  if (config && (config.bannerTitle || config.bannerText || config.bannerPromo)) {
+    dynamicSlides[0] = {
+      ...dynamicSlides[0],
+      title: config.bannerTitle || dynamicSlides[0].title,
+      desc: config.bannerText || dynamicSlides[0].desc,
+      badge: config.bannerPromo || dynamicSlides[0].badge,
+      bg: config.bannerImage ? `url(${config.bannerImage}) center/cover no-repeat, ${dynamicSlides[0].bg}` : dynamicSlides[0].bg
+    };
+  }
+
   const next = useCallback(() => {
-    setCurrent((prev) => (prev + 1) % slides.length);
-  }, []);
+    setCurrent((prev) => (prev + 1) % dynamicSlides.length);
+  }, [dynamicSlides.length]);
 
   const prev = useCallback(() => {
-    setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
-  }, []);
+    setCurrent((prev) => (prev - 1 + dynamicSlides.length) % dynamicSlides.length);
+  }, [dynamicSlides.length]);
 
   useEffect(() => {
     const timer = setInterval(next, 5000);
@@ -93,7 +105,7 @@ export default function HeroBanner() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.8, ease: 'easeInOut' }}
             className="absolute inset-0 w-full"
-            style={{ background: slides[current].bg }}
+            style={{ background: dynamicSlides[current].bg }}
           >
             {/* Decorative circles */}
             <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-white/20 blur-3xl" />
@@ -106,14 +118,14 @@ export default function HeroBanner() {
               animate={{ y: [-15, 15, -15], rotate: [-4, 4, -4] }}
               transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
             >
-              {slides[current].emoji}
+              {dynamicSlides[current].emoji}
             </motion.div>
             <motion.div
               className="absolute bottom-[20%] right-[10%] lg:right-[20%] text-5xl sm:text-6xl opacity-20 select-none drop-shadow-md"
               animate={{ y: [10, -15, 10], rotate: [5, -5, 5] }}
               transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
             >
-              {slides[current].decorEmoji}
+              {dynamicSlides[current].decorEmoji}
             </motion.div>
 
             {/* Content */}
@@ -128,7 +140,7 @@ export default function HeroBanner() {
                     className="inline-flex items-center gap-2 mb-6 px-5 py-2 bg-white/80 backdrop-blur-md rounded-full border border-white/50 shadow-sm"
                   >
                     <span className="text-sm font-semibold text-primary-dark tracking-wide font-sans">
-                      {slides[current].badge}
+                      {dynamicSlides[current].badge}
                     </span>
                   </motion.div>
 
@@ -139,11 +151,11 @@ export default function HeroBanner() {
                     transition={{ delay: 0.3, duration: 0.6 }}
                     className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-bold leading-[1.15] mb-6 text-txt"
                   >
-                    {slides[current].title}
+                    {dynamicSlides[current].title}
                   </motion.h1>
 
                   {/* Optional Brands for Slide 5 */}
-                  {slides[current].isBrandSlide && (
+                  {dynamicSlides[current].isBrandSlide && (
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -165,21 +177,21 @@ export default function HeroBanner() {
                   <motion.p
                     initial={{ opacity: 0, y: 28 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: slides[current].isBrandSlide ? 0.5 : 0.4, duration: 0.6 }}
+                    transition={{ delay: dynamicSlides[current].isBrandSlide ? 0.5 : 0.4, duration: 0.6 }}
                     className="text-base sm:text-lg md:text-xl text-txt-secondary leading-relaxed mb-10 max-w-lg font-sans font-medium"
                   >
-                    {slides[current].desc}
+                    {dynamicSlides[current].desc}
                   </motion.p>
 
                   {/* CTA Button */}
                   <motion.div
                     initial={{ opacity: 0, y: 28 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: slides[current].isBrandSlide ? 0.6 : 0.5, duration: 0.6 }}
+                    transition={{ delay: dynamicSlides[current].isBrandSlide ? 0.6 : 0.5, duration: 0.6 }}
                     className="flex flex-wrap gap-4 mt-4"
                   >
-                    <Link href={slides[current].btnHref} className="btn-primary text-lg font-bold px-10 py-4 shadow-primary/40 shadow-xl hover:shadow-primary/50 hover:scale-105 transition-all">
-                      <span>{slides[current].btnText}</span>
+                    <Link href={dynamicSlides[current].btnHref} className="btn-primary text-lg font-bold px-10 py-4 shadow-primary/40 shadow-xl hover:shadow-primary/50 hover:scale-105 transition-all">
+                      <span>{dynamicSlides[current].btnText}</span>
                       <ChevronRight className="w-5 h-5 ml-1" />
                     </Link>
                   </motion.div>
@@ -207,7 +219,7 @@ export default function HeroBanner() {
 
         {/* Dots */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2.5 z-20">
-          {slides.map((_, index) => (
+          {dynamicSlides.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrent(index)}

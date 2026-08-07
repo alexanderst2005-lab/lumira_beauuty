@@ -15,7 +15,7 @@ export async function PATCH(
 
   try {
     const data = await request.json();
-    const { name, price, category, stock, active, image, description, featured, isNew } = data;
+    const { name, price, category, stock, active, image, description, featured, isNew, inTrash } = data;
 
     const properties: any = {};
     if (name !== undefined) properties.Name = { title: [{ text: { content: name } }] };
@@ -25,6 +25,7 @@ export async function PATCH(
     if (active !== undefined) properties.Active = { checkbox: active };
     if (featured !== undefined) properties.Destacado = { checkbox: featured };
     if (isNew !== undefined) properties.Nuevo = { checkbox: isNew };
+    if (inTrash !== undefined) properties['En Papelera'] = { checkbox: inTrash };
     if (description !== undefined) properties.Description = { rich_text: [{ text: { content: description } }] };
     
     if (image !== undefined) {
@@ -73,13 +74,35 @@ export async function DELETE(
   }
 
   try {
-    const response = await fetch(`https://api.notion.com/v1/blocks/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${TOKEN}`,
-        'Notion-Version': '2022-06-28'
-      }
-    });
+    const { searchParams } = new URL(request.url);
+    const permanent = searchParams.get('permanent') === 'true';
+
+    let response;
+    if (permanent) {
+      // Hard delete (Archive block)
+      response = await fetch(`https://api.notion.com/v1/blocks/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${TOKEN}`,
+          'Notion-Version': '2022-06-28'
+        }
+      });
+    } else {
+      // Soft delete (Mover a papelera)
+      response = await fetch(`https://api.notion.com/v1/pages/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${TOKEN}`,
+          'Content-Type': 'application/json',
+          'Notion-Version': '2022-06-28'
+        },
+        body: JSON.stringify({
+          properties: {
+            'En Papelera': { checkbox: true }
+          }
+        })
+      });
+    }
 
     if (!response.ok) {
       throw new Error('Error deleting product');

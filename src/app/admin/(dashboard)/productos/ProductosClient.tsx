@@ -60,6 +60,13 @@ export default function ProductosClient({ initialProducts }: { initialProducts: 
     setIsModalOpen(true);
   };
 
+  const handleDuplicate = (product: Product) => {
+    // Al duplicar le quitamos el ID para que lo tome como nuevo
+    const duplicated = { ...product, id: '', notionId: undefined, name: product.name + ' (Copia)' };
+    setEditingProduct(duplicated);
+    setIsModalOpen(true);
+  };
+
   const handleCreate = () => {
     setEditingProduct(null);
     setIsModalOpen(true);
@@ -149,7 +156,7 @@ export default function ProductosClient({ initialProducts }: { initialProducts: 
                 <button onClick={() => handleEdit(product)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors" title="Editar">
                   <Edit2 className="w-4 h-4" />
                 </button>
-                <button className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-md transition-colors" title="Duplicar">
+                <button onClick={() => handleDuplicate(product)} className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-md transition-colors" title="Duplicar">
                   <Copy className="w-4 h-4" />
                 </button>
                 <button onClick={() => handleDelete(product)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors" title="Eliminar">

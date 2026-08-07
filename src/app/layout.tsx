@@ -31,11 +31,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+import { getStoreConfig } from "@/data/notion";
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const config = await getStoreConfig();
+
   return (
     <html lang="es" className={`${inter.variable}`}>
       <body className="font-sans antialiased text-txt bg-bg selection:bg-rose-200 selection:text-primary-darker">
-        <StoreLayoutWrapper>
+        <StoreLayoutWrapper config={config}>
           {children}
         </StoreLayoutWrapper>
       </body>

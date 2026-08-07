@@ -11,7 +11,7 @@ import FavoritesDrawer from "@/components/favorites/FavoritesDrawer";
 import WhatsAppButton from "@/components/layout/WhatsAppButton";
 import { Toaster } from "sonner";
 
-export default function StoreLayoutWrapper({ children }: { children: React.ReactNode }) {
+export default function StoreLayoutWrapper({ children, config }: { children: React.ReactNode, config?: any }) {
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith('/admin');
 
@@ -43,12 +43,12 @@ export default function StoreLayoutWrapper({ children }: { children: React.React
     <FavoritesProvider>
       <CartProvider>
         <MarqueeBanner />
-        <Header />
+        <Header config={config} />
         <main className="min-h-screen">{children}</main>
-        <Footer />
+        <Footer config={config} />
         <CartDrawer />
         <FavoritesDrawer />
-        <WhatsAppButton />
+        <WhatsAppButton config={config} />
         <Toaster {...toasterOptions} />
       </CartProvider>
     </FavoritesProvider>

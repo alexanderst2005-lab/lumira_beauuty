@@ -8,7 +8,7 @@ import { useCart } from '@/context/CartContext';
 import { useFavorites } from '@/context/FavoritesContext';
 import MobileMenu from './MobileMenu';
 
-export default function Header() {
+export default function Header({ config }: { config?: any }) {
   const { itemCount, setIsCartOpen } = useCart();
   const { favoritesCount, setIsFavoritesOpen } = useFavorites();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -56,14 +56,25 @@ export default function Header() {
 
             {/* Center: Logo */}
             <Link href="/" className="flex-none transition-transform duration-300 hover:scale-105">
-              <Image
-                src="/images/logo.png"
-                alt="Lumira Beauty"
-                width={160}
-                height={60}
-                className="h-12 sm:h-14 w-auto object-contain"
-                priority
-              />
+              {config?.logo ? (
+                <Image
+                  src={config.logo}
+                  alt={config.storeName || "Lumira Beauty"}
+                  width={160}
+                  height={60}
+                  className="h-12 sm:h-14 w-auto object-contain"
+                  priority
+                />
+              ) : (
+                <Image
+                  src="/images/logo.png"
+                  alt={config?.storeName || "Lumira Beauty"}
+                  width={160}
+                  height={60}
+                  className="h-12 sm:h-14 w-auto object-contain"
+                  priority
+                />
+              )}
             </Link>
 
             {/* Right: Actions */}

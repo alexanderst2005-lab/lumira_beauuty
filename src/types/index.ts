@@ -28,6 +28,7 @@ export interface Product {
   featured?: boolean;
   isNew?: boolean;
   tags?: string[];
+  inTrash?: boolean;
 }
 
 export interface CartItem {

@@ -13,7 +13,11 @@ export async function PATCH(
   }
 
   try {
-    const { status } = await request.json();
+    const { status, inTrash } = await request.json();
+
+    const properties: any = {};
+    if (status !== undefined) properties.Status = { select: { name: status } };
+    if (inTrash !== undefined) properties['En Papelera'] = { checkbox: inTrash };
 
     const response = await fetch(`https://api.notion.com/v1/pages/${id}`, {
       method: 'PATCH',
@@ -22,11 +26,7 @@ export async function PATCH(
         'Content-Type': 'application/json',
         'Notion-Version': '2022-06-28'
       },
-      body: JSON.stringify({
-        properties: {
-          Status: { select: { name: status } }
-        }
-      })
+      body: JSON.stringify({ properties })
     });
 
     if (!response.ok) {
@@ -52,13 +52,35 @@ export async function DELETE(
   }
 
   try {
-    const response = await fetch(`https://api.notion.com/v1/blocks/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${TOKEN}`,
-        'Notion-Version': '2022-06-28'
-      }
-    });
+    const { searchParams } = new URL(request.url);
+    const permanent = searchParams.get('permanent') === 'true';
+
+    let response;
+    if (permanent) {
+      // Hard delete (Archive block)
+      response = await fetch(`https://api.notion.com/v1/blocks/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${TOKEN}`,
+          'Notion-Version': '2022-06-28'
+        }
+      });
+    } else {
+      // Soft delete (Mover a papelera)
+      response = await fetch(`https://api.notion.com/v1/pages/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${TOKEN}`,
+          'Content-Type': 'application/json',
+          'Notion-Version': '2022-06-28'
+        },
+        body: JSON.stringify({
+          properties: {
+            'En Papelera': { checkbox: true }
+          }
+        })
+      });
+    }
 
     if (!response.ok) {
       throw new Error('Error deleting order');

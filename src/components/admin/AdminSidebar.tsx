@@ -8,7 +8,9 @@ import {
   Package,
   Users, 
   LogOut,
-  X
+  X,
+  Settings,
+  Trash2
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -22,6 +24,8 @@ const navItems = [
   { name: 'Pedidos', href: '/admin/pedidos', icon: ShoppingBag },
   { name: 'Productos', href: '/admin/productos', icon: Package },
   { name: 'Clientes', href: '/admin/clientes', icon: Users },
+  { name: 'Configuración', href: '/admin/configuracion', icon: Settings },
+  { name: 'Papelera', href: '/admin/papelera', icon: Trash2 },
 ];
 
 export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
