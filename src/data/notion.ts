@@ -129,6 +129,7 @@ export async function getAllOrdersFromNotion(includeTrash = false) {
       const props = page.properties;
       return {
         id: page.id,
+        orderNumber: props.OrderNumber?.rich_text[0]?.plain_text || page.id,
         name: props.Name?.title[0]?.plain_text || "",
         whatsapp: props.WhatsApp?.phone_number || "",
         city: props.City?.rich_text[0]?.plain_text || "",

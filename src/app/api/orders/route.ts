@@ -19,6 +19,39 @@ export async function POST(request: Request) {
       .map((item: any) => `${item.product.name}: ${item.selectedTone.name}`)
       .join('\n');
 
+    // Generate Order Number
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0]; // YYYY-MM-DD
+    
+    let todaysOrders = 0;
+    try {
+      const countResponse = await fetch(`https://api.notion.com/v1/databases/${ORDERS_DB_ID}/query`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${TOKEN}`,
+          'Content-Type': 'application/json',
+          'Notion-Version': '2022-06-28'
+        },
+        body: JSON.stringify({
+          filter: {
+            property: 'Date',
+            date: {
+              on_or_after: todayStr
+            }
+          }
+        })
+      });
+      if (countResponse.ok) {
+        const countData = await countResponse.json();
+        todaysOrders = countData.results.length;
+      }
+    } catch (err) {
+      console.error('Error counting today orders:', err);
+    }
+
+    const nextNumber = (todaysOrders + 1).toString().padStart(3, '0');
+    const orderNumber = `LUM-${todayStr.replace(/-/g, '')}-${nextNumber}`;
+
     const response = await fetch('https://api.notion.com/v1/pages', {
       method: 'POST',
       headers: {
@@ -38,7 +71,8 @@ export async function POST(request: Request) {
           Tones: { rich_text: [{ text: { content: tonesString } }] },
           Total: { number: total },
           Status: { select: { name: 'Pendiente' } },
-          Date: { date: { start: new Date().toISOString() } },
+          Date: { date: { start: today.toISOString() } },
+          OrderNumber: { rich_text: [{ text: { content: orderNumber } }] }
         }
       })
     });

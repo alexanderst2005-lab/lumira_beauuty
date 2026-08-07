@@ -22,6 +22,26 @@ const STATUS_OPTIONS = [
   'Pendiente', 'Confirmado', 'En preparación', 'Enviado', 'Entregado', 'Cancelado'
 ];
 
+const getWhatsAppMessage = (order: any) => {
+  const base = `Hola ${order.name}, te contactamos de Lumira Beauty. `;
+  switch (order.status) {
+    case 'Pendiente':
+      return `${base}Recibimos tu pedido ${order.orderNumber}. Por favor, confírmanos el pago para comenzar a prepararlo.`;
+    case 'Confirmado':
+      return `${base}Tu pago del pedido ${order.orderNumber} ha sido confirmado. ¡Pronto comenzaremos a prepararlo!`;
+    case 'En preparación':
+      return `${base}Tu pedido ${order.orderNumber} ya está en preparación y pronto será despachado.`;
+    case 'Enviado':
+      return `${base}¡Excelentes noticias! Tu pedido ${order.orderNumber} acaba de ser enviado.`;
+    case 'Entregado':
+      return `${base}Vemos que tu pedido ${order.orderNumber} ha sido entregado. ¡Esperamos que lo disfrutes mucho!`;
+    case 'Cancelado':
+      return `${base}Lamentamos informarte que tu pedido ${order.orderNumber} ha sido cancelado. Si tienes dudas, contáctanos.`;
+    default:
+      return `${base}Recibimos tu pedido ${order.orderNumber}.`;
+  }
+};
+
 export default function PedidosClient({ initialOrders }: { initialOrders: any[] }) {
   const [orders, setOrders] = useState(initialOrders);
   const [searchTerm, setSearchTerm] = useState('');
@@ -80,66 +100,110 @@ export default function PedidosClient({ initialOrders }: { initialOrders: any[] 
   const handleDownloadPDF = (order: any) => {
     const doc = new jsPDF();
     
-    // Header
-    doc.setFontSize(22);
-    doc.setTextColor(0, 0, 0);
-    doc.text('LUMIRA BEAUTY', 14, 20);
+    // Header Background
+    doc.setFillColor(236, 72, 153); // Pink-500
+    doc.rect(0, 0, 210, 40, 'F');
     
-    doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
-    doc.text('Factura de Compra', 14, 28);
-    
-    // Order Info
-    doc.setFontSize(10);
-    doc.setTextColor(0, 0, 0);
-    doc.text(`Orden #: ${order.id.slice(0, 8).toUpperCase()}`, 130, 20);
-    doc.text(`Fecha: ${format(new Date(order.date), "dd/MM/yyyy")}`, 130, 26);
-    doc.text(`Estado: ${order.status}`, 130, 32);
-
-    // Customer Info
-    doc.setFontSize(12);
+    // Logo / Brand Name
+    doc.setFontSize(28);
+    doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
-    doc.text('Información del Cliente', 14, 45);
+    doc.text('LUMIRA BEAUTY', 14, 25);
+    
+    // Invoice Title
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Factura Oficial de Compra', 14, 33);
+    
+    // Order Info Panel (Right side)
+    doc.setFontSize(10);
+    doc.setTextColor(255, 255, 255);
+    doc.text(`Orden:`, 130, 20);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`${order.orderNumber}`, 150, 20);
     
     doc.setFont('helvetica', 'normal');
+    doc.text(`Fecha:`, 130, 27);
+    doc.text(`${format(new Date(order.date), "dd/MM/yyyy")}`, 150, 27);
+    
+    doc.text(`Estado:`, 130, 34);
+    doc.text(`${order.status}`, 150, 34);
+
+    // Customer Info Section
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Información del Cliente', 14, 55);
+    
+    doc.setDrawColor(236, 72, 153);
+    doc.line(14, 57, 80, 57); // Underline
+
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
-    doc.text(`Nombre: ${order.name}`, 14, 52);
-    doc.text(`Teléfono: ${order.whatsapp}`, 14, 58);
-    doc.text(`Ciudad: ${order.city}`, 14, 64);
-    doc.text(`Dirección: ${order.address}`, 14, 70);
-    if (order.neighborhood) doc.text(`Barrio: ${order.neighborhood}`, 14, 76);
+    doc.text(`Nombre: ${order.name}`, 14, 65);
+    doc.text(`WhatsApp: ${order.whatsapp}`, 14, 72);
+    doc.text(`Ciudad: ${order.city}`, 14, 79);
+    doc.text(`Dirección de Envío: ${order.address}`, 14, 86);
+    if (order.neighborhood) doc.text(`Barrio: ${order.neighborhood}`, 14, 93);
 
     // Products table
-    const productsList = order.products.split('\\n').filter(Boolean).map((p: string) => [p]);
+    const productsList = order.products.split('\n').filter(Boolean).map((p: string) => {
+      // Intenta separar cantidad de nombre si empieza por "Nx "
+      const match = p.match(/^(\d+)x\s(.+)$/);
+      if (match) return [match[1], match[2]];
+      return ['1', p];
+    });
+    
+    let currentY = 105;
     
     autoTable(doc, {
-      startY: 85,
-      head: [['Productos Solicitados']],
+      startY: currentY,
+      head: [['Cant.', 'Descripción del Producto']],
       body: productsList,
       theme: 'grid',
-      headStyles: { fillColor: [0, 0, 0] },
+      headStyles: { fillColor: [236, 72, 153], textColor: [255, 255, 255] },
+      columnStyles: { 
+        0: { cellWidth: 20, halign: 'center' },
+        1: { cellWidth: 'auto' }
+      }
     });
 
     // Tones
-    const tonesList = order.tones.split('\\n').filter(Boolean);
+    const tonesList = order.tones.split('\n').filter(Boolean);
     let finalY = (doc as any).lastAutoTable.finalY + 10;
 
     if (tonesList.length > 0) {
       doc.setFont('helvetica', 'bold');
-      doc.text('Tonos Seleccionados:', 14, finalY);
+      doc.setFontSize(11);
+      doc.text('Tonos / Variantes Seleccionadas:', 14, finalY);
       doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
       tonesList.forEach((t: string, i: number) => {
-        doc.text(`- ${t}`, 14, finalY + 6 + (i * 6));
+        doc.text(`• ${t}`, 14, finalY + 7 + (i * 6));
       });
-      finalY += 6 + (tonesList.length * 6);
+      finalY += 7 + (tonesList.length * 6) + 5;
     }
 
-    // Total
+    // Total Box
+    doc.setFillColor(249, 250, 251); // Gray-50
+    doc.setDrawColor(229, 231, 235); // Gray-200
+    doc.rect(120, finalY, 76, 20, 'FD');
+    
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text(`Total Pagado: ${formatPrice(order.total)}`, 130, finalY + 15);
+    doc.setTextColor(17, 24, 39); // Gray-900
+    doc.text('Total:', 125, finalY + 13);
+    doc.setTextColor(236, 72, 153); // Pink-500
+    doc.text(`${formatPrice(order.total)}`, 145, finalY + 13);
 
-    doc.save(`Factura-ORD-${order.id.slice(0,8).toUpperCase()}.pdf`);
+    // Footer
+    const pageHeight = doc.internal.pageSize.getHeight();
+    doc.setTextColor(156, 163, 175); // Gray-400
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'italic');
+    doc.text('“Gracias por comprar en Lumira Beauty. ¡Esperamos verte de nuevo pronto!”', 105, pageHeight - 15, { align: 'center' });
+
+    doc.save(`Factura-${order.orderNumber}.pdf`);
   };
 
   return (
@@ -199,7 +263,7 @@ export default function PedidosClient({ initialOrders }: { initialOrders: any[] 
                 filteredOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="py-4 px-6">
-                      <div className="text-xs font-mono text-gray-500 mb-1">{order.id.slice(0, 8)}</div>
+                      <div className="text-xs font-mono text-pink-600 font-bold mb-1">{order.orderNumber}</div>
                       <div className="text-sm font-medium text-gray-900">
                         {format(new Date(order.date), "d MMM yyyy", { locale: es })}
                       </div>
@@ -230,7 +294,7 @@ export default function PedidosClient({ initialOrders }: { initialOrders: any[] 
                     </td>
                     <td className="py-4 px-6 text-right space-x-2">
                       <a 
-                        href={`https://wa.me/${order.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Hola ${order.name}, recibimos tu pedido #${order.id.slice(0, 8).toUpperCase()}. Muy pronto comenzaremos a prepararlo.`)}`}
+                        href={`https://wa.me/${order.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(getWhatsAppMessage(order))}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors inline-block"
