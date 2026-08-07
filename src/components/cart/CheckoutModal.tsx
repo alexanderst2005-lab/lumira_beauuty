@@ -21,6 +21,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     referencia: '',
     observaciones: '',
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -35,13 +36,15 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     }).format(price);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Validar requeridos básicos en caso de que HTML5 falle por alguna razón
     if (!formData.nombre || !formData.whatsapp || !formData.ciudad || !formData.direccion) {
       return;
     }
+
+    setIsSubmitting(true);
 
     const STORE_NUMBER = '573011675661'; // Este número se configurará posteriormente
     
@@ -69,6 +72,17 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     const encodedText = encodeURIComponent(text);
     const url = `https://wa.me/${STORE_NUMBER}?text=${encodedText}`;
     
+    try {
+      await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ formData, items, total })
+      });
+    } catch (error) {
+      console.error('Error saving order to Notion:', error);
+    }
+    
+    setIsSubmitting(false);
     window.location.href = url;
   };
 
