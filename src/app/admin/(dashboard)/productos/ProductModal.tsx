@@ -14,7 +14,7 @@ interface ProductModalProps {
 export default function ProductModal({ product, onClose, onSave }: ProductModalProps) {
   const [formData, setFormData] = useState({
     name: product?.name || '',
-    price: product?.price !== undefined ? String(product.price) : '',
+    price: (product?.price !== undefined && product.price !== 0) ? String(product.price) : '',
     category: product?.category || 'makeup',
     stock: product?.stock ?? 10,
     active: product?.active ?? true,
@@ -173,7 +173,17 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Precio ($)</label>
-                  <input required type="number" min="0" step="any" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2" />
+                  <input 
+                    required 
+                    type="text" 
+                    value={formData.price} 
+                    onChange={e => {
+                      // Permitir solo números y punto decimal
+                      const val = e.target.value.replace(/[^0-9.]/g, '');
+                      setFormData({...formData, price: val});
+                    }} 
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2" 
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Disponibilidad</label>
