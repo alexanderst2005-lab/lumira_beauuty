@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { ShoppingCart, Menu, Search, X, Heart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useFavorites } from '@/context/FavoritesContext';
+import { usePathname, useRouter } from 'next/navigation';
 import MobileMenu from './MobileMenu';
 
 export default function Header({ config }: { config?: any }) {
@@ -15,6 +16,8 @@ export default function Header({ config }: { config?: any }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -80,13 +83,22 @@ export default function Header({ config }: { config?: any }) {
             {/* Right: Actions */}
             <div className="flex-1 flex items-center justify-end gap-1 sm:gap-2">
               {/* Search Toggle */}
-              <Link
-                href="/catalogo"
+              <button
+                onClick={() => {
+                  if (pathname === '/catalogo') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    setTimeout(() => {
+                      document.getElementById('catalog-search-input')?.focus();
+                    }, 500);
+                  } else {
+                    router.push('/catalogo');
+                  }
+                }}
                 className="p-2 rounded-full hover:bg-secondary-100 transition-colors duration-200 group"
                 aria-label="Buscar"
               >
                 <Search className="w-5 h-5 sm:w-6 sm:h-6 text-txt group-hover:text-primary transition-colors duration-200" />
-              </Link>
+              </button>
 
               {/* Favorites */}
               <button

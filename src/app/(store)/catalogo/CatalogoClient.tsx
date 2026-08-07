@@ -79,6 +79,7 @@ export default function CatalogoClient({ initialProducts }: { initialProducts: P
         <div className="max-w-xl mx-auto relative group">
           <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-primary/50 transition-colors group-focus-within:text-primary" />
           <input
+            id="catalog-search-input"
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
