@@ -8,7 +8,7 @@ import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 const slides = [
   {
     id: 1,
-    badge: '✨ Más de 120 productos disponibles',
+    badge: '✨ Tu belleza, tu momento',
     title: 'Descubre tu belleza con Lumira Beauty ✨',
     desc: 'Encuentra maquillaje, skincare, pestañas y accesorios en un solo lugar.',
     btnText: 'Comprar ahora',
@@ -76,7 +76,7 @@ export default function HeroBanner({ config }: { config?: any }) {
       ...dynamicSlides[0],
       title: config.bannerTitle || dynamicSlides[0].title,
       desc: config.bannerText || dynamicSlides[0].desc,
-      badge: config.bannerPromo || dynamicSlides[0].badge,
+      badge: '✨ Tu belleza, tu momento',
       bg: config.bannerImage ? `url(${config.bannerImage}) center/cover no-repeat, ${dynamicSlides[0].bg}` : dynamicSlides[0].bg
     };
   }
