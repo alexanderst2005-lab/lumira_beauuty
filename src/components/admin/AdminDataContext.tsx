@@ -100,28 +100,59 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
       const res = await fetch('/api/admin/pedidos');
       if (res.ok) {
         const data = await res.json();
-        const newOrders = data.orders || [];
+        const fetchedOrders = data.orders || [];
         
-        // Find new orders that we didn't have before to create notifications
-        const oldOrderIds = new Set(orders.map(o => o.id));
-        const newOrdersAdded = newOrders.filter((o: any) => !oldOrderIds.has(o.id));
-        
-        if (newOrdersAdded.length > 0) {
-          const newNotifs: AdminNotification[] = newOrdersAdded.map((o: any) => ({
-            id: `notif_order_${o.id}`,
-            type: 'order',
-            date: new Date().toISOString(),
-            title: `Nuevo pedido: ${o.orderNumber || o.id.slice(0,8)}`,
-            message: `El cliente ${o.name} ha realizado una compra por $${o.total.toLocaleString('es-CO')}.`,
-            read: false,
-            link: '/admin/pedidos'
-          }));
+        setOrders(currentOrders => {
+          const oldOrderIds = new Set(currentOrders.map((o: any) => o.id));
+          const newOrdersAdded = fetchedOrders.filter((o: any) => !oldOrderIds.has(o.id));
           
-          setNotifications(prev => [...newNotifs, ...prev]);
-          toast.success(`Tienes ${newOrdersAdded.length} nuevo(s) pedido(s)`);
-        }
+          if (newOrdersAdded.length > 0 && currentOrders.length > 0) {
+            const oldClientWhatsapps = new Set(currentOrders.map((o: any) => o.whatsapp).filter(Boolean));
+            const newClientsAdded = newOrdersAdded.filter((o: any) => o.whatsapp && !oldClientWhatsapps.has(o.whatsapp));
 
-        setOrders(newOrders);
+            setNotifications(prevNotifs => {
+              const existingNotifIds = new Set(prevNotifs.map(n => n.id));
+              
+              const actuallyNewOrders = newOrdersAdded.filter((o: any) => !existingNotifIds.has(`notif_order_${o.id}`));
+              const actuallyNewClients = newClientsAdded.filter((o: any) => !existingNotifIds.has(`notif_client_${o.whatsapp}`));
+              
+              let newNotifs: AdminNotification[] = [];
+              
+              if (actuallyNewOrders.length > 0) {
+                 setTimeout(() => toast.success(`Tienes ${actuallyNewOrders.length} nuevo(s) pedido(s)`), 0);
+                 newNotifs = [...newNotifs, ...actuallyNewOrders.map((o: any) => ({
+                    id: `notif_order_${o.id}`,
+                    type: 'order',
+                    date: new Date().toISOString(),
+                    title: `Nuevo pedido: ${o.orderNumber || o.id.slice(0,8)}`,
+                    message: `El cliente ${o.name} ha realizado una compra por $${o.total.toLocaleString('es-CO')}.`,
+                    read: false,
+                    link: '/admin/pedidos'
+                 }))];
+              }
+
+              if (actuallyNewClients.length > 0) {
+                 setTimeout(() => toast.info(`¡${actuallyNewClients.length} nuevo(s) cliente(s)!`), 0);
+                 newNotifs = [...newNotifs, ...actuallyNewClients.map((o: any) => ({
+                    id: `notif_client_${o.whatsapp}`,
+                    type: 'client',
+                    date: new Date().toISOString(),
+                    title: `Nuevo cliente: ${o.name}`,
+                    message: `${o.name} se ha registrado como cliente nuevo.`,
+                    read: false,
+                    link: '/admin/clientes'
+                 }))];
+              }
+
+              if (newNotifs.length > 0) {
+                return [...newNotifs, ...prevNotifs];
+              }
+              return prevNotifs;
+            });
+          }
+          return fetchedOrders;
+        });
+        
         setLastCheckTime(Date.now());
       }
     } catch (error) {
@@ -138,7 +169,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
     }, 20000);
     
     return () => clearInterval(intervalId);
-  }, [orders]); // rebind when orders change so we have latest state to compare
+  }, []); // Remove dependency on orders since we use functional updates
 
   const markAsRead = (id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
