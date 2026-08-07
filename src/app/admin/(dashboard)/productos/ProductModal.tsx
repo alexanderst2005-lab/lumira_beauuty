@@ -18,6 +18,8 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
     category: product?.category || 'makeup',
     stock: product?.stock ?? 10,
     active: product?.active ?? true,
+    featured: product?.featured ?? false,
+    isNew: product?.isNew ?? false,
     description: product?.description || '',
     image: product?.image || '',
   });
@@ -124,9 +126,21 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
                 </select>
               </div>
               
-              <div className="flex items-center gap-2">
-                <input type="checkbox" id="active" checked={formData.active} onChange={e => setFormData({...formData, active: e.target.checked})} className="w-4 h-4 text-pink-600 focus:ring-pink-500 rounded" />
-                <label htmlFor="active" className="text-sm font-medium text-gray-700">Producto Activo (Visible en la tienda)</label>
+              <div className="flex flex-col gap-3 mt-2">
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="active" checked={formData.active} onChange={e => setFormData({...formData, active: e.target.checked})} className="w-4 h-4 text-pink-600 focus:ring-pink-500 rounded" />
+                  <label htmlFor="active" className="text-sm font-medium text-gray-700">Producto Activo (Visible en la tienda)</label>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="featured" checked={formData.featured} onChange={e => setFormData({...formData, featured: e.target.checked})} className="w-4 h-4 text-pink-600 focus:ring-pink-500 rounded" />
+                  <label htmlFor="featured" className="text-sm font-medium text-gray-700">Producto Destacado</label>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="isNew" checked={formData.isNew} onChange={e => setFormData({...formData, isNew: e.target.checked})} className="w-4 h-4 text-pink-600 focus:ring-pink-500 rounded" />
+                  <label htmlFor="isNew" className="text-sm font-medium text-gray-700">Producto Nuevo</label>
+                </div>
               </div>
             </div>
             

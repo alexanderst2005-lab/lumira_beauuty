@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 
 const TOKEN = process.env.NOTION_SECRET;
 const PRODUCTS_DB_ID = process.env.NOTION_PRODUCTS_DB;
@@ -10,7 +11,7 @@ export async function POST(request: Request) {
 
   try {
     const data = await request.json();
-    const { name, price, category, stock, active, image, description } = data;
+    const { name, price, category, stock, active, image, description, featured, isNew } = data;
 
     const response = await fetch('https://api.notion.com/v1/pages', {
       method: 'POST',
@@ -28,6 +29,8 @@ export async function POST(request: Request) {
           Category: { select: { name: category } },
           Stock: { number: Number(stock) },
           Active: { checkbox: active },
+          Destacado: { checkbox: featured || false },
+          Nuevo: { checkbox: isNew || false },
           Description: { rich_text: [{ text: { content: description || '' } }] },
           Image: {
             files: image ? [
@@ -46,6 +49,11 @@ export async function POST(request: Request) {
       const errorData = await response.json();
       throw new Error(errorData.message || 'Error creating product');
     }
+
+    // Invalidar caché para que los productos aparezcan de inmediato
+    revalidatePath('/catalogo');
+    revalidatePath('/admin');
+    revalidatePath('/');
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

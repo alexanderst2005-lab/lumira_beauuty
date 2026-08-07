@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 
 const TOKEN = process.env.NOTION_SECRET;
 
@@ -14,7 +15,7 @@ export async function PATCH(
 
   try {
     const data = await request.json();
-    const { name, price, category, stock, active, image, description } = data;
+    const { name, price, category, stock, active, image, description, featured, isNew } = data;
 
     const properties: any = {};
     if (name !== undefined) properties.Name = { title: [{ text: { content: name } }] };
@@ -22,6 +23,8 @@ export async function PATCH(
     if (category !== undefined) properties.Category = { select: { name: category } };
     if (stock !== undefined) properties.Stock = { number: Number(stock) };
     if (active !== undefined) properties.Active = { checkbox: active };
+    if (featured !== undefined) properties.Destacado = { checkbox: featured };
+    if (isNew !== undefined) properties.Nuevo = { checkbox: isNew };
     if (description !== undefined) properties.Description = { rich_text: [{ text: { content: description } }] };
     
     if (image !== undefined) {
@@ -49,6 +52,11 @@ export async function PATCH(
     if (!response.ok) {
       throw new Error('Error updating product');
     }
+
+    // Invalidar caché para que los productos aparezcan de inmediato
+    revalidatePath('/catalogo');
+    revalidatePath('/admin');
+    revalidatePath('/');
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

@@ -24,6 +24,8 @@ export interface Product {
   tones?: Tone[];
   stock?: number;
   active?: boolean;
+  featured?: boolean;
+  isNew?: boolean;
   tags?: string[];
 }
 

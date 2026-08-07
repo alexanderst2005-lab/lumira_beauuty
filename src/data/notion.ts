@@ -89,6 +89,8 @@ export async function getAllProductsFromNotion(): Promise<Product[]> {
         tones: tones,
         stock: props.Stock?.number ?? 10, // Default a 10 si es null (para productos antiguos)
         active: props.Active?.checkbox ?? true,
+        featured: props.Destacado?.checkbox ?? false,
+        isNew: props.Nuevo?.checkbox ?? false,
         tags: props.Tags?.multi_select?.map((t: any) => t.name) || [],
       };
     }).filter(p => p.name && p.name.trim() !== '' && p.price > 0);
