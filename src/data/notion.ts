@@ -19,7 +19,7 @@ export async function getAllProductsFromNotion(): Promise<Product[]> {
     let nextCursor = undefined;
 
     while (hasMore) {
-      const response = await fetch(`https://api.notion.com/v1/databases/${PRODUCTS_DB_ID}/query`, {
+      const response: Response = await fetch(`https://api.notion.com/v1/databases/${PRODUCTS_DB_ID}/query`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${TOKEN}`,
@@ -36,7 +36,7 @@ export async function getAllProductsFromNotion(): Promise<Product[]> {
         throw new Error('Error querying Notion DB');
       }
 
-      const data = await response.json();
+      const data: any = await response.json();
       allResults = [...allResults, ...data.results];
       
       hasMore = data.has_more;
