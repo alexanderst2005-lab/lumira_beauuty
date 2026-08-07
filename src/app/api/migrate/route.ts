@@ -38,7 +38,7 @@ export async function GET() {
         throw new Error(data.message || 'Error inserting product');
       }
       successCount++;
-    } catch (error) {
+    } catch (error: any) {
       errors.push({ id: product.id, error: error.message });
     }
   }
