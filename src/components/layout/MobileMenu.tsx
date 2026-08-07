@@ -96,7 +96,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               {/* Footer */}
               <div className="p-6 border-t border-border">
                 <p className="text-xs text-text-light text-center">
-                  © 2024 Lumira Beauty
+                  © 2026 Lumira Beauty
                 </p>
               </div>
             </div>
