@@ -123,18 +123,15 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative aspect-square w-full rounded-2xl overflow-hidden bg-white border border-border-light shadow-sm touch-pan-y"
+              className="relative w-full rounded-2xl overflow-hidden bg-white border border-border-light shadow-sm touch-pan-y flex items-center justify-center"
               onTouchStart={onTouchStart}
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEndHandler}
             >
-              <Image
+              <img
                 src={overrideImage || displayImages[currentImageIndex]}
                 alt={product.name}
-                fill
-                className={`object-contain p-2 sm:p-4 lg:p-6 mix-blend-multiply transition-opacity duration-300 ${isOutOfStock ? 'grayscale opacity-60' : ''}`}
-                priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
+                className={`w-full h-auto object-cover transition-opacity duration-300 ${isOutOfStock ? 'grayscale opacity-60' : ''}`}
               />
               {/* Fallback decorativo */}
               <div className="absolute inset-0 flex items-center justify-center text-9xl opacity-10 pointer-events-none">
@@ -222,7 +219,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
           transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
           className="flex flex-col justify-center"
         >
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-display font-bold text-txt mb-1.5 lg:mb-2 leading-tight">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-display font-bold text-txt mb-1.5 lg:mb-2 leading-tight uppercase">
             {product.name}
           </h1>
 
