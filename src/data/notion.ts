@@ -65,16 +65,14 @@ export async function getAllProductsFromNotion(includeTrash = false): Promise<Pr
       }
       
       const name = props.Name?.title[0]?.plain_text || '';
-      let tones: {name: string, hex: string}[] = [];
-      
-      if (name === 'Splash Purpure 200ml' || name.includes('Splash Purpure')) {
-        tones = [
-          { name: 'Caramel Crush', hex: '#FDB777' },
-          { name: 'Bubble Gum', hex: '#72D6D3' },
-          { name: 'Piña Colada', hex: '#F9E58A' },
-          { name: 'Strawberry', hex: '#F381A6' },
-          { name: 'Choco Vibes', hex: '#5E3823' }
-        ];
+      let options: { name: string; values: any[] }[] = [];
+      const optionsJson = props.Options?.rich_text[0]?.plain_text;
+      if (optionsJson) {
+        try {
+          options = JSON.parse(optionsJson);
+        } catch (e) {
+          console.error(`Error parsing Options for product ${name}:`, e);
+        }
       }
 
       return {
@@ -87,7 +85,7 @@ export async function getAllProductsFromNotion(includeTrash = false): Promise<Pr
         category: props.Category?.select?.name || '',
         image: imageUrl,
         images: imagesList.length > 0 ? imagesList : [imageUrl],
-        tones: tones,
+        options: options,
         stock: props.Stock?.number ?? 10, // Default a 10 si es null (para productos antiguos)
         active: props.Active?.checkbox ?? true,
         featured: props.Destacado?.checkbox ?? false,

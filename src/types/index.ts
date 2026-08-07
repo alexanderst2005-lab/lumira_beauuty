@@ -12,6 +12,18 @@ export interface Tone {
   hex: string;
 }
 
+export interface ProductOptionValue {
+  name: string;
+  image?: string;
+  hex?: string;
+}
+
+export interface ProductOption {
+  name: string;
+  values: ProductOptionValue[];
+}
+
+
 export interface Product {
   id: string; // The URL/slug ID
   notionId?: string; // The actual Notion Page ID used for updates/deletes
@@ -22,7 +34,8 @@ export interface Product {
   category: Category;
   image: string;
   images?: string[];
-  tones?: Tone[];
+  tones?: Tone[]; // Deprecated, use options
+  options?: ProductOption[];
   stock?: number;
   active?: boolean;
   featured?: boolean;
@@ -32,10 +45,11 @@ export interface Product {
 }
 
 export interface CartItem {
-  id: string; // Unique cart item ID: productId + selectedTone (if any)
+  id: string; // Unique cart item ID: productId + selected options
   product: Product;
   quantity: number;
-  selectedTone?: Tone;
+  selectedTone?: Tone; // Deprecated
+  selectedOptions?: Record<string, ProductOptionValue>;
 }
 
 export interface CategoryInfo {

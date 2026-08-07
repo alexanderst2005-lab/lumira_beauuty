@@ -15,7 +15,7 @@ export async function PATCH(
 
   try {
     const data = await request.json();
-    const { name, price, category, stock, active, image, description, featured, isNew, inTrash } = data;
+    const { name, price, category, stock, active, image, description, featured, isNew, inTrash, options } = data;
 
     const properties: any = {};
     if (name !== undefined) properties.Name = { title: [{ text: { content: name } }] };
@@ -27,6 +27,7 @@ export async function PATCH(
     if (isNew !== undefined) properties.Nuevo = { checkbox: isNew };
     if (inTrash !== undefined) properties['En Papelera'] = { checkbox: inTrash };
     if (description !== undefined) properties.Description = { rich_text: [{ text: { content: description } }] };
+    if (options !== undefined) properties.Options = { rich_text: [{ text: { content: JSON.stringify(options) } }] };
     
     if (image !== undefined) {
       properties.Image = {

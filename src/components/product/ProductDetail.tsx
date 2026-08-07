@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Heart, ShoppingCart, ArrowLeft, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Product, Tone } from '@/types';
+import { Product, Tone, ProductOptionValue } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { useFavorites } from '@/context/FavoritesContext';
 import { formatPrice } from '@/utils/whatsapp';
@@ -28,6 +28,8 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [selectedTone, setSelectedTone] = useState<Tone | null>(null);
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, ProductOptionValue>>({});
+  const [overrideImage, setOverrideImage] = useState<string | null>(null);
 
   const isOutOfStock = product.stock === 0;
 
@@ -71,13 +73,31 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
   const handleAddToCart = () => {
     if (isOutOfStock) return;
     
+    // Legacy support
     if (product.tones && product.tones.length > 0 && !selectedTone) {
       toast.error('Selecciona un tono antes de agregar este producto al carrito.', { icon: '🎨' });
       return;
     }
-    addToCart(product, quantity, selectedTone || undefined);
+
+    // New options support
+    if (product.options && product.options.length > 0) {
+      const missingOptions = product.options.filter(opt => !selectedOptions[opt.name]);
+      if (missingOptions.length > 0) {
+        toast.error(`Selecciona ${missingOptions[0].name} antes de agregar al carrito.`, { icon: '⚠️' });
+        return;
+      }
+    }
+
+    addToCart(product, quantity, selectedTone || undefined, selectedOptions);
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
+  };
+
+  const handleOptionSelect = (optionName: string, value: ProductOptionValue) => {
+    setSelectedOptions(prev => ({ ...prev, [optionName]: value }));
+    if (value.image) {
+      setOverrideImage(value.image);
+    }
   };
 
   const displayImages = product.images || [product.image];
@@ -108,7 +128,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
               onTouchEnd={onTouchEndHandler}
             >
               <Image
-                src={displayImages[currentImageIndex]}
+                src={overrideImage || displayImages[currentImageIndex]}
                 alt={product.name}
                 fill
                 className={`object-contain p-8 sm:p-12 mix-blend-multiply transition-opacity duration-300 ${isOutOfStock ? 'grayscale opacity-60' : ''}`}
@@ -174,9 +194,12 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
                 {displayImages.map((img, idx) => (
                   <button
                     key={idx}
-                    onClick={() => setCurrentImageIndex(idx)}
+                    onClick={() => {
+                      setCurrentImageIndex(idx);
+                      setOverrideImage(null);
+                    }}
                     className={`relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all duration-200 ${
-                      currentImageIndex === idx ? 'border-primary' : 'border-transparent opacity-60 hover:opacity-100'
+                      (currentImageIndex === idx && !overrideImage) ? 'border-primary' : 'border-transparent opacity-60 hover:opacity-100'
                     }`}
                   >
                     <Image
@@ -234,6 +257,37 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
                     />
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Opciones Dinámicas */}
+            {product.options && product.options.length > 0 && (
+              <div className="w-full space-y-6">
+                {product.options.map((option) => (
+                  <div key={option.name}>
+                    <label className="block text-xs font-bold text-txt-secondary mb-3 uppercase tracking-wider">
+                      {option.name}: <span className="text-txt font-semibold">{selectedOptions[option.name] ? selectedOptions[option.name].name : 'Seleccionar...'}</span>
+                    </label>
+                    <div className="flex flex-wrap gap-3">
+                      {option.values.map((val) => {
+                        const isSelected = selectedOptions[option.name]?.name === val.name;
+                        return (
+                          <button
+                            key={val.name}
+                            onClick={() => handleOptionSelect(option.name, val)}
+                            className={`px-4 py-2 rounded-xl border-2 transition-all duration-200 text-sm font-medium ${
+                              isSelected
+                                ? 'border-primary bg-primary/5 text-primary'
+                                : 'border-border hover:border-txt-secondary text-txt-secondary hover:text-txt'
+                            }`}
+                          >
+                            {val.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
 

@@ -1,11 +1,11 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { Product, CartItem } from '@/types';
+import { Product, CartItem, ProductOptionValue } from '@/types';
 
 interface CartContextType {
   items: CartItem[];
-  addToCart: (product: Product, quantity?: number, selectedTone?: { name: string; hex: string }) => void;
+  addToCart: (product: Product, quantity?: number, selectedTone?: { name: string; hex: string }, selectedOptions?: Record<string, ProductOptionValue>) => void;
   removeFromCart: (cartItemId: string) => void;
   updateQuantity: (cartItemId: string, quantity: number) => void;
   clearCart: () => void;
@@ -43,9 +43,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, isLoaded]);
 
-  const addToCart = useCallback((product: Product, quantity = 1, selectedTone?: { name: string; hex: string }) => {
+  const addToCart = useCallback((product: Product, quantity = 1, selectedTone?: { name: string; hex: string }, selectedOptions?: Record<string, ProductOptionValue>) => {
     setItems((prev) => {
-      const cartItemId = selectedTone ? `${product.id}-${selectedTone.name}` : product.id;
+      let cartItemId = product.id;
+      if (selectedTone) cartItemId += `-${selectedTone.name}`;
+      if (selectedOptions) {
+        cartItemId += `-${Object.values(selectedOptions).map(v => v.name).join('-')}`;
+      }
+      
       const existing = prev.find((item) => item.id === cartItemId);
       if (existing) {
         return prev.map((item) =>
@@ -54,7 +59,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             : item
         );
       }
-      return [...prev, { id: cartItemId, product, quantity, selectedTone }];
+      return [...prev, { id: cartItemId, product, quantity, selectedTone, selectedOptions }];
     });
   }, []);
 

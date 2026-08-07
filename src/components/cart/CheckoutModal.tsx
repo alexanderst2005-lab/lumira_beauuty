@@ -55,6 +55,11 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
       if (item.selectedTone) {
         text += `  - Tono: ${item.selectedTone.name}\n`;
       }
+      if (item.selectedOptions) {
+        Object.entries(item.selectedOptions).forEach(([optionName, value]) => {
+          text += `  - ${optionName}: ${value.name}\n`;
+        });
+      }
       text += `  - Cantidad: ${item.quantity}\n`;
       text += `  - Precio: ${formatPrice(item.product.price * item.quantity)}\n`;
     });
