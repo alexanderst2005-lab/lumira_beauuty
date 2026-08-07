@@ -114,11 +114,11 @@ export default function Footer({ config }: { config?: any }) {
               Información
             </h3>
             <ul className="space-y-3">
-              <li className="text-sm text-txt-secondary inline-flex items-start gap-2 font-sans">
+              <li className="text-sm text-txt-secondary flex items-start gap-2 font-sans">
                 <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
                 <span>Cali, Colombia</span>
               </li>
-              <li className="text-sm text-txt-secondary inline-flex items-start gap-2 font-sans">
+              <li className="text-sm text-txt-secondary flex items-start gap-2 font-sans">
                 <Clock className="w-4 h-4 flex-shrink-0 mt-0.5" />
                 <span>Lunes a Domingos</span>
               </li>
