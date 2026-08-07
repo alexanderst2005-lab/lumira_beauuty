@@ -14,7 +14,7 @@ interface ProductModalProps {
 export default function ProductModal({ product, onClose, onSave }: ProductModalProps) {
   const [formData, setFormData] = useState({
     name: product?.name || '',
-    price: product?.price || 0,
+    price: product?.price !== undefined ? String(product.price) : '',
     category: product?.category || 'makeup',
     stock: product?.stock ?? 10,
     active: product?.active ?? true,
@@ -117,9 +117,20 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (formData.price === '') {
+      toast.error('Por favor, ingresa un precio.');
+      return;
+    }
+
     setIsSaving(true);
     
     try {
+      const dataToSave = {
+        ...formData,
+        price: Number(formData.price)
+      };
+
       const targetId = product ? (product.notionId || product.id) : '';
       const url = product ? `/api/admin/productos/${targetId}` : '/api/admin/productos';
       const method = product ? 'PATCH' : 'POST';
@@ -127,7 +138,7 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(dataToSave)
       });
       
       if (res.ok) {
@@ -162,7 +173,7 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Precio ($)</label>
-                  <input required type="number" value={formData.price} onChange={e => setFormData({...formData, price: Number(e.target.value)})} className="w-full border border-gray-200 rounded-lg px-3 py-2" />
+                  <input required type="number" min="0" step="any" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Disponibilidad</label>
