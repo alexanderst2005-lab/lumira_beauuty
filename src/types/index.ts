@@ -22,6 +22,9 @@ export interface Product {
   image: string;
   images?: string[];
   tones?: Tone[];
+  stock?: number;
+  active?: boolean;
+  tags?: string[];
 }
 
 export interface CartItem {

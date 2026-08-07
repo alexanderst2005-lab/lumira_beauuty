@@ -87,10 +87,58 @@ export async function getAllProductsFromNotion(): Promise<Product[]> {
         image: imageUrl,
         images: imagesList.length > 0 ? imagesList : [imageUrl],
         tones: tones,
+        stock: props.Stock?.number ?? 10, // Default a 10 si es null (para productos antiguos)
+        active: props.Active?.checkbox ?? true,
+        tags: props.Tags?.multi_select?.map((t: any) => t.name) || [],
       };
     }).filter(p => p.name && p.name.trim() !== '' && p.price > 0);
   } catch (error) {
     console.error('Error fetching products from Notion:', error);
+    return [];
+  }
+}
+
+export async function getAllOrdersFromNotion() {
+  if (!ORDERS_DB_ID || !TOKEN) return [];
+  try {
+    let allResults: any[] = [];
+    let hasMore = true;
+    let nextCursor = undefined;
+    while (hasMore) {
+      const response = await fetch(`https://api.notion.com/v1/databases/${ORDERS_DB_ID}/query`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${TOKEN}`,
+          "Content-Type": "application/json",
+          "Notion-Version": "2022-06-28"
+        },
+        body: JSON.stringify({ start_cursor: nextCursor }),
+        cache: "no-store"
+      });
+      if (!response.ok) throw new Error("Error querying Orders DB");
+      const data: any = await response.json();
+      allResults = [...allResults, ...data.results];
+      hasMore = data.has_more;
+      nextCursor = data.next_cursor;
+    }
+    return allResults.map(page => {
+      const props = page.properties;
+      return {
+        id: page.id,
+        name: props.Name?.title[0]?.plain_text || "",
+        whatsapp: props.WhatsApp?.phone_number || "",
+        city: props.City?.rich_text[0]?.plain_text || "",
+        address: props.Address?.rich_text[0]?.plain_text || "",
+        neighborhood: props.Neighborhood?.rich_text[0]?.plain_text || "",
+        products: props.Products?.rich_text[0]?.plain_text || "",
+        tones: props.Tones?.rich_text[0]?.plain_text || "",
+        total: props.Total?.number || 0,
+        status: props.Status?.select?.name || "Pendiente",
+        date: props.Date?.date?.start || page.created_time,
+      };
+    });
+  } catch (error) {
+    console.error("Error fetching orders:", error);
     return [];
   }
 }
