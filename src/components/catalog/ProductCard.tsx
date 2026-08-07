@@ -50,7 +50,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
 
     if (isOutOfStock) return;
 
-    if (product.tones && product.tones.length > 0) {
+    if ((product.tones && product.tones.length > 0) || (product.options && product.options.length > 0)) {
       router.push(`/producto/${product.id}`);
       return;
     }

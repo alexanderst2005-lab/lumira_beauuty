@@ -28,7 +28,7 @@ export default function FavoritesDrawer() {
   }, [isFavoritesOpen]);
 
   const handleAddToCart = (product: any) => {
-    if (product.tones && product.tones.length > 0) {
+    if ((product.tones && product.tones.length > 0) || (product.options && product.options.length > 0)) {
       setIsFavoritesOpen(false);
       router.push(`/producto/${product.id}`);
       return;
