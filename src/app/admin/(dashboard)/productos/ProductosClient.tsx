@@ -168,17 +168,7 @@ export default function ProductosClient({ initialProducts }: { initialProducts: 
               <p className="font-bold text-sm text-gray-900 mt-1">{formatPrice(product.price)}</p>
             </div>
             
-            <div className="mt-2 pt-2 border-t border-gray-50 flex items-center justify-between gap-1">
-              <button
-                onClick={() => handleToggleActive(product)}
-                className={`p-1.5 rounded transition-colors ${
-                  product.active ? 'text-green-600 hover:bg-green-50' : 'text-gray-400 hover:bg-gray-50'
-                }`}
-                title={product.active ? 'Desactivar' : 'Activar'}
-              >
-                {product.active ? <Check className="w-3.5 h-3.5" /> : <X className="w-3.5 h-3.5" />}
-              </button>
-              
+            <div className="mt-2 pt-2 border-t border-gray-50 flex items-center justify-end gap-1">
               <div className="flex gap-0.5">
                 <button onClick={() => handleEdit(product)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Editar">
                   <Edit2 className="w-3.5 h-3.5" />
