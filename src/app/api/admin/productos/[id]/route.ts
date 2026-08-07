@@ -53,10 +53,8 @@ export async function PATCH(
       throw new Error('Error updating product');
     }
 
-    // Invalidar caché para que los productos aparezcan de inmediato
-    revalidatePath('/catalogo');
-    revalidatePath('/admin');
-    revalidatePath('/');
+    // Invalidar caché global
+    revalidatePath('/', 'layout');
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
@@ -86,6 +84,9 @@ export async function DELETE(
     if (!response.ok) {
       throw new Error('Error deleting product');
     }
+
+    // Invalidar caché global
+    revalidatePath('/', 'layout');
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

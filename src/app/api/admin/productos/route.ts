@@ -50,10 +50,8 @@ export async function POST(request: Request) {
       throw new Error(errorData.message || 'Error creating product');
     }
 
-    // Invalidar caché para que los productos aparezcan de inmediato
-    revalidatePath('/catalogo');
-    revalidatePath('/admin');
-    revalidatePath('/');
+    // Invalidar caché global para que los productos aparezcan de inmediato en toda la tienda
+    revalidatePath('/', 'layout');
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

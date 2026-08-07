@@ -13,6 +13,16 @@ const nextConfig: NextConfig = {
         hostname: 'prod-files-secure.s3.us-west-2.amazonaws.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'iili.io',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'freeimage.host',
+        pathname: '/**',
+      },
     ],
   },
 };

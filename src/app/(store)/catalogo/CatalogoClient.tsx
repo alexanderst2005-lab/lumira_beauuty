@@ -37,6 +37,13 @@ export default function CatalogoClient({ initialProducts }: { initialProducts: P
       result = [...result].sort((a, b) => a.price - b.price);
     } else if (sortOrder === 'desc') {
       result = [...result].sort((a, b) => b.price - a.price);
+    } else {
+      // Default sort: Nuevos de primero
+      result = [...result].sort((a, b) => {
+        if (a.isNew && !b.isNew) return -1;
+        if (!a.isNew && b.isNew) return 1;
+        return 0;
+      });
     }
 
     return result;

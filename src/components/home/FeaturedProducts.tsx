@@ -4,50 +4,33 @@ import { motion } from 'framer-motion';
 import { Product } from '@/types';
 import ProductCard from '@/components/catalog/ProductCard';
 
-const getDiverseFeaturedProducts = (productsList: Product[], count: number) => {
-  const byCategory: Record<string, Product[]> = {};
-  
-  // Filter out incomplete products and group by category
-  productsList
-    .filter(p => p.name && p.price > 0 && p.category && p.image !== '/images/products/placeholder.webp')
-    .forEach(p => {
-      if (!byCategory[p.category]) byCategory[p.category] = [];
-      byCategory[p.category].push(p);
-    });
+const getFeaturedAndNewProducts = (productsList: Product[], count: number) => {
+  // Primero tomamos los que están marcados explícitamente como "Nuevo" o "Destacado"
+  const priorityProducts = productsList.filter(p => 
+    p.name && p.price > 0 && p.image !== '/images/products/placeholder.webp' &&
+    (p.isNew || p.featured)
+  );
 
-  const categories = Object.keys(byCategory);
-  const featured: Product[] = [];
-  const usedIds = new Set<string>();
-  
-  let lastCat = '';
+  // Si no hay suficientes, rellenamos con otros productos de forma diversa
+  let result = [...priorityProducts];
 
-  while (featured.length < count && categories.length > 0) {
-    // Find next category different from the last one
-    let catIndex = categories.findIndex(c => c !== lastCat);
-    if (catIndex === -1) catIndex = 0; // fallback if only one category remains
+  if (result.length < count) {
+    const remainingProducts = productsList.filter(p => 
+      p.name && p.price > 0 && p.image !== '/images/products/placeholder.webp' &&
+      !p.isNew && !p.featured
+    );
     
-    const cat = categories[catIndex];
-    // Find first unused product in this category
-    const available = byCategory[cat].filter(p => !usedIds.has(p.id));
-    
-    if (available.length > 0) {
-      const p = available[0];
-      featured.push(p);
-      usedIds.add(p.id);
-      lastCat = cat;
-      // Rotate the used category to the end of the list
-      categories.push(categories.splice(catIndex, 1)[0]);
-    } else {
-      // No more products in this category, remove it
-      categories.splice(catIndex, 1);
-    }
+    // Sort remaining randomly or keep them
+    const shuffledRemaining = remainingProducts.sort(() => 0.5 - Math.random());
+    result = [...result, ...shuffledRemaining];
   }
 
-  return featured;
+  // Si hay más del count requerido, cortamos
+  return result.slice(0, count);
 };
 
 export default function FeaturedProducts({ initialProducts }: { initialProducts: Product[] }) {
-  const featured = getDiverseFeaturedProducts(initialProducts, 8);
+  const featured = getFeaturedAndNewProducts(initialProducts, 8);
 
   return (
     <section className="py-16 sm:py-20 bg-gradient-to-b from-white to-secondary-100/30" id="featured">

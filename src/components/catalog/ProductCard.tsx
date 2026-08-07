@@ -95,6 +95,15 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
           />
         </div>
 
+        {/* Nuevo Badge */}
+        {product.isNew && (
+          <div className="absolute top-4 left-4 z-20">
+            <span className="bg-pink-500 text-white text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wide shadow-sm">
+              Nuevo
+            </span>
+          </div>
+        )}
+
         {/* Favorite Button Minimalista */}
         <button
           onClick={handleFavoriteToggle}
