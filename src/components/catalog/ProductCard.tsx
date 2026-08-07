@@ -146,7 +146,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
       {/* Contenido Minimalista */}
       <div className="p-3 sm:p-4 flex flex-col gap-2 sm:gap-3 bg-white z-10 flex-1 border-t border-border-light rounded-b-2xl">
         <div className="space-y-0.5 flex-1">
-          <h3 className="font-sans font-medium text-xs sm:text-sm text-txt line-clamp-2 group-hover:text-primary transition-colors duration-200 leading-snug">
+          <h3 className="font-sans font-bold uppercase tracking-wide text-xs sm:text-sm text-txt line-clamp-2 group-hover:text-primary transition-colors duration-200 leading-snug">
             {product.name}
           </h3>
           <p className="text-[10px] sm:text-xs text-txt-secondary/70 line-clamp-1">
