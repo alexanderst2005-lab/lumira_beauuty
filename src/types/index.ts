@@ -13,7 +13,8 @@ export interface Tone {
 }
 
 export interface Product {
-  id: string;
+  id: string; // The URL/slug ID
+  notionId?: string; // The actual Notion Page ID used for updates/deletes
   name: string;
   description: string;
   fullDescription: string;

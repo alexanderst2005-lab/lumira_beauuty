@@ -23,7 +23,8 @@ export default function ProductosClient({ initialProducts }: { initialProducts: 
 
   const handleToggleActive = async (product: Product) => {
     try {
-      const res = await fetch(`/api/admin/productos/${product.id}`, {
+      const targetId = product.notionId || product.id;
+      const res = await fetch(`/api/admin/productos/${targetId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ active: !product.active })
@@ -37,14 +38,17 @@ export default function ProductosClient({ initialProducts }: { initialProducts: 
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (product: Product) => {
     if (!confirm('¿Estás seguro de eliminar este producto? (Se archivará en Notion)')) return;
     
     try {
-      const res = await fetch(`/api/admin/productos/${id}`, { method: 'DELETE' });
+      const targetId = product.notionId || product.id;
+      const res = await fetch(`/api/admin/productos/${targetId}`, { method: 'DELETE' });
       if (res.ok) {
-        setProducts(products.filter(p => p.id !== id));
+        setProducts(products.filter(p => p.id !== product.id));
         toast.success('Producto eliminado');
+      } else {
+        toast.error('No se pudo eliminar de Notion');
       }
     } catch {
       toast.error('Error al eliminar');
@@ -148,7 +152,7 @@ export default function ProductosClient({ initialProducts }: { initialProducts: 
                 <button className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-md transition-colors" title="Duplicar">
                   <Copy className="w-4 h-4" />
                 </button>
-                <button onClick={() => handleDelete(product.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors" title="Eliminar">
+                <button onClick={() => handleDelete(product)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors" title="Eliminar">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>

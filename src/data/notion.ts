@@ -79,6 +79,7 @@ export async function getAllProductsFromNotion(): Promise<Product[]> {
 
       return {
         id: props.Id?.rich_text[0]?.plain_text || page.id,
+        notionId: page.id,
         name: name,
         description: props.Description?.rich_text[0]?.plain_text || '',
         fullDescription: props.FullDescription?.rich_text[0]?.plain_text || '',

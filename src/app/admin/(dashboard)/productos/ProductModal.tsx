@@ -63,7 +63,8 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
     setIsSaving(true);
     
     try {
-      const url = product ? `/api/admin/productos/${product.id}` : '/api/admin/productos';
+      const targetId = product ? (product.notionId || product.id) : '';
+      const url = product ? `/api/admin/productos/${targetId}` : '/api/admin/productos';
       const method = product ? 'PATCH' : 'POST';
       
       const res = await fetch(url, {
