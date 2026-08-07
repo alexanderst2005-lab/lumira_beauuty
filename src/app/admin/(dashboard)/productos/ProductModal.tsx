@@ -108,8 +108,15 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
                   <input required type="number" value={formData.price} onChange={e => setFormData({...formData, price: Number(e.target.value)})} className="w-full border border-gray-200 rounded-lg px-3 py-2" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Stock</label>
-                  <input required type="number" value={formData.stock} onChange={e => setFormData({...formData, stock: Number(e.target.value)})} className="w-full border border-gray-200 rounded-lg px-3 py-2" />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Disponibilidad</label>
+                  <select 
+                    value={formData.stock > 0 ? 'disponible' : 'agotado'} 
+                    onChange={e => setFormData({...formData, stock: e.target.value === 'disponible' ? 10 : 0})} 
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 bg-white font-medium"
+                  >
+                    <option value="disponible">✅ Disponible</option>
+                    <option value="agotado">❌ Agotado</option>
+                  </select>
                 </div>
               </div>
               

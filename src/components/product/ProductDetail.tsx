@@ -29,6 +29,8 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [selectedTone, setSelectedTone] = useState<Tone | null>(null);
 
+  const isOutOfStock = product.stock === 0;
+
   // Swipe logic
   const minSwipeDistance = 50;
   
@@ -67,6 +69,8 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
   };
 
   const handleAddToCart = () => {
+    if (isOutOfStock) return;
+    
     if (product.tones && product.tones.length > 0 && !selectedTone) {
       toast.error('Selecciona un tono antes de agregar este producto al carrito.', { icon: '🎨' });
       return;
@@ -107,7 +111,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
                 src={displayImages[currentImageIndex]}
                 alt={product.name}
                 fill
-                className="object-contain p-8 sm:p-12 mix-blend-multiply transition-opacity duration-300"
+                className={`object-contain p-8 sm:p-12 mix-blend-multiply transition-opacity duration-300 ${isOutOfStock ? 'grayscale opacity-60' : ''}`}
                 priority
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
@@ -115,6 +119,22 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
               <div className="absolute inset-0 flex items-center justify-center text-9xl opacity-10 pointer-events-none">
                 ✨
               </div>
+
+              {/* Capa oscura si está agotado */}
+              {isOutOfStock && (
+                <div className="absolute inset-0 bg-black/20 z-10 pointer-events-none" />
+              )}
+
+              {/* Agotado Badge (GIGANTE) */}
+              {isOutOfStock && (
+                <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
+                  <div className="bg-black/80 backdrop-blur-sm text-white px-8 py-3 rounded-xl -rotate-12 border border-white/20 shadow-2xl">
+                    <span className="text-2xl sm:text-4xl font-bold tracking-widest uppercase">
+                      Agotado
+                    </span>
+                  </div>
+                </div>
+              )}
               
               {/* Indicadores de swipe */}
               {displayImages.length > 1 && (
@@ -228,16 +248,20 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
 
             {/* Botón Agregar al Carrito */}
             <button
-              onClick={handleAddToCart}
-              disabled={isAdded}
+              onClick={isOutOfStock ? (e) => e.preventDefault() : handleAddToCart}
+              disabled={isAdded || isOutOfStock}
               className={`w-full py-4 px-8 rounded-full font-semibold text-base transition-all duration-300 flex items-center justify-center gap-3 ${
-                isAdded
+                isOutOfStock
+                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                  : isAdded
                   ? 'bg-green-500 text-white shadow-lg shadow-green-500/25 scale-95'
                   : 'btn-primary flex-1'
               }`}
               id="add-to-cart"
             >
-              {isAdded ? (
+              {isOutOfStock ? (
+                <span className="font-bold tracking-widest uppercase">Agotado - No Disponible</span>
+              ) : isAdded ? (
                 <>
                   <Check className="w-5 h-5" />
                   ¡Agregado al carrito!

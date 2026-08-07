@@ -26,6 +26,8 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
   const [quantity, setQuantity] = useState(1);
   const [isLocalFav, setIsLocalFav] = useState(false);
 
+  const isOutOfStock = product.stock === 0;
+
   const handleFavoriteToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -45,6 +47,8 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (isOutOfStock) return;
 
     if (product.tones && product.tones.length > 0) {
       router.push(`/producto/${product.id}`);
@@ -87,16 +91,31 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             priority={priority}
-            className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+            className={`object-cover object-center transition-all duration-700 ${!isOutOfStock ? 'group-hover:scale-105' : ''} ${isOutOfStock ? 'grayscale opacity-70' : ''}`}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.style.display = 'none';
             }}
           />
+          {/* Capa oscura si está agotado */}
+          {isOutOfStock && (
+            <div className="absolute inset-0 bg-black/40 z-10" />
+          )}
         </div>
 
+        {/* Agotado Badge (GIGANTE) */}
+        {isOutOfStock && (
+          <div className="absolute inset-0 z-30 flex items-center justify-center">
+            <div className="bg-black/80 backdrop-blur-sm text-white px-6 py-2 rounded-lg -rotate-12 border border-white/20 shadow-2xl">
+              <span className="text-lg sm:text-xl font-bold tracking-widest uppercase">
+                Agotado
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Nuevo Badge */}
-        {product.isNew && (
+        {product.isNew && !isOutOfStock && (
           <div className="absolute top-4 left-4 z-20">
             <span className="bg-pink-500 text-white text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wide shadow-sm">
               Nuevo
@@ -141,16 +160,22 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
           </div>
           
           <button
-            onClick={handleAddToCart}
-            disabled={isAdding}
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
-              isAdding
+            onClick={isOutOfStock ? (e) => { e.preventDefault(); e.stopPropagation(); } : handleAddToCart}
+            disabled={isAdding || isOutOfStock}
+            className={`h-10 px-4 rounded-full flex items-center justify-center transition-all duration-300 ${
+              isOutOfStock
+                ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                : isAdding
                 ? 'bg-green-500 text-white scale-95'
                 : 'bg-txt text-white hover:bg-txt-secondary hover:shadow-md active:scale-95'
             }`}
-            aria-label={`Agregar ${product.name} al carrito`}
+            aria-label={isOutOfStock ? 'Producto Agotado' : `Agregar ${product.name} al carrito`}
           >
-            <ShoppingCart className="w-4 h-4" />
+            {isOutOfStock ? (
+              <span className="text-xs font-bold uppercase tracking-wider">Agotado</span>
+            ) : (
+              <ShoppingCart className="w-4 h-4" />
+            )}
           </button>
         </div>
       </div>
