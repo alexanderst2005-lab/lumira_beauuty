@@ -60,14 +60,14 @@ export async function getAllProductsFromNotion(): Promise<Product[]> {
 
       return {
         id: props.Id?.rich_text[0]?.plain_text || page.id,
-        name: props.Name?.title[0]?.plain_text || 'Sin nombre',
+        name: props.Name?.title[0]?.plain_text || '',
         description: props.Description?.rich_text[0]?.plain_text || '',
         fullDescription: props.FullDescription?.rich_text[0]?.plain_text || '',
         price: props.Price?.number || 0,
-        category: props.Category?.select?.name || 'todos',
+        category: props.Category?.select?.name || '',
         image: imageUrl,
       };
-    });
+    }).filter(p => p.name && p.name.trim() !== '' && p.price > 0);
   } catch (error) {
     console.error('Error fetching products from Notion:', error);
     return [];

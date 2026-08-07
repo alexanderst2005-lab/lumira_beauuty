@@ -7,11 +7,13 @@ import ProductCard from '@/components/catalog/ProductCard';
 const getDiverseFeaturedProducts = (productsList: Product[], count: number) => {
   const byCategory: Record<string, Product[]> = {};
   
-  // Group products by category
-  productsList.forEach(p => {
-    if (!byCategory[p.category]) byCategory[p.category] = [];
-    byCategory[p.category].push(p);
-  });
+  // Filter out incomplete products and group by category
+  productsList
+    .filter(p => p.name && p.price > 0 && p.category && p.image !== '/images/products/placeholder.webp')
+    .forEach(p => {
+      if (!byCategory[p.category]) byCategory[p.category] = [];
+      byCategory[p.category].push(p);
+    });
 
   const categories = Object.keys(byCategory);
   const featured: Product[] = [];
