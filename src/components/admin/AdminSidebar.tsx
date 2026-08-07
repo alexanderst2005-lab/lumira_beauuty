@@ -5,9 +5,7 @@ import { usePathname } from 'next/navigation';
 import { 
   LayoutDashboard, 
   ShoppingBag, 
-  Package, 
-  Users, 
-  LogOut,
+  Package,
   Users, 
   LogOut,
   X
