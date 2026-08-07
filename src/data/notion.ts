@@ -47,25 +47,46 @@ export async function getAllProductsFromNotion(): Promise<Product[]> {
       const props = page.properties;
       
       let imageUrl = '/images/products/placeholder.webp';
+      let imagesList: string[] = [];
+      
       if (props.Image?.type === 'files' && props.Image.files.length > 0) {
-        const fileObj = props.Image.files[0];
-        if (fileObj.type === 'file') {
-          imageUrl = fileObj.file.url;
-        } else if (fileObj.type === 'external') {
-          imageUrl = fileObj.external.url;
+        imagesList = props.Image.files.map((fileObj: any) => {
+          if (fileObj.type === 'file') return fileObj.file.url;
+          if (fileObj.type === 'external') return fileObj.external.url;
+          return null;
+        }).filter((url: string | null) => url !== null);
+        
+        if (imagesList.length > 0) {
+          imageUrl = imagesList[0];
         }
       } else if (props.Image?.type === 'url' && props.Image.url) {
         imageUrl = props.Image.url;
+        imagesList = [imageUrl];
+      }
+      
+      const name = props.Name?.title[0]?.plain_text || '';
+      let tones: {name: string, hex: string}[] = [];
+      
+      if (name === 'Splash Purpure 200ml' || name.includes('Splash Purpure')) {
+        tones = [
+          { name: 'Caramel Crush', hex: '#FDB777' },
+          { name: 'Bubble Gum', hex: '#72D6D3' },
+          { name: 'Piña Colada', hex: '#F9E58A' },
+          { name: 'Strawberry', hex: '#F381A6' },
+          { name: 'Choco Vibes', hex: '#5E3823' }
+        ];
       }
 
       return {
         id: props.Id?.rich_text[0]?.plain_text || page.id,
-        name: props.Name?.title[0]?.plain_text || '',
+        name: name,
         description: props.Description?.rich_text[0]?.plain_text || '',
         fullDescription: props.FullDescription?.rich_text[0]?.plain_text || '',
         price: props.Price?.number || 0,
         category: props.Category?.select?.name || '',
         image: imageUrl,
+        images: imagesList.length > 0 ? imagesList : [imageUrl],
+        tones: tones,
       };
     }).filter(p => p.name && p.name.trim() !== '' && p.price > 0);
   } catch (error) {
