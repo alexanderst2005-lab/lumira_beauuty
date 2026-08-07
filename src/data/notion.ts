@@ -14,24 +14,36 @@ export async function getAllProductsFromNotion(): Promise<Product[]> {
   }
 
   try {
-    const response = await fetch(`https://api.notion.com/v1/databases/${PRODUCTS_DB_ID}/query`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${TOKEN}`,
-        'Content-Type': 'application/json',
-        'Notion-Version': '2022-06-28'
-      },
-      // Hacemos que Next.js no cachee los datos nunca
-      cache: 'no-store'
-    });
+    let allResults: any[] = [];
+    let hasMore = true;
+    let nextCursor = undefined;
 
-    if (!response.ok) {
-      throw new Error('Error querying Notion DB');
+    while (hasMore) {
+      const response = await fetch(`https://api.notion.com/v1/databases/${PRODUCTS_DB_ID}/query`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${TOKEN}`,
+          'Content-Type': 'application/json',
+          'Notion-Version': '2022-06-28'
+        },
+        body: JSON.stringify({
+          start_cursor: nextCursor
+        }),
+        cache: 'no-store'
+      });
+
+      if (!response.ok) {
+        throw new Error('Error querying Notion DB');
+      }
+
+      const data = await response.json();
+      allResults = [...allResults, ...data.results];
+      
+      hasMore = data.has_more;
+      nextCursor = data.next_cursor;
     }
 
-    const data = await response.json();
-
-    return data.results.map((page: any) => {
+    return allResults.map((page: any) => {
       const props = page.properties;
       return {
         id: props.Id?.rich_text[0]?.plain_text || page.id,
@@ -41,7 +53,6 @@ export async function getAllProductsFromNotion(): Promise<Product[]> {
         price: props.Price?.number || 0,
         category: props.Category?.select?.name || 'todos',
         image: props.Image?.url || '/images/products/placeholder.webp',
-        // Omitimos tones y images adicionales por ahora, se pueden agregar después
       };
     });
   } catch (error) {
