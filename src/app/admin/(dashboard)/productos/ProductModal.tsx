@@ -11,6 +11,49 @@ interface ProductModalProps {
   onSave: () => void;
 }
 
+const compressImage = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        const MAX_WIDTH = 1200;
+        const MAX_HEIGHT = 1200;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject('No canvas context');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        resolve(dataUrl);
+      };
+      img.onerror = reject;
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
 export default function ProductModal({ product, onClose, onSave }: ProductModalProps) {
   const [formData, setFormData] = useState({
     name: product?.name || '',
@@ -29,14 +72,16 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
   const [isSaving, setIsSaving] = useState(false);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
     setIsUploading(true);
-    try {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64 = reader.result as string;
+    let uploadedUrls: string[] = [];
+    const toastId = toast.loading(`Subiendo ${files.length} imagen(es)...`);
+
+    for (const file of files) {
+      try {
+        const base64 = await compressImage(file);
         const res = await fetch('/api/admin/upload', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -45,48 +90,52 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
         
         if (res.ok) {
           const data = await res.json();
-          setFormData(prev => ({ ...prev, images: [...prev.images, data.url] }));
-          toast.success('Imagen subida con éxito');
+          uploadedUrls.push(data.url);
         } else {
-          toast.error('Error al subir la imagen (¿Falta GITHUB_TOKEN?)');
+          toast.error(`Error subiendo ${file.name}`);
         }
-        setIsUploading(false);
-      };
-      reader.readAsDataURL(file);
-    } catch {
-      toast.error('Error procesando imagen');
-      setIsUploading(false);
+      } catch (err) {
+        toast.error(`Error procesando ${file.name}`);
+      }
     }
+
+    if (uploadedUrls.length > 0) {
+      setFormData(prev => ({ ...prev, images: [...prev.images, ...uploadedUrls] }));
+      toast.success(`${uploadedUrls.length} imagen(es) subida(s)`, { id: toastId });
+    } else {
+      toast.dismiss(toastId);
+    }
+    
+    setIsUploading(false);
+    e.target.value = '';
   };
 
   const handleOptionImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, optionIndex: number, valueIndex: number) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const toastId = toast.loading('Subiendo imagen de variante...');
     try {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64 = reader.result as string;
-        const res = await fetch('/api/admin/upload', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ file: base64, filename: file.name }),
-        });
-        
-        if (res.ok) {
-          const data = await res.json();
-          const newOptions = [...formData.options];
-          newOptions[optionIndex].values[valueIndex].image = data.url;
-          setFormData({ ...formData, options: newOptions });
-          toast.success('Imagen de variante subida');
-        } else {
-          toast.error('Error al subir la imagen');
-        }
-      };
-      reader.readAsDataURL(file);
+      const base64 = await compressImage(file);
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ file: base64, filename: file.name }),
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        const newOptions = [...formData.options];
+        newOptions[optionIndex].values[valueIndex].image = data.url;
+        setFormData({ ...formData, options: newOptions });
+        toast.success('Imagen de variante subida', { id: toastId });
+      } else {
+        toast.error('Error al subir la imagen', { id: toastId });
+      }
     } catch {
-      toast.error('Error procesando imagen');
+      toast.error('Error procesando imagen', { id: toastId });
     }
+    e.target.value = '';
   };
 
   const addOption = () => {
@@ -258,7 +307,7 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
                       <div className="flex text-sm text-gray-600 justify-center">
                         <label className="relative cursor-pointer bg-white rounded-md font-medium text-pink-600 hover:text-pink-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-pink-500 px-2 py-1 shadow-sm border border-gray-200">
                           <span>Subir imagen</span>
-                          <input type="file" className="sr-only" accept="image/*" onChange={handleImageUpload} disabled={isUploading} />
+                          <input type="file" multiple className="sr-only" accept="image/*" onChange={handleImageUpload} disabled={isUploading} />
                         </label>
                       </div>
                       <p className="text-xs text-gray-500">{isUploading ? 'Subiendo...' : 'PNG, JPG, WEBP hasta 5MB'}</p>
