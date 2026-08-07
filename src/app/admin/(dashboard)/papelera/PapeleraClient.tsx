@@ -12,18 +12,21 @@ export default function PapeleraClient({ initialProducts, initialOrders }: { ini
   const [orders, setOrders] = useState(initialOrders);
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
-  const handleRestore = async (id: string, type: ItemType) => {
-    setLoadingId(id);
+  const handleRestore = async (item: any, type: ItemType) => {
+    const uiId = item.id;
+    const targetId = type === 'producto' ? (item.notionId || item.id) : item.id;
+    
+    setLoadingId(uiId);
     try {
-      const endpoint = type === 'producto' ? `/api/admin/productos/${id}` : `/api/admin/pedidos/${id}`;
+      const endpoint = type === 'producto' ? `/api/admin/productos/${targetId}` : `/api/admin/pedidos/${targetId}`;
       const res = await fetch(endpoint, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ inTrash: false })
       });
       if (res.ok) {
-        if (type === 'producto') setProducts(products.filter(p => p.id !== id));
-        else setOrders(orders.filter(o => o.id !== id));
+        if (type === 'producto') setProducts(products.filter(p => p.id !== uiId));
+        else setOrders(orders.filter(o => o.id !== uiId));
       }
     } catch (error) {
       console.error(error);
@@ -32,15 +35,19 @@ export default function PapeleraClient({ initialProducts, initialOrders }: { ini
     }
   };
 
-  const handlePermanentDelete = async (id: string, type: ItemType) => {
+  const handlePermanentDelete = async (item: any, type: ItemType) => {
     if (!confirm('¿Estás seguro de eliminar este elemento para siempre? Esta acción no se puede deshacer.')) return;
-    setLoadingId(id);
+    
+    const uiId = item.id;
+    const targetId = type === 'producto' ? (item.notionId || item.id) : item.id;
+
+    setLoadingId(uiId);
     try {
-      const endpoint = type === 'producto' ? `/api/admin/productos/${id}?permanent=true` : `/api/admin/pedidos/${id}?permanent=true`;
+      const endpoint = type === 'producto' ? `/api/admin/productos/${targetId}?permanent=true` : `/api/admin/pedidos/${targetId}?permanent=true`;
       const res = await fetch(endpoint, { method: 'DELETE' });
       if (res.ok) {
-        if (type === 'producto') setProducts(products.filter(p => p.id !== id));
-        else setOrders(orders.filter(o => o.id !== id));
+        if (type === 'producto') setProducts(products.filter(p => p.id !== uiId));
+        else setOrders(orders.filter(o => o.id !== uiId));
       }
     } catch (error) {
       console.error(error);
@@ -89,10 +96,10 @@ export default function PapeleraClient({ initialProducts, initialOrders }: { ini
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => handleRestore(product.id, 'producto')} disabled={loadingId === product.id} className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Restaurar">
+                    <button onClick={() => handleRestore(product, 'producto')} disabled={loadingId === product.id} className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Restaurar">
                       {loadingId === product.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <RefreshCcw className="w-5 h-5" />}
                     </button>
-                    <button onClick={() => handlePermanentDelete(product.id, 'producto')} disabled={loadingId === product.id} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Eliminar para siempre">
+                    <button onClick={() => handlePermanentDelete(product, 'producto')} disabled={loadingId === product.id} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Eliminar para siempre">
                       {loadingId === product.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <Trash2 className="w-5 h-5" />}
                     </button>
                   </div>
@@ -114,10 +121,10 @@ export default function PapeleraClient({ initialProducts, initialOrders }: { ini
                     <p className="text-sm text-gray-500">{new Date(order.date).toLocaleDateString()} • ${order.total.toLocaleString()}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => handleRestore(order.id, 'pedido')} disabled={loadingId === order.id} className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Restaurar">
+                    <button onClick={() => handleRestore(order, 'pedido')} disabled={loadingId === order.id} className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Restaurar">
                       {loadingId === order.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <RefreshCcw className="w-5 h-5" />}
                     </button>
-                    <button onClick={() => handlePermanentDelete(order.id, 'pedido')} disabled={loadingId === order.id} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Eliminar para siempre">
+                    <button onClick={() => handlePermanentDelete(order, 'pedido')} disabled={loadingId === order.id} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Eliminar para siempre">
                       {loadingId === order.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <Trash2 className="w-5 h-5" />}
                     </button>
                   </div>
