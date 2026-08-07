@@ -21,8 +21,8 @@ export async function getAllProductsFromNotion(): Promise<Product[]> {
         'Content-Type': 'application/json',
         'Notion-Version': '2022-06-28'
       },
-      // Hacemos que Next.js revalide los datos cada 10 segundos
-      next: { revalidate: 10 }
+      // Hacemos que Next.js no cachee los datos nunca
+      cache: 'no-store'
     });
 
     if (!response.ok) {

@@ -1,11 +1,11 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { products } from '@/data/products';
+import { Product } from '@/types';
 import ProductCard from '@/components/catalog/ProductCard';
 
-const getDiverseFeaturedProducts = (productsList: typeof products, count: number) => {
-  const byCategory: Record<string, typeof products> = {};
+const getDiverseFeaturedProducts = (productsList: Product[], count: number) => {
+  const byCategory: Record<string, Product[]> = {};
   
   // Group products by category
   productsList.forEach(p => {
@@ -14,7 +14,7 @@ const getDiverseFeaturedProducts = (productsList: typeof products, count: number
   });
 
   const categories = Object.keys(byCategory);
-  const featured: typeof products = [];
+  const featured: Product[] = [];
   const usedIds = new Set<string>();
   
   let lastCat = '';
@@ -44,8 +44,8 @@ const getDiverseFeaturedProducts = (productsList: typeof products, count: number
   return featured;
 };
 
-export default function FeaturedProducts() {
-  const featured = getDiverseFeaturedProducts(products, 8);
+export default function FeaturedProducts({ initialProducts }: { initialProducts: Product[] }) {
+  const featured = getDiverseFeaturedProducts(initialProducts, 8);
 
   return (
     <section className="py-16 sm:py-20 bg-gradient-to-b from-white to-secondary-100/30" id="featured">
