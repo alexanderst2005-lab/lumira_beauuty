@@ -21,7 +21,7 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
     featured: product?.featured ?? false,
     isNew: product?.isNew ?? false,
     description: product?.description || '',
-    image: product?.image || '',
+    images: product?.images?.length ? product.images : (product?.image ? [product.image] : [] as string[]),
     options: product?.options || [] as ProductOption[],
   });
   
@@ -45,7 +45,7 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
         
         if (res.ok) {
           const data = await res.json();
-          setFormData(prev => ({ ...prev, image: data.url }));
+          setFormData(prev => ({ ...prev, images: [...prev.images, data.url] }));
           toast.success('Imagen subida con éxito');
         } else {
           toast.error('Error al subir la imagen (¿Falta GITHUB_TOKEN?)');
@@ -211,21 +211,32 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Imagen</label>
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors relative">
-                  {formData.image ? (
-                    <div className="relative w-full aspect-square rounded-lg overflow-hidden">
-                      <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
-                      <button type="button" onClick={() => setFormData({...formData, image: ''})} className="absolute top-2 right-2 bg-white rounded-full p-1 shadow hover:bg-red-50 text-red-600">
-                        <X className="w-4 h-4" />
-                      </button>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Imágenes del Producto</label>
+                <div className="mt-1 flex flex-col gap-3 px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl bg-gray-50 relative">
+                  
+                  {formData.images.length > 0 && (
+                    <div className="grid grid-cols-3 gap-2">
+                      {formData.images.map((imgUrl, i) => (
+                        <div key={i} className="relative w-full aspect-square rounded-lg overflow-hidden border border-gray-200">
+                          <img src={imgUrl} alt={`Preview ${i}`} className="w-full h-full object-cover" />
+                          <button type="button" onClick={() => {
+                            const newImages = [...formData.images];
+                            newImages.splice(i, 1);
+                            setFormData({...formData, images: newImages});
+                          }} className="absolute top-1 right-1 bg-white rounded-full p-1 shadow hover:bg-red-50 text-red-600">
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
                     </div>
-                  ) : (
-                    <div className="space-y-1 text-center">
+                  )}
+
+                  {formData.images.length < 5 && (
+                    <div className="space-y-1 text-center py-4">
                       <Upload className="mx-auto h-12 w-12 text-gray-400" />
                       <div className="flex text-sm text-gray-600 justify-center">
-                        <label className="relative cursor-pointer bg-white rounded-md font-medium text-pink-600 hover:text-pink-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-pink-500 px-2 py-1">
-                          <span>Subir un archivo</span>
+                        <label className="relative cursor-pointer bg-white rounded-md font-medium text-pink-600 hover:text-pink-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-pink-500 px-2 py-1 shadow-sm border border-gray-200">
+                          <span>Subir imagen</span>
                           <input type="file" className="sr-only" accept="image/*" onChange={handleImageUpload} disabled={isUploading} />
                         </label>
                       </div>

@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 
   try {
     const data = await request.json();
-    const { name, price, category, stock, active, image, description, featured, isNew, options } = data;
+    const { name, price, category, stock, active, images, description, featured, isNew, options } = data;
 
     const response = await fetch('https://api.notion.com/v1/pages', {
       method: 'POST',
@@ -34,13 +34,11 @@ export async function POST(request: Request) {
           Description: { rich_text: [{ text: { content: description || '' } }] },
           Options: { rich_text: [{ text: { content: options ? JSON.stringify(options) : '[]' } }] },
           Image: {
-            files: image ? [
-              {
-                name: 'image.jpg',
-                type: 'external',
-                external: { url: image }
-              }
-            ] : []
+            files: (images || []).map((url: string, i: number) => ({
+              name: `image_${i}.jpg`,
+              type: 'external',
+              external: { url }
+            }))
           }
         }
       })
