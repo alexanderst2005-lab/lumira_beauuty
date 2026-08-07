@@ -115,10 +115,11 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
         </Link>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-24">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
+      {/* Aumentamos pb-24 sm:pb-32 para que el botón de WhatsApp no tape contenido */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 sm:pb-32">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-start">
           {/* Galería del Producto */}
-          <div className="flex flex-col gap-4 max-w-sm sm:max-w-md lg:max-w-full mx-auto w-full">
+          <div className="flex flex-col gap-4 max-w-[280px] sm:max-w-sm lg:max-w-full mx-auto w-full">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -131,7 +132,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
                 src={overrideImage || displayImages[currentImageIndex]}
                 alt={product.name}
                 fill
-                className={`object-contain p-6 sm:p-8 lg:p-12 mix-blend-multiply transition-opacity duration-300 ${isOutOfStock ? 'grayscale opacity-60' : ''}`}
+                className={`object-contain p-4 sm:p-6 lg:p-10 mix-blend-multiply transition-opacity duration-300 ${isOutOfStock ? 'grayscale opacity-60' : ''}`}
                 priority
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
@@ -221,19 +222,19 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
           transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
           className="flex flex-col justify-center"
         >
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold text-txt mb-2 lg:mb-4 leading-tight">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-display font-bold text-txt mb-1.5 lg:mb-3 leading-tight">
             {product.name}
           </h1>
 
-          <p className="text-base sm:text-lg text-txt-secondary leading-relaxed mb-6">
+          <p className="text-sm sm:text-base text-txt-secondary leading-relaxed mb-4 max-w-prose">
             {product.fullDescription}
           </p>
 
-          <div className="text-2xl sm:text-3xl lg:text-4xl font-display font-extrabold text-primary mb-8 drop-shadow-sm">
+          <div className="text-xl sm:text-2xl lg:text-3xl font-display font-extrabold text-primary mb-5 drop-shadow-sm">
             {formatPrice(product.price)}
           </div>
 
-          <div className="bg-white rounded-3xl p-5 sm:p-6 border border-border-light shadow-sm flex flex-col gap-6">
+          <div className="bg-white rounded-3xl p-4 sm:p-5 border border-border-light shadow-sm flex flex-col gap-5">
             
             {/* Opciones de Tonos */}
             {product.tones && product.tones.length > 0 && (
@@ -291,7 +292,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
               </div>
             )}
 
-            <div className="flex flex-col sm:flex-row items-center gap-6">
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mt-1">
               {/* Selector de Cantidad */}
             <div className="w-full sm:w-auto">
               <label className="block text-xs font-bold text-txt-secondary mb-3 uppercase tracking-wider text-center sm:text-left">
@@ -304,7 +305,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
             <button
               onClick={isOutOfStock ? (e) => e.preventDefault() : handleAddToCart}
               disabled={isAdded || isOutOfStock}
-              className={`w-full py-4 px-8 rounded-full font-semibold text-base transition-all duration-300 flex items-center justify-center gap-3 ${
+              className={`w-full py-3 px-6 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 flex items-center justify-center gap-2 sm:gap-3 ${
                 isOutOfStock
                   ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                   : isAdded
@@ -314,7 +315,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
               id="add-to-cart"
             >
               {isOutOfStock ? (
-                <span className="font-bold tracking-widest uppercase">Agotado - No Disponible</span>
+                <span className="font-bold tracking-wider uppercase text-xs sm:text-sm">Agotado - No Disponible</span>
               ) : isAdded ? (
                 <>
                   <Check className="w-5 h-5" />
