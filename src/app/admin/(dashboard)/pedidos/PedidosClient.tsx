@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Search, Printer, Edit2, Eye } from 'lucide-react';
+import { Search, Printer, Trash2, FileText } from 'lucide-react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { formatPrice } from '@/utils/whatsapp';
 import { toast } from 'sonner';
 
@@ -55,6 +57,89 @@ export default function PedidosClient({ initialOrders }: { initialOrders: any[] 
     } finally {
       setUpdatingId(null);
     }
+  };
+
+  const handleDelete = async (orderId: string) => {
+    if (!confirm('¿Estás seguro de que deseas eliminar este pedido? Esta acción no se puede deshacer.')) return;
+    setUpdatingId(orderId);
+    try {
+      const res = await fetch(`/api/admin/pedidos/${orderId}`, { method: 'DELETE' });
+      if (res.ok) {
+        setOrders(orders.filter(o => o.id !== orderId));
+        toast.success('Pedido eliminado');
+      } else {
+        toast.error('Error al eliminar');
+      }
+    } catch {
+      toast.error('Error de conexión');
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const handleDownloadPDF = (order: any) => {
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(22);
+    doc.setTextColor(0, 0, 0);
+    doc.text('LUMIRA BEAUTY', 14, 20);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text('Factura de Compra', 14, 28);
+    
+    // Order Info
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Orden #: ${order.id.slice(0, 8).toUpperCase()}`, 130, 20);
+    doc.text(`Fecha: ${format(new Date(order.date), "dd/MM/yyyy")}`, 130, 26);
+    doc.text(`Estado: ${order.status}`, 130, 32);
+
+    // Customer Info
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Información del Cliente', 14, 45);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(`Nombre: ${order.name}`, 14, 52);
+    doc.text(`Teléfono: ${order.whatsapp}`, 14, 58);
+    doc.text(`Ciudad: ${order.city}`, 14, 64);
+    doc.text(`Dirección: ${order.address}`, 14, 70);
+    if (order.neighborhood) doc.text(`Barrio: ${order.neighborhood}`, 14, 76);
+
+    // Products table
+    const productsList = order.products.split('\\n').filter(Boolean).map((p: string) => [p]);
+    
+    autoTable(doc, {
+      startY: 85,
+      head: [['Productos Solicitados']],
+      body: productsList,
+      theme: 'grid',
+      headStyles: { fillColor: [0, 0, 0] },
+    });
+
+    // Tones
+    const tonesList = order.tones.split('\\n').filter(Boolean);
+    let finalY = (doc as any).lastAutoTable.finalY + 10;
+
+    if (tonesList.length > 0) {
+      doc.setFont('helvetica', 'bold');
+      doc.text('Tonos Seleccionados:', 14, finalY);
+      doc.setFont('helvetica', 'normal');
+      tonesList.forEach((t: string, i: number) => {
+        doc.text(`- ${t}`, 14, finalY + 6 + (i * 6));
+      });
+      finalY += 6 + (tonesList.length * 6);
+    }
+
+    // Total
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Total Pagado: ${formatPrice(order.total)}`, 130, finalY + 15);
+
+    doc.save(`Factura-ORD-${order.id.slice(0,8).toUpperCase()}.pdf`);
   };
 
   return (
@@ -145,11 +230,26 @@ export default function PedidosClient({ initialOrders }: { initialOrders: any[] 
                     </td>
                     <td className="py-4 px-6 text-right space-x-2">
                       <button 
-                        onClick={() => window.open(`/admin/pedidos/print/${order.id}`, '_blank')}
+                        onClick={() => handleDownloadPDF(order)}
                         className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="Descargar Factura PDF"
+                      >
+                        <FileText className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => window.open(`/admin/pedidos/print/${order.id}`, '_blank')}
+                        className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors hidden sm:inline-block"
                         title="Imprimir Pedido"
                       >
                         <Printer className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(order.id)}
+                        disabled={updatingId === order.id}
+                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Eliminar Pedido"
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </td>
                   </tr>

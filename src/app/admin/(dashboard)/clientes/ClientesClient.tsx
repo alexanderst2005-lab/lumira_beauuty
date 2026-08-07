@@ -1,11 +1,14 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Search, UserCircle, MapPin } from 'lucide-react';
+import { Search, UserCircle, MapPin, Trash2 } from 'lucide-react';
 import { formatPrice } from '@/utils/whatsapp';
+import { toast } from 'sonner';
 
-export default function ClientesClient({ orders }: { orders: any[] }) {
+export default function ClientesClient({ orders: initialOrders }: { orders: any[] }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [orders, setOrders] = useState(initialOrders);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // Group orders by WhatsApp to form customers
   const customers = useMemo(() => {
@@ -42,6 +45,24 @@ export default function ClientesClient({ orders }: { orders: any[] }) {
     c.whatsapp.includes(searchTerm)
   );
 
+  const handleDelete = async (whatsapp: string, customerName: string) => {
+    if (!confirm(`¿Estás seguro de que deseas eliminar al cliente ${customerName} y TODOS sus pedidos? Esta acción no se puede deshacer.`)) return;
+    setDeletingId(whatsapp);
+    try {
+      const res = await fetch(`/api/admin/clientes/${encodeURIComponent(whatsapp)}`, { method: 'DELETE' });
+      if (res.ok) {
+        setOrders(orders.filter(o => o.whatsapp !== whatsapp));
+        toast.success(`Cliente ${customerName} eliminado`);
+      } else {
+        toast.error('Error al eliminar');
+      }
+    } catch {
+      toast.error('Error de conexión');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -64,7 +85,15 @@ export default function ClientesClient({ orders }: { orders: any[] }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {filteredCustomers.map(customer => (
-          <div key={customer.whatsapp} className="bg-white border border-gray-100 rounded-2xl p-6 flex flex-col shadow-sm">
+          <div key={customer.whatsapp} className="bg-white border border-gray-100 rounded-2xl p-6 flex flex-col shadow-sm relative group">
+            <button
+              onClick={() => handleDelete(customer.whatsapp, customer.name)}
+              disabled={deletingId === customer.whatsapp}
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+              title="Eliminar Cliente"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
             <div className="flex items-center gap-4 mb-4">
               <div className="w-12 h-12 bg-pink-50 rounded-full flex items-center justify-center">
                 <UserCircle className="w-7 h-7 text-pink-600" />
