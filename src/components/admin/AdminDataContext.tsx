@@ -130,26 +130,26 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
                  setTimeout(() => toast.success(`Tienes ${actuallyNewOrders.length} nuevo(s) pedido(s)`), 0);
                  newNotifs = [...newNotifs, ...actuallyNewOrders.map((o: any) => ({
                     id: `notif_order_${o.id}`,
-                    type: 'order',
+                    type: 'order' as 'order',
                     date: new Date().toISOString(),
                     title: `Nuevo pedido: ${o.orderNumber || o.id.slice(0,8)}`,
                     message: `El cliente ${o.name} ha realizado una compra por $${o.total.toLocaleString('es-CO')}.`,
                     read: false,
                     link: '/admin/pedidos'
-                 }))];
+                 } as AdminNotification))];
               }
 
               if (actuallyNewClients.length > 0) {
                  setTimeout(() => toast.info(`¡${actuallyNewClients.length} nuevo(s) cliente(s)!`), 0);
                  newNotifs = [...newNotifs, ...actuallyNewClients.map((o: any) => ({
                     id: `notif_client_${o.whatsapp}`,
-                    type: 'client',
+                    type: 'client' as 'client',
                     date: new Date().toISOString(),
                     title: `Nuevo cliente: ${o.name}`,
                     message: `${o.name} se ha registrado como cliente nuevo.`,
                     read: false,
                     link: '/admin/clientes'
-                 }))];
+                 } as AdminNotification))];
               }
 
               if (newNotifs.length > 0) {
