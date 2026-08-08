@@ -19,20 +19,28 @@ export default function StoreLayoutWrapper({ children, config }: { children: Rea
 
   // Corrección general de scroll: Forzar siempre el inicio en cualquier cambio de página/categoría
   useEffect(() => {
-    if (isAdmin) return; // No interferir con el scroll del panel de admin si no es necesario
+    if (isAdmin) return;
     
-    const scrollToTop = () => {
-      window.scrollTo({ top: 0, behavior: 'instant' });
+    const forceScrollToTop = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
+      
+      // Intentar resetear cualquier posible contenedor interno por si acaso
+      const main = document.querySelector('main');
+      if (main) main.scrollTop = 0;
     };
     
-    // Ejecutar inmediatamente
-    scrollToTop();
+    forceScrollToTop();
     
-    // Reintentar un instante después para evitar que Next.js restaure el scroll anterior
-    const timer = setTimeout(scrollToTop, 100);
-    return () => clearTimeout(timer);
+    // Bombardear con reset de scroll para vencer al sistema automático de Next.js
+    requestAnimationFrame(() => {
+      forceScrollToTop();
+      setTimeout(forceScrollToTop, 50);
+      setTimeout(forceScrollToTop, 150);
+      setTimeout(forceScrollToTop, 350);
+      setTimeout(forceScrollToTop, 600);
+    });
   }, [pathname, searchParams]);
 
   const toasterOptions = {
