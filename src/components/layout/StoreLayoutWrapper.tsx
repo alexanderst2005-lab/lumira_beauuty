@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import { FavoritesProvider } from "@/context/FavoritesContext";
 import { CartProvider } from "@/context/CartContext";
 import MarqueeBanner from "@/components/layout/MarqueeBanner";
@@ -12,19 +13,10 @@ import FavoritesDrawer from "@/components/favorites/FavoritesDrawer";
 import WhatsAppButton from "@/components/layout/WhatsAppButton";
 import { Toaster } from "sonner";
 
-export default function StoreLayoutWrapper({ children, config }: { children: React.ReactNode, config?: any }) {
+function ScrollRestorer({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const isAdmin = pathname?.startsWith('/admin');
 
-  // EL SANTO GRIAL DEL SCROLL: Desactivar la memoria nativa del navegador
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.history.scrollRestoration = 'manual';
-    }
-  }, []);
-
-  // Forzar scroll arriba en cada cambio exacto de ruta, sin pelear con el navegador
   useEffect(() => {
     if (!isAdmin) {
       window.scrollTo(0, 0);
@@ -32,6 +24,20 @@ export default function StoreLayoutWrapper({ children, config }: { children: Rea
       document.documentElement.scrollTop = 0;
     }
   }, [pathname, searchParams, isAdmin]);
+
+  return null;
+}
+
+export default function StoreLayoutWrapper({ children, config }: { children: React.ReactNode, config?: any }) {
+  const pathname = usePathname();
+  const isAdmin = pathname?.startsWith('/admin') ?? false;
+
+  // EL SANTO GRIAL DEL SCROLL: Desactivar la memoria nativa del navegador
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.history.scrollRestoration = 'manual';
+    }
+  }, []);
 
   const toasterOptions = {
     position: "bottom-center" as const,
@@ -51,6 +57,7 @@ export default function StoreLayoutWrapper({ children, config }: { children: Rea
   if (isAdmin) {
     return (
       <>
+        <Suspense fallback={null}><ScrollRestorer isAdmin={isAdmin} /></Suspense>
         {children}
         <Toaster {...toasterOptions} />
       </>
@@ -60,6 +67,7 @@ export default function StoreLayoutWrapper({ children, config }: { children: Rea
   return (
     <FavoritesProvider>
       <CartProvider>
+        <Suspense fallback={null}><ScrollRestorer isAdmin={isAdmin} /></Suspense>
         <MarqueeBanner />
         <Header config={config} />
         <main className="min-h-screen">{children}</main>
