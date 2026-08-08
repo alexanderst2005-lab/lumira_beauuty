@@ -12,6 +12,7 @@ import { formatPrice } from '@/utils/whatsapp';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getOptimizedImageUrl } from '@/utils/image';
 
 interface ProductCardProps {
   product: Product;
@@ -90,7 +91,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
       <div className="product-image-container aspect-square flex items-center justify-center relative bg-gray-50 overflow-hidden rounded-t-2xl">
         <div className="relative w-full h-full">
           <Image
-            src={product.image}
+            src={getOptimizedImageUrl(product.image, 400)}
             alt={product.name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"

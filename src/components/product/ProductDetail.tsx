@@ -12,6 +12,7 @@ import { formatPrice } from '@/utils/whatsapp';
 import QuantitySelector from './QuantitySelector';
 import ProductCard from '@/components/catalog/ProductCard';
 import { toast } from 'sonner';
+import { getOptimizedImageUrl } from '@/utils/image';
 
 interface ProductDetailProps {
   product: Product;
@@ -142,7 +143,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
               onTouchEnd={onTouchEndHandler}
             >
               <Image
-                src={overrideImage || displayImages[currentImageIndex]}
+                src={getOptimizedImageUrl(overrideImage || displayImages[currentImageIndex], 800)}
                 alt={product.name}
                 fill
                 priority={true}
@@ -218,7 +219,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
                     }`}
                   >
                     <Image
-                      src={img}
+                      src={getOptimizedImageUrl(img, 150)}
                       alt={`Vista ${idx + 1}`}
                       fill
                       className="object-cover"
