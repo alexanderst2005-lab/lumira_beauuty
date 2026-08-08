@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Heart, ShoppingCart, ArrowLeft, Check, Truck, CreditCard } from 'lucide-react';
@@ -30,6 +30,11 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
   const [selectedTone, setSelectedTone] = useState<Tone | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, ProductOptionValue>>({});
   const [overrideImage, setOverrideImage] = useState<string | null>(null);
+
+  // Auto-scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
 
   const isOutOfStock = product.stock === 0;
 
