@@ -6,15 +6,19 @@ import { useAdminData } from './AdminDataContext';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import Link from 'next/link';
+import Image from 'next/image';
+import { useRouter, usePathname } from 'next/navigation';
 
 interface AdminTopbarProps {
   onOpenSidebar: () => void;
 }
 
 export default function AdminTopbar({ onOpenSidebar }: AdminTopbarProps) {
-  const { notifications, markAsRead, markAllAsRead, deleteNotification, clearAllNotifications } = useAdminData();
+  const { notifications, markAsRead, markAllAsRead, deleteNotification, clearAllNotifications, config } = useAdminData();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const pathname = usePathname();
 
   const activeNotifications = notifications.filter(n => !n.deleted);
   const unreadCount = activeNotifications.filter(n => !n.read).length;
@@ -29,6 +33,17 @@ export default function AdminTopbar({ onOpenSidebar }: AdminTopbarProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleLogoClick = () => {
+    if (pathname === '/admin') {
+      const mainContent = document.getElementById('admin-main-scroll');
+      if (mainContent) {
+        mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } else {
+      router.push('/admin');
+    }
+  };
+
   return (
     <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 sm:px-6 z-10 sticky top-0">
       <div className="flex items-center gap-4">
@@ -37,6 +52,21 @@ export default function AdminTopbar({ onOpenSidebar }: AdminTopbarProps) {
           className="lg:hidden p-2 -ml-2 text-gray-500 hover:text-black rounded-lg hover:bg-gray-50"
         >
           <Menu className="w-5 h-5" />
+        </button>
+
+        <button 
+          onClick={handleLogoClick}
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          title="Volver al inicio"
+        >
+          <Image 
+            src={config?.logo || "/images/logo.png"} 
+            alt="Lumira Beauty" 
+            width={100} 
+            height={32} 
+            className="h-8 w-auto object-contain"
+            priority
+          />
         </button>
 
         <div className="hidden sm:flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200 w-64 focus-within:ring-2 focus-within:ring-pink-100 focus-within:border-pink-300 transition-all">
