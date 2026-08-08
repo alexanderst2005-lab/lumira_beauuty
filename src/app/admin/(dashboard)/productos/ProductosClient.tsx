@@ -205,8 +205,15 @@ export default function ProductosClient({ initialProducts }: { initialProducts: 
         <ProductModal 
           product={editingProduct} 
           onClose={() => setIsModalOpen(false)} 
-          onSave={() => {
+          onSave={(savedProduct, isNew) => {
             setIsModalOpen(false);
+            if (savedProduct) {
+              if (isNew) {
+                setProducts([savedProduct, ...products]);
+              } else {
+                setProducts(products.map(p => p.id === savedProduct.id ? savedProduct : p));
+              }
+            }
             router.refresh(); // Fetch fresh data without full reload
           }} 
         />

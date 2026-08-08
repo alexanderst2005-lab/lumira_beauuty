@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 interface ProductModalProps {
   product?: Product | null;
   onClose: () => void;
-  onSave: () => void;
+  onSave: (savedProduct?: any, isNew?: boolean) => void;
 }
 
 const compressImage = (file: File): Promise<string> => {
@@ -192,7 +192,7 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
       
       if (res.ok) {
         toast.success(product ? 'Producto actualizado' : 'Producto creado');
-        onSave();
+        onSave({ ...product, ...dataToSave, id: product?.id || targetId || crypto.randomUUID() }, !product);
       } else {
         toast.error('Error al guardar');
       }
