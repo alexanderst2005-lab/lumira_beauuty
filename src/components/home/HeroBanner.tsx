@@ -6,7 +6,21 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 
-const slides = [
+type SlideType = {
+  id: number;
+  badge: string;
+  title: string;
+  desc: string;
+  btnText: string;
+  btnHref: string;
+  bg: string;
+  emoji: string;
+  decorEmoji: string;
+  image?: string | null;
+  isBrandSlide?: boolean;
+};
+
+const slides: SlideType[] = [
   {
     id: 1,
     badge: '✨ Tu belleza, tu momento',

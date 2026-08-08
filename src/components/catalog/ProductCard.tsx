@@ -79,6 +79,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
   return (
     <Link
       href={`/producto/${product.id}`}
+      scroll={false}
       className="card-premium block group flex flex-col h-full bg-white"
       id={`product-${product.id}`}
       onClick={() => {
