@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Heart, ShoppingCart, ArrowLeft, Check, Truck, CreditCard } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Product, Tone, ProductOptionValue } from '@/types';
@@ -20,6 +21,7 @@ interface ProductDetailProps {
 }
 
 export default function ProductDetail({ product, relatedProducts }: ProductDetailProps) {
+  const router = useRouter();
   const { addToCart } = useCart();
   const { toggleFavorite } = useFavorites();
   const [quantity, setQuantity] = useState(1);
@@ -120,13 +122,13 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
     <div className="min-h-screen bg-bg">
       {/* Botón de retroceso */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-        <Link 
-          href="/catalogo" 
+        <button 
+          onClick={() => window.history.length > 1 ? router.back() : router.push('/catalogo')}
           className="inline-flex items-center gap-2 text-txt-secondary hover:text-primary transition-colors text-sm font-medium"
         >
           <ArrowLeft className="w-4 h-4" />
-          Volver al catálogo
-        </Link>
+          Volver
+        </button>
       </div>
 
       {/* Aumentamos pb-24 sm:pb-32 para que el botón de WhatsApp no tape contenido */}
