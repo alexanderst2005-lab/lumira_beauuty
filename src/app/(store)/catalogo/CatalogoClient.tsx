@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Product } from '@/types';
 import Filters from '@/components/catalog/Filters';
@@ -10,6 +10,7 @@ import { Search, ChevronDown } from 'lucide-react';
 
 export default function CatalogoClient({ initialProducts }: { initialProducts: Product[] }) {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState('todos');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('');
@@ -52,6 +53,16 @@ export default function CatalogoClient({ initialProducts }: { initialProducts: P
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
     setSearchQuery(''); // Limpiar búsqueda al cambiar categoría
+    
+    // Update URL without scrolling
+    const params = new URLSearchParams(searchParams.toString());
+    if (category === 'todos') {
+      params.delete('categoria');
+    } else {
+      params.set('categoria', category);
+    }
+    params.delete('buscar');
+    router.replace(`/catalogo?${params.toString()}`, { scroll: false });
     
     // Smooth scroll a la grilla de productos
     setTimeout(() => {
