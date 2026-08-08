@@ -1,6 +1,8 @@
 import { getAllProductsFromNotion, getAllOrdersFromNotion } from '@/data/notion';
 import PapeleraClient from './PapeleraClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function PapeleraPage() {
   const allProducts = await getAllProductsFromNotion(true);
   const allOrders = await getAllOrdersFromNotion(true);

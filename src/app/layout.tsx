@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import StoreLayoutWrapper from "@/components/layout/StoreLayoutWrapper";
+import { Suspense } from "react";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -39,9 +40,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="es" className={`${inter.variable}`}>
       <body className="font-sans antialiased text-txt bg-bg selection:bg-rose-200 selection:text-primary-darker">
-        <StoreLayoutWrapper config={config}>
-          {children}
-        </StoreLayoutWrapper>
+        <Suspense fallback={null}>
+          <StoreLayoutWrapper config={config}>
+            {children}
+          </StoreLayoutWrapper>
+        </Suspense>
       </body>
     </html>
   );
