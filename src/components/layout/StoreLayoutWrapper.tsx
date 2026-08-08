@@ -1,6 +1,7 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { FavoritesProvider } from "@/context/FavoritesContext";
 import { CartProvider } from "@/context/CartContext";
 import MarqueeBanner from "@/components/layout/MarqueeBanner";
@@ -13,7 +14,26 @@ import { Toaster } from "sonner";
 
 export default function StoreLayoutWrapper({ children, config }: { children: React.ReactNode, config?: any }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const isAdmin = pathname?.startsWith('/admin');
+
+  // Corrección general de scroll: Forzar siempre el inicio en cualquier cambio de página/categoría
+  useEffect(() => {
+    if (isAdmin) return; // No interferir con el scroll del panel de admin si no es necesario
+    
+    const scrollToTop = () => {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+    
+    // Ejecutar inmediatamente
+    scrollToTop();
+    
+    // Reintentar un instante después para evitar que Next.js restaure el scroll anterior
+    const timer = setTimeout(scrollToTop, 100);
+    return () => clearTimeout(timer);
+  }, [pathname, searchParams]);
 
   const toasterOptions = {
     position: "bottom-center" as const,
