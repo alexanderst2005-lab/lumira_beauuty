@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Link from 'next/link';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   LineChart, Line
@@ -82,7 +83,7 @@ export default function DashboardClient({ initialOrders, initialProducts }: { in
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+        <Link href="/admin/pedidos" className="block bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-pink-200 transition-all cursor-pointer transform hover:-translate-y-1">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
               <TrendingUp className="w-6 h-6 text-green-600" />
@@ -92,9 +93,9 @@ export default function DashboardClient({ initialOrders, initialProducts }: { in
               <h3 className="text-xl font-bold text-gray-900">{formatPrice(stats.totalSales)}</h3>
             </div>
           </div>
-        </div>
+        </Link>
 
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+        <Link href="/admin/pedidos" className="block bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-pink-200 transition-all cursor-pointer transform hover:-translate-y-1">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
               <ShoppingBag className="w-6 h-6 text-blue-600" />
@@ -104,9 +105,9 @@ export default function DashboardClient({ initialOrders, initialProducts }: { in
               <h3 className="text-xl font-bold text-gray-900">{stats.orderCount}</h3>
             </div>
           </div>
-        </div>
+        </Link>
 
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+        <Link href="/admin/clientes" className="block bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-pink-200 transition-all cursor-pointer transform hover:-translate-y-1">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-yellow-50 rounded-xl flex items-center justify-center">
               <Users className="w-6 h-6 text-yellow-600" />
@@ -116,9 +117,9 @@ export default function DashboardClient({ initialOrders, initialProducts }: { in
               <h3 className="text-xl font-bold text-gray-900">{stats.newCustomersCount}</h3>
             </div>
           </div>
-        </div>
+        </Link>
 
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+        <Link href="/admin/productos" className="block bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-pink-200 transition-all cursor-pointer transform hover:-translate-y-1">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
               <Package className="w-6 h-6 text-purple-600" />
@@ -128,7 +129,7 @@ export default function DashboardClient({ initialOrders, initialProducts }: { in
               <h3 className="text-xl font-bold text-gray-900">{stats.newProductsCount}</h3>
             </div>
           </div>
-        </div>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
