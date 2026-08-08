@@ -16,15 +16,25 @@ export default function ProductosClient({ initialProducts }: { initialProducts: 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-  const categories = ['Todas', 'Makeup', 'Skincare', 'Corporal', 'Accesorios', 'Pestañas Punto a Punto', 'Pestañas Enteras', 'Productos para el Cabello'];
+  const categoryMap: Record<string, string> = {
+    'Todas': 'all',
+    'Makeup': 'makeup',
+    'Skincare': 'skincare',
+    'Corporal': 'corporal',
+    'Accesorios': 'accesorios',
+    'Pestañas Punto a Punto': 'pestanas-punto-a-punto',
+    'Pestañas Enteras': 'pestanas-enteras',
+    'Productos para el Cabello': 'productos-cabello'
+  };
+
+  const categories = Object.keys(categoryMap);
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterActive === 'all' ? true : (filterActive === 'active' ? product.active : !product.active);
     
-    // Mapeo simple de categorías para coincidencias más flexibles
-    const normalizeCat = (c: string) => c.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const matchesCategory = activeCategory === 'Todas' ? true : normalizeCat(product.category) === normalizeCat(activeCategory);
+    const targetSlug = categoryMap[activeCategory];
+    const matchesCategory = activeCategory === 'Todas' ? true : product.category === targetSlug;
     
     return matchesSearch && matchesStatus && matchesCategory;
   });
