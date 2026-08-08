@@ -26,9 +26,12 @@ export default function StoreLayoutWrapper({ children, config }: { children: Rea
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
       
-      // Intentar resetear cualquier posible contenedor interno por si acaso
-      const main = document.querySelector('main');
-      if (main) main.scrollTop = 0;
+      // Reseteo extremo: cualquier contenedor interno que se haya quedado scrolleado
+      document.querySelectorAll('*').forEach((el) => {
+        if (el.scrollTop > 0) {
+          el.scrollTop = 0;
+        }
+      });
     };
     
     forceScrollToTop();
