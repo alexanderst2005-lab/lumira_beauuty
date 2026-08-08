@@ -83,7 +83,7 @@ export default function DashboardClient({ initialOrders, initialProducts }: { in
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Link href="/admin/pedidos" className="block bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-pink-200 transition-all cursor-pointer transform hover:-translate-y-1">
+        <Link href="/admin/ventas" className="block bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-pink-200 transition-all cursor-pointer transform hover:-translate-y-1">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
               <TrendingUp className="w-6 h-6 text-green-600" />
