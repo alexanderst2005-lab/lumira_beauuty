@@ -129,6 +129,7 @@ export default function HeroBanner({ config }: { config?: any }) {
                 alt={dynamicSlides[current].title}
                 fill
                 priority={current === 0}
+                unoptimized={true}
                 className="object-cover absolute inset-0 z-0 opacity-90"
               />
             )}

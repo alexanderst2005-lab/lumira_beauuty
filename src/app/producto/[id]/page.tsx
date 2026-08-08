@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { getAllProductsFromNotion } from '@/data/notion';
 import ProductDetail from '@/components/product/ProductDetail';
 
-export const revalidate = 0;
+export const revalidate = 60;
 
 export async function generateStaticParams() {
   const products = await getAllProductsFromNotion();

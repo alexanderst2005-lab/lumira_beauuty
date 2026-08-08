@@ -95,6 +95,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             priority={priority}
+            unoptimized={true}
             className={`object-cover object-center transition-all duration-700 ${!isOutOfStock ? 'group-hover:scale-105' : ''} ${isOutOfStock ? 'grayscale opacity-70' : ''}`}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
