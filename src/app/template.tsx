@@ -14,9 +14,15 @@ export default function Template({ children }: { children: React.ReactNode }) {
     
     resetScroll();
     
-    // Doble verificación para ganarle a cualquier restauración tardía de Next.js
-    const timer = setTimeout(resetScroll, 50);
-    return () => clearTimeout(timer);
+    // Aniquilar cualquier intento de Next.js de restaurar el scroll
+    requestAnimationFrame(() => {
+      resetScroll();
+      setTimeout(resetScroll, 10);
+      setTimeout(resetScroll, 50);
+      setTimeout(resetScroll, 100);
+      setTimeout(resetScroll, 300);
+      setTimeout(resetScroll, 500);
+    });
   }, []);
 
   return <>{children}</>;

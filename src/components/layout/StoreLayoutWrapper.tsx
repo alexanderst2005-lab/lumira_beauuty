@@ -17,6 +17,22 @@ export default function StoreLayoutWrapper({ children, config }: { children: Rea
   const searchParams = useSearchParams();
   const isAdmin = pathname?.startsWith('/admin');
 
+  // EL SANTO GRIAL DEL SCROLL: Desactivar la memoria nativa del navegador
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.history.scrollRestoration = 'manual';
+    }
+  }, []);
+
+  // Forzar scroll arriba en cada cambio exacto de ruta, sin pelear con el navegador
+  useEffect(() => {
+    if (!isAdmin) {
+      window.scrollTo(0, 0);
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    }
+  }, [pathname, searchParams, isAdmin]);
+
   const toasterOptions = {
     position: "bottom-center" as const,
     toastOptions: {
