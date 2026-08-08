@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 
@@ -77,7 +78,8 @@ export default function HeroBanner({ config }: { config?: any }) {
       title: config.bannerTitle || dynamicSlides[0].title,
       desc: config.bannerText || dynamicSlides[0].desc,
       badge: '✨ Tu belleza, tu momento',
-      bg: config.bannerImage ? `url(${config.bannerImage}) center/cover no-repeat, ${dynamicSlides[0].bg}` : dynamicSlides[0].bg
+      image: config.bannerImage || null,
+      bg: dynamicSlides[0].bg
     };
   }
 
@@ -107,10 +109,20 @@ export default function HeroBanner({ config }: { config?: any }) {
             className="absolute inset-0 w-full"
             style={{ background: dynamicSlides[current].bg }}
           >
+            {dynamicSlides[current].image && (
+              <Image
+                src={dynamicSlides[current].image}
+                alt={dynamicSlides[current].title}
+                fill
+                priority={current === 0}
+                className="object-cover absolute inset-0 z-0 opacity-90"
+              />
+            )}
+            
             {/* Decorative circles */}
-            <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-white/20 blur-3xl" />
-            <div className="absolute -bottom-32 -left-20 w-96 h-96 rounded-full bg-white/25 blur-3xl" />
-            <div className="absolute top-1/4 right-1/4 w-40 h-40 rounded-full bg-primary/10 blur-2xl animate-float" />
+            <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-white/20 blur-3xl z-0" />
+            <div className="absolute -bottom-32 -left-20 w-96 h-96 rounded-full bg-white/25 blur-3xl z-0" />
+            <div className="absolute top-1/4 right-1/4 w-40 h-40 rounded-full bg-primary/10 blur-2xl animate-float z-0" />
 
             {/* Floating decorative emojis */}
             <motion.div
