@@ -354,13 +354,6 @@ export default function PedidosClient({ initialOrders, products }: { initialOrde
               {/* Footer Actions */}
               <div className="bg-gray-50/50 border-t border-gray-100 p-3 sm:px-6 flex items-center justify-end gap-2">
                 <button 
-                  onClick={() => window.open(`/admin/pedidos/print/${order.id}`, '_blank')}
-                  className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-2"
-                >
-                  <Printer className="w-4 h-4" />
-                  <span className="hidden sm:inline">Imprimir</span>
-                </button>
-                <button 
                   onClick={() => handleDownloadPDF(order)}
                   className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-2"
                 >
