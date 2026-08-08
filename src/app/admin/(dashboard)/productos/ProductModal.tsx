@@ -254,9 +254,9 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
                   <option value="skincare">Skincare</option>
                   <option value="corporal">Corporal</option>
                   <option value="accesorios">Accesorios</option>
-                  <option value="pestanas-punto-a-punto">Pestañas P a P</option>
+                  <option value="pestanas-punto-a-punto">Pestañas Punto a Punto</option>
                   <option value="pestanas-enteras">Pestañas Enteras</option>
-                  <option value="productos-cabello">Cabello</option>
+                  <option value="productos-cabello">Productos para el Cabello</option>
                   <option value="Labios">Labios</option>
                 </select>
               </div>

@@ -16,7 +16,7 @@ export default function ProductosClient({ initialProducts }: { initialProducts: 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-  const categories = ['Todas', 'Makeup', 'Skincare', 'Corporal', 'Accesorios', 'Pestañas P a P', 'Pestañas Enteras', 'Cabello', 'Labios'];
+  const categories = ['Todas', 'Makeup', 'Skincare', 'Corporal', 'Accesorios', 'Pestañas Punto a Punto', 'Pestañas Enteras', 'Productos para el Cabello'];
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
