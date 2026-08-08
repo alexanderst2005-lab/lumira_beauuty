@@ -33,7 +33,15 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
 
   // Auto-scroll to top on mount
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    const scrollToTop = () => {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+    
+    scrollToTop();
+    const timer = setTimeout(scrollToTop, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   const isOutOfStock = product.stock === 0;
