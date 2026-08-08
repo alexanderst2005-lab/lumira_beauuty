@@ -94,6 +94,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             alt={product.name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            loading="eager"
             priority={priority}
             unoptimized={true}
             className={`object-cover object-center transition-all duration-700 ${!isOutOfStock ? 'group-hover:scale-105' : ''} ${isOutOfStock ? 'grayscale opacity-70' : ''}`}
