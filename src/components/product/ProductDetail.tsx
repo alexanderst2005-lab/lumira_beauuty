@@ -136,7 +136,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative w-full rounded-2xl overflow-hidden bg-white border border-border-light shadow-sm touch-pan-y flex items-center justify-center"
+              className="relative w-full aspect-square md:aspect-auto md:min-h-[400px] lg:min-h-[500px] rounded-2xl overflow-hidden bg-white border border-border-light shadow-sm touch-pan-y flex items-center justify-center"
               onTouchStart={onTouchStart}
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEndHandler}
