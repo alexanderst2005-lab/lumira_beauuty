@@ -14,7 +14,7 @@ interface AdminTopbarProps {
 }
 
 export default function AdminTopbar({ onOpenSidebar }: AdminTopbarProps) {
-  const { notifications, markAsRead, markAllAsRead, deleteNotification, clearAllNotifications, config } = useAdminData();
+  const { notifications, markAsRead, markAllAsRead, deleteNotification, clearAllNotifications } = useAdminData();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -60,7 +60,7 @@ export default function AdminTopbar({ onOpenSidebar }: AdminTopbarProps) {
           title="Volver al inicio"
         >
           <Image 
-            src={config?.logo || "/images/logo.png"} 
+            src="/images/logo.png" 
             alt="Lumira Beauty" 
             width={100} 
             height={32} 
