@@ -81,6 +81,9 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
       href={`/producto/${product.id}`}
       className="card-premium block group flex flex-col h-full bg-white"
       id={`product-${product.id}`}
+      onClick={() => {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }}
     >
       {/* Imagen tipo cover (sin espacios blancos) */}
       <div className="product-image-container aspect-square flex items-center justify-center relative bg-gray-50 overflow-hidden rounded-t-2xl">
