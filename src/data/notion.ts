@@ -29,7 +29,7 @@ export async function getAllProductsFromNotion(includeTrash = false): Promise<Pr
         body: JSON.stringify({
           start_cursor: nextCursor
         }),
-        next: { revalidate: 3600 }
+        next: { revalidate: 60 }
       });
 
       if (!response.ok) {
