@@ -172,9 +172,6 @@ export default function ProductosClient({ initialProducts }: { initialProducts: 
                 {product.stock === 0 && (
                   <span className="bg-red-100 text-red-700 text-[9px] font-bold px-1.5 py-0.5 rounded-sm">Agotado</span>
                 )}
-                {!product.active && (
-                  <span className="bg-gray-100 text-gray-600 text-[9px] font-bold px-1.5 py-0.5 rounded-sm">Inactivo</span>
-                )}
               </div>
             </div>
             
