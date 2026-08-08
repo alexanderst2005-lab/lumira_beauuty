@@ -178,8 +178,8 @@ export const products: Product[] = [
   { id: 'pc-001', name: 'Gel Vibrante', description: 'Fijador de cabello duradero.', fullDescription: 'Gel fijador para todo tipo de peinados que requieran un acabado duradero y firme.', price: 5000, category: 'productos-cabello', image: '/images/products/gel-vibrante.png' },
   { id: 'pc-002', name: 'Alisadora en Sobre', description: 'Tratamiento alisador práctico.', fullDescription: 'Tratamiento capilar formulado para facilitar el alisado del cabello sin maltratarlo.', price: 7500, category: 'productos-cabello', image: '/images/products/alisadora-sobre.jpg' },
   { id: 'pc-003', name: 'Pelo Sintético', description: 'Extensiones prácticas.', fullDescription: 'Extensión de cabello sintético ideal para realizar trenzas y diferentes estilos.', price: 7500, category: 'productos-cabello', image: '/images/products/pelo-sintetico.png' },
-  { id: 'pc-004', name: 'Polvo de Hadas', description: 'Toque de brillo mágico.', fullDescription: 'Polvo brillante ideal para darle un toque espectacular y festivo a tu cabello.', price: 7000, category: 'productos-cabello', image: '/images/products/placeholder.webp' },
-  { id: 'pc-005', name: 'Polvo de Hadas Hello Kitty', description: 'Edición especial Hello Kitty.', fullDescription: 'El clásico polvo de hadas capilar brillante en un hermoso empaque de Hello Kitty.', price: 8000, category: 'productos-cabello', image: '/images/products/placeholder.webp' }
+  { id: 'pc-004', name: 'Polvo de Hadas', description: 'Toque de brillo mágico.', fullDescription: 'Polvo brillante ideal para darle un toque espectacular y festivo a tu maquillaje o cabello.', price: 7000, category: 'makeup', image: '/images/products/placeholder.webp' },
+  { id: 'pc-005', name: 'Polvo de Hadas Hello Kitty', description: 'Edición especial Hello Kitty.', fullDescription: 'El clásico polvo de hadas brillante en un hermoso empaque de Hello Kitty.', price: 8000, category: 'makeup', image: '/images/products/placeholder.webp' }
 ];
 
 export function getProductById(id: string): Product | undefined {
