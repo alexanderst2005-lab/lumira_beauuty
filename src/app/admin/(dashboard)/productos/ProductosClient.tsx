@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Product } from '@/types';
 import { Search, Plus, Edit2, Trash2, Copy, Check, X, Image as ImageIcon } from 'lucide-react';
 import { formatPrice } from '@/utils/whatsapp';
@@ -15,6 +16,11 @@ export default function ProductosClient({ initialProducts }: { initialProducts: 
   const [activeCategory, setActiveCategory] = useState('Todas');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    setProducts(initialProducts);
+  }, [initialProducts]);
 
   const categoryMap: Record<string, string> = {
     'Todas': 'all',
@@ -201,7 +207,7 @@ export default function ProductosClient({ initialProducts }: { initialProducts: 
           onClose={() => setIsModalOpen(false)} 
           onSave={() => {
             setIsModalOpen(false);
-            window.location.reload(); // Reload to fetch fresh data from Notion
+            router.refresh(); // Fetch fresh data without full reload
           }} 
         />
       )}
