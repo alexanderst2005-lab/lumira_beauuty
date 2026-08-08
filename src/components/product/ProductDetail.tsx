@@ -141,10 +141,14 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEndHandler}
             >
-              <img
+              <Image
                 src={overrideImage || displayImages[currentImageIndex]}
                 alt={product.name}
-                className={`max-w-full w-auto h-auto max-h-[400px] lg:max-h-[550px] object-contain transition-opacity duration-300 ${isOutOfStock ? 'grayscale opacity-60' : ''}`}
+                fill
+                priority={true}
+                unoptimized={true}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className={`object-contain p-2 sm:p-4 transition-opacity duration-300 ${isOutOfStock ? 'grayscale opacity-60' : ''}`}
               />
               {/* Fallback decorativo */}
               <div className="absolute inset-0 flex items-center justify-center text-9xl opacity-10 pointer-events-none">
