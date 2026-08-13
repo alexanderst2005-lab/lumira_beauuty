@@ -255,9 +255,11 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
             {product.name}
           </h1>
 
-          <p className="text-xs sm:text-sm text-txt-secondary leading-relaxed mb-4 max-w-prose line-clamp-[8]">
-            {product.fullDescription}
-          </p>
+          {(product.description || product.fullDescription) && (
+            <p className="text-xs sm:text-sm text-txt-secondary leading-relaxed mb-4 max-w-prose">
+              {product.description || product.fullDescription}
+            </p>
+          )}
 
           <div className="text-lg sm:text-xl lg:text-2xl font-display font-extrabold text-primary mb-5 drop-shadow-sm">
             {formatPrice(product.price)}
