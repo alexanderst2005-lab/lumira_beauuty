@@ -6,6 +6,7 @@ import ProductCard from './ProductCard';
 import SkeletonProductCard from './SkeletonProductCard';
 import { motion } from 'framer-motion';
 import { preloadProductImages } from '@/utils/imagePreloader';
+import { getSavedScrollPosition } from '@/utils/scrollRestoration';
 
 interface ProductGridProps {
   products: Product[];
@@ -19,11 +20,33 @@ export default function ProductGrid({ products, emptyMessage = 'No se encontraro
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-  // Reset visible count when products array changes (e.g., category change)
+  // Restaurar cantidad de productos visibles y posición de scroll al regresar de un producto
   useEffect(() => {
-    setVisibleCount(ITEMS_PER_PAGE);
-    // Precargar inmediatamente las primeras imágenes y el siguiente lote anticipado
-    preloadProductImages(products, 0, ITEMS_PER_PAGE * 2, 400);
+    if (typeof window === 'undefined') return;
+
+    const savedY = getSavedScrollPosition();
+    if (savedY && savedY > 0) {
+      // Estimar productos necesarios para renderizar la altura requerida
+      const neededCount = Math.max(ITEMS_PER_PAGE, Math.ceil((savedY + 1200) / 120) * 2);
+      const targetCount = Math.min(products.length, neededCount);
+
+      setVisibleCount(targetCount);
+      preloadProductImages(products, 0, targetCount + ITEMS_PER_PAGE, 400);
+
+      // Ejecutar la restauración de desplazamiento
+      const restore = () => {
+        window.scrollTo({ top: savedY, behavior: 'instant' });
+      };
+
+      requestAnimationFrame(() => {
+        restore();
+        setTimeout(restore, 50);
+        setTimeout(restore, 150);
+      });
+    } else {
+      setVisibleCount(ITEMS_PER_PAGE);
+      preloadProductImages(products, 0, ITEMS_PER_PAGE * 2, 400);
+    }
   }, [products]);
 
   // Precargar de forma continua las imágenes de los productos que vendrán más abajo

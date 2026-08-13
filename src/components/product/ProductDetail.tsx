@@ -15,6 +15,7 @@ import ProductCard from '@/components/catalog/ProductCard';
 import { toast } from 'sonner';
 import { getOptimizedImageUrl } from '@/utils/image';
 import { preloadProductImages, preloadSingleImage } from '@/utils/imagePreloader';
+import { getLastCatalogUrl } from '@/utils/scrollRestoration';
 
 interface ProductDetailProps {
   product: Product;
@@ -34,6 +35,18 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
   const [selectedTone, setSelectedTone] = useState<Tone | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, ProductOptionValue>>({});
   const [overrideImage, setOverrideImage] = useState<string | null>(null);
+
+  const handleBack = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const lastUrl = getLastCatalogUrl();
+    if (lastUrl) {
+      router.push(lastUrl);
+    } else if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push('/catalogo');
+    }
+  };
 
   // Precargar las imágenes principales y los productos relacionados de inmediato
   useEffect(() => {
@@ -135,7 +148,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
       {/* Botón de retroceso */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         <button 
-          onClick={() => window.history.length > 1 ? router.back() : router.push('/catalogo')}
+          onClick={handleBack}
           className="inline-flex items-center gap-2 text-txt-secondary hover:text-primary transition-colors text-sm font-medium"
         >
           <ArrowLeft className="w-4 h-4" />

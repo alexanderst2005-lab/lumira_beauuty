@@ -13,15 +13,20 @@ import FavoritesDrawer from "@/components/favorites/FavoritesDrawer";
 import WhatsAppButton from "@/components/layout/WhatsAppButton";
 import { Toaster } from "sonner";
 
+import { getSavedScrollPosition } from '@/utils/scrollRestoration';
+
 function ScrollRestorer({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (!isAdmin) {
-      window.scrollTo(0, 0);
-      document.body.scrollTop = 0;
-      document.documentElement.scrollTop = 0;
+    if (!isAdmin && typeof window !== 'undefined') {
+      const savedY = getSavedScrollPosition();
+      if (savedY === null || savedY === 0) {
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+      }
     }
   }, [pathname, searchParams, isAdmin]);
 
@@ -32,10 +37,9 @@ export default function StoreLayoutWrapper({ children, config }: { children: Rea
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith('/admin') ?? false;
 
-  // EL SANTO GRIAL DEL SCROLL: Desactivar la memoria nativa del navegador
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      window.history.scrollRestoration = 'manual';
+      window.history.scrollRestoration = 'auto';
     }
   }, []);
 

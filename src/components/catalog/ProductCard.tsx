@@ -13,6 +13,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getOptimizedImageUrl } from '@/utils/image';
+import { saveCurrentScrollPosition } from '@/utils/scrollRestoration';
 
 interface ProductCardProps {
   product: Product;
@@ -52,6 +53,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
     if (isOutOfStock) return;
 
     if ((product.tones && product.tones.length > 0) || (product.options && product.options.length > 0)) {
+      saveCurrentScrollPosition();
       router.push(`/producto/${product.id}`);
       return;
     }
@@ -84,7 +86,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
       className="card-premium block group flex flex-col h-full bg-white"
       id={`product-${product.id}`}
       onClick={() => {
-        window.scrollTo({ top: 0, behavior: 'instant' });
+        saveCurrentScrollPosition();
       }}
     >
       {/* Imagen tipo cover (sin espacios blancos) */}
