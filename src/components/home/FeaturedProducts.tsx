@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Product } from '@/types';
 import ProductCard from '@/components/catalog/ProductCard';
 import { preloadProductImages } from '@/utils/imagePreloader';
+import { getSavedScrollPosition } from '@/utils/scrollRestoration';
 
 const getFeaturedAndNewProducts = (productsList: Product[], count: number) => {
   // Primero tomamos los que están marcados explícitamente como "Nuevo" o "Destacado"
@@ -39,6 +40,22 @@ export default function FeaturedProducts({ initialProducts }: { initialProducts:
       preloadProductImages(featured, 0, featured.length, 400);
     }
   }, [featured]);
+
+  // Restaurar posición de scroll en la página de inicio
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const savedY = getSavedScrollPosition('/');
+    if (savedY && savedY > 0) {
+      const restore = () => {
+        window.scrollTo({ top: savedY, behavior: 'instant' });
+      };
+      requestAnimationFrame(() => {
+        restore();
+        setTimeout(restore, 50);
+        setTimeout(restore, 150);
+      });
+    }
+  }, []);
 
   return (
     <section className="py-16 sm:py-20 bg-gradient-to-b from-white to-secondary-100/30" id="featured">

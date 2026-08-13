@@ -22,7 +22,16 @@ function ScrollRestorer({ isAdmin }: { isAdmin: boolean }) {
   useEffect(() => {
     if (!isAdmin && typeof window !== 'undefined') {
       const savedY = getSavedScrollPosition();
-      if (savedY === null || savedY === 0) {
+      if (savedY !== null && savedY > 0) {
+        const restore = () => {
+          window.scrollTo({ top: savedY, behavior: 'instant' });
+        };
+        requestAnimationFrame(() => {
+          restore();
+          setTimeout(restore, 50);
+          setTimeout(restore, 150);
+        });
+      } else {
         window.scrollTo(0, 0);
         document.body.scrollTop = 0;
         document.documentElement.scrollTop = 0;
