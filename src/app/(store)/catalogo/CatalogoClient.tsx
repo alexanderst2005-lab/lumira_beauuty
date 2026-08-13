@@ -7,6 +7,7 @@ import { Product } from '@/types';
 import Filters from '@/components/catalog/Filters';
 import ProductGrid from '@/components/catalog/ProductGrid';
 import { Search, ChevronDown } from 'lucide-react';
+import { preloadProductImages } from '@/utils/imagePreloader';
 
 export default function CatalogoClient({ initialProducts }: { initialProducts: Product[] }) {
   const searchParams = useSearchParams();
@@ -23,6 +24,13 @@ export default function CatalogoClient({ initialProducts }: { initialProducts: P
     if (categoria) setSelectedCategory(categoria);
     if (buscar) setSearchQuery(buscar);
   }, [searchParams]);
+
+  // Precargar las primeras imágenes de la página al cargar o cambiar el listado
+  useEffect(() => {
+    if (initialProducts && initialProducts.length > 0) {
+      preloadProductImages(initialProducts, 0, 32, 400);
+    }
+  }, [initialProducts]);
 
   // Filtrar y ordenar productos
   const filteredProducts = useMemo(() => {
@@ -49,6 +57,11 @@ export default function CatalogoClient({ initialProducts }: { initialProducts: P
 
     return result;
   }, [selectedCategory, searchQuery, sortOrder]);
+
+  // Precargar imágenes del resultado filtrado
+  useEffect(() => {
+    preloadProductImages(filteredProducts, 0, 24, 400);
+  }, [filteredProducts]);
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);

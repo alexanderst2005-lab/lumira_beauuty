@@ -1,8 +1,10 @@
 'use client';
 
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Product } from '@/types';
 import ProductCard from '@/components/catalog/ProductCard';
+import { preloadProductImages } from '@/utils/imagePreloader';
 
 const getFeaturedAndNewProducts = (productsList: Product[], count: number) => {
   // Primero tomamos los que están marcados explícitamente como "Nuevo" o "Destacado"
@@ -31,6 +33,12 @@ const getFeaturedAndNewProducts = (productsList: Product[], count: number) => {
 
 export default function FeaturedProducts({ initialProducts }: { initialProducts: Product[] }) {
   const featured = getFeaturedAndNewProducts(initialProducts, 8);
+
+  useEffect(() => {
+    if (featured && featured.length > 0) {
+      preloadProductImages(featured, 0, featured.length, 400);
+    }
+  }, [featured]);
 
   return (
     <section className="py-16 sm:py-20 bg-gradient-to-b from-white to-secondary-100/30" id="featured">

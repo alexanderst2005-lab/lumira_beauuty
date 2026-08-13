@@ -14,6 +14,7 @@ import QuantitySelector from './QuantitySelector';
 import ProductCard from '@/components/catalog/ProductCard';
 import { toast } from 'sonner';
 import { getOptimizedImageUrl } from '@/utils/image';
+import { preloadProductImages, preloadSingleImage } from '@/utils/imagePreloader';
 
 interface ProductDetailProps {
   product: Product;
@@ -33,6 +34,17 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
   const [selectedTone, setSelectedTone] = useState<Tone | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, ProductOptionValue>>({});
   const [overrideImage, setOverrideImage] = useState<string | null>(null);
+
+  // Precargar las imágenes principales y los productos relacionados de inmediato
+  useEffect(() => {
+    if (product) {
+      const displayImgs = product.images || [product.image];
+      displayImgs.forEach(img => preloadSingleImage(img, 800));
+    }
+    if (relatedProducts && relatedProducts.length > 0) {
+      preloadProductImages(relatedProducts, 0, relatedProducts.length, 400);
+    }
+  }, [product, relatedProducts]);
 
   // Auto-scroll to top on mount
   useEffect(() => {
