@@ -18,6 +18,12 @@ export function normalizeImageUrl(url: string | null | undefined): string {
     }
   }
 
+  // Convertir URLs absolutas del propio dominio Vercel a rutas relativas estáticas locales /images/...
+  if (cleanUrl.includes('/images/products/')) {
+    const imgIndex = cleanUrl.indexOf('/images/products/');
+    cleanUrl = cleanUrl.substring(imgIndex);
+  }
+
   return cleanUrl;
 }
 

@@ -74,5 +74,5 @@ export async function processAndCacheNotionUrl(
     console.warn(`[AutoImageCache] No se pudo guardar localmente la imagen (${pageId}):`, err);
   }
 
-  return rawUrl;
+  return normalized;
 }
