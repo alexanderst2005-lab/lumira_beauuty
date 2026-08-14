@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { normalizeImageUrl } from './image';
 
 /**
  * Intercepta URLs temporales de Notion (AWS S3) y las descarga automáticamente 
@@ -10,13 +11,20 @@ export async function processAndCacheNotionUrl(
   pageId: string,
   index: number = 0
 ): Promise<string> {
-  if (!rawUrl || typeof rawUrl !== 'string' || !rawUrl.startsWith('http')) {
-    return rawUrl || '/images/products/placeholder.webp';
+  const normalized = normalizeImageUrl(rawUrl);
+
+  if (!normalized || typeof normalized !== 'string') {
+    return '/images/products/placeholder.webp';
+  }
+
+  // Si después de normalizar es una ruta relativa (/images/..., /uploads/...), devolverla directamente
+  if (normalized.startsWith('/') || !normalized.startsWith('http')) {
+    return normalized;
   }
 
   // Si la URL no es de Notion o AWS, devolver la URL original directamente
-  if (!rawUrl.includes('amazonaws.com') && !rawUrl.includes('notion-static.com') && !rawUrl.includes('notion.so')) {
-    return rawUrl;
+  if (!normalized.includes('amazonaws.com') && !normalized.includes('notion-static.com') && !normalized.includes('notion.so')) {
+    return normalized;
   }
 
   try {
