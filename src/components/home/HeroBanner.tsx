@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import SafeImage from '@/components/common/SafeImage';
 import { getOptimizedImageUrl } from '@/utils/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
@@ -125,7 +125,7 @@ export default function HeroBanner({ config }: { config?: any }) {
             style={{ background: dynamicSlides[current].bg }}
           >
             {dynamicSlides[current].image && (
-              <Image
+              <SafeImage
                 src={dynamicSlides[current].image}
                 alt={dynamicSlides[current].title}
                 fill

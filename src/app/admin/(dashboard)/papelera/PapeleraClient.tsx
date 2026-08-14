@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { RefreshCcw, Trash2, Package, ShoppingBag, Loader2 } from 'lucide-react';
-import Image from 'next/image';
+import SafeImage from '@/components/common/SafeImage';
 
 type ItemType = 'producto' | 'pedido';
 
@@ -88,7 +88,7 @@ export default function PapeleraClient({ initialProducts, initialOrders }: { ini
                 <div key={product.id} className="flex items-center justify-between p-4 hover:bg-gray-50">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden relative">
-                      {product.image && <Image src={product.image} alt={product.name} fill className="object-cover" />}
+                      <SafeImage src={product.image} alt={product.name} fill className="object-cover" />
                     </div>
                     <div>
                       <h4 className="font-medium text-gray-900">{product.name}</h4>

@@ -1,4 +1,5 @@
 import { Product } from '@/types';
+import { processAndCacheNotionUrl } from '@/utils/imageServerCache';
 
 const TOKEN = process.env.NOTION_SECRET;
 const PRODUCTS_DB_ID = process.env.NOTION_PRODUCTS_DB;
@@ -43,25 +44,32 @@ export async function getAllProductsFromNotion(includeTrash = false): Promise<Pr
       nextCursor = data.next_cursor;
     }
 
-    return allResults.map((page: any) => {
+    const productsMapped = await Promise.all(allResults.map(async (page: any) => {
       const props = page.properties;
       
-      let imageUrl = '/images/products/placeholder.webp';
-      let imagesList: string[] = [];
+      const DEFAULT_IMG = '/images/products/placeholder.webp';
+      let rawImagesList: string[] = [];
       
       if (props.Image?.type === 'files' && props.Image.files.length > 0) {
-        imagesList = props.Image.files.map((fileObj: any) => {
-          if (fileObj.type === 'file') return fileObj.file.url;
-          if (fileObj.type === 'external') return fileObj.external.url;
+        rawImagesList = props.Image.files.map((fileObj: any) => {
+          if (fileObj.type === 'file') return fileObj.file?.url || null;
+          if (fileObj.type === 'external') return fileObj.external?.url || null;
           return null;
-        }).filter((url: string | null) => url !== null);
-        
-        if (imagesList.length > 0) {
-          imageUrl = imagesList[0];
-        }
+        }).filter((url: string | null): url is string => Boolean(url && url.trim() !== ''));
       } else if (props.Image?.type === 'url' && props.Image.url) {
-        imageUrl = props.Image.url;
-        imagesList = [imageUrl];
+        rawImagesList = [props.Image.url];
+      }
+
+      // Interceptar y guardar localmente en public/uploads/ cualquier URL de Notion S3 que expire
+      const processedImagesList = await Promise.all(
+        rawImagesList.map((url, idx) => processAndCacheNotionUrl(url, page.id, idx))
+      );
+
+      let imageUrl = processedImagesList.length > 0 ? processedImagesList[0] : DEFAULT_IMG;
+      const imagesList = processedImagesList.length > 0 ? processedImagesList : [DEFAULT_IMG];
+
+      if (!imageUrl || imageUrl.trim() === '') {
+        imageUrl = DEFAULT_IMG;
       }
       
       const name = props.Name?.title[0]?.plain_text || '';
@@ -84,7 +92,7 @@ export async function getAllProductsFromNotion(includeTrash = false): Promise<Pr
         price: props.Price?.number || 0,
         category: props.Category?.select?.name || '',
         image: imageUrl,
-        images: imagesList.length > 0 ? imagesList : [imageUrl],
+        images: imagesList,
         options: options,
         stock: props.Stock?.number ?? 10, // Default a 10 si es null (para productos antiguos)
         active: props.Active?.checkbox ?? true,
@@ -93,7 +101,9 @@ export async function getAllProductsFromNotion(includeTrash = false): Promise<Pr
         tags: props.Tags?.multi_select?.map((t: any) => t.name) || [],
         inTrash: props['En Papelera']?.checkbox ?? false,
       };
-    }).filter(p => p.name && p.name !== '__CONFIG__' && (includeTrash ? true : !p.inTrash));
+    }));
+
+    return productsMapped.filter(p => p.name && p.name !== '__CONFIG__' && (includeTrash ? true : !p.inTrash));
   } catch (error) {
     console.error('Error fetching products from Notion:', error);
     return [];

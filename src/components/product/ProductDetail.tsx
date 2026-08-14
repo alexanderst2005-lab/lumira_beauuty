@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import SafeImage from '@/components/common/SafeImage';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Heart, ShoppingCart, ArrowLeft, Check, Truck, CreditCard } from 'lucide-react';
@@ -169,12 +169,13 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEndHandler}
             >
-              <Image
-                src={getOptimizedImageUrl(overrideImage || displayImages[currentImageIndex], 800)}
+              <SafeImage
+                src={overrideImage || displayImages[currentImageIndex]}
                 alt={product.name}
                 fill
                 priority={true}
                 unoptimized={true}
+                optimizeWidth={800}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className={`object-contain p-2 sm:p-4 transition-opacity duration-300 ${isOutOfStock ? 'grayscale opacity-60' : ''}`}
               />
@@ -245,10 +246,11 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
                       (currentImageIndex === idx && !overrideImage) ? 'border-primary' : 'border-transparent opacity-60 hover:opacity-100'
                     }`}
                   >
-                    <Image
-                      src={getOptimizedImageUrl(img, 150)}
+                    <SafeImage
+                      src={img}
                       alt={`Vista ${idx + 1}`}
                       fill
+                      optimizeWidth={150}
                       className="object-cover"
                     />
                   </button>

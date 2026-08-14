@@ -6,6 +6,7 @@ import { Product } from '@/types';
 import { Search, Plus, Edit2, Trash2, Copy, Check, X, Image as ImageIcon } from 'lucide-react';
 import { formatPrice } from '@/utils/whatsapp';
 import { toast } from 'sonner';
+import SafeImage from '@/components/common/SafeImage';
 
 import ProductModal from './ProductModal';
 
@@ -148,11 +149,13 @@ export default function ProductosClient({ initialProducts }: { initialProducts: 
         {filteredProducts.map(product => (
           <div key={product.id} className="bg-white border border-gray-100 rounded-xl p-2.5 flex flex-col shadow-sm hover:shadow-md transition-shadow group">
             <div className="aspect-square bg-gray-50 rounded-lg mb-2 relative overflow-hidden flex items-center justify-center">
-              {product.image && product.image !== '/images/products/placeholder.webp' ? (
-                <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-              ) : (
-                <ImageIcon className="w-8 h-8 text-gray-300" />
-              )}
+              <SafeImage
+                src={product.image}
+                alt={product.name}
+                fill
+                sizes="150px"
+                className="object-cover group-hover:scale-105 transition-transform"
+              />
               
               <div className="absolute top-1.5 left-1.5 flex flex-col gap-0.5">
                 {product.stock !== undefined && product.stock <= 5 && product.stock > 0 && (

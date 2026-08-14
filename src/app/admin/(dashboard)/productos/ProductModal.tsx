@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Product, ProductOption, ProductOptionValue } from '@/types';
 import { X, Upload, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import SafeImage from '@/components/common/SafeImage';
 
 interface ProductModalProps {
   product?: Product | null;
@@ -288,7 +289,7 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
                     <div className="grid grid-cols-3 gap-2">
                       {formData.images.map((imgUrl, i) => (
                         <div key={i} className="relative w-full aspect-square rounded-lg overflow-hidden border border-gray-200">
-                          <img src={imgUrl} alt={`Preview ${i}`} className="w-full h-full object-cover" />
+                          <SafeImage src={imgUrl} alt={`Preview ${i}`} fill className="object-cover" />
                           <button type="button" onClick={() => {
                             const newImages = [...formData.images];
                             newImages.splice(i, 1);
@@ -371,7 +372,7 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
                         <div className="relative">
                           {val.image ? (
                             <div className="w-10 h-10 rounded overflow-hidden border border-gray-200 relative">
-                              <img src={val.image} alt="val" className="w-full h-full object-cover" />
+                              <SafeImage src={val.image} alt="val" fill className="object-cover" />
                               <button type="button" onClick={() => {
                                 const newOptions = [...formData.options];
                                 newOptions[optIdx].values[valIdx].image = '';

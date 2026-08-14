@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { X, Heart, ShoppingCart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
+import SafeImage from '@/components/common/SafeImage';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useFavorites } from '@/context/FavoritesContext';
@@ -112,7 +112,7 @@ export default function FavoritesDrawer() {
                       onClick={() => setIsFavoritesOpen(false)}
                       className="relative w-24 h-24 flex-shrink-0 bg-white rounded-lg overflow-hidden border border-border-light"
                     >
-                      <Image
+                      <SafeImage
                         src={product.image}
                         alt={product.name}
                         fill

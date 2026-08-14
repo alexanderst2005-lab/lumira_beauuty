@@ -10,6 +10,7 @@ import { formatPrice } from '@/utils/whatsapp';
 import { toast } from 'sonner';
 import { useAdminData } from '@/components/admin/AdminDataContext';
 import { Product } from '@/types';
+import SafeImage from '@/components/common/SafeImage';
 import Image from 'next/image';
 import { getOptimizedImageUrl } from '@/utils/image';
 
@@ -322,11 +323,13 @@ export default function PedidosClient({ initialOrders, products }: { initialOrde
                 {parseOrderProducts(order.products).map((item, idx) => (
                   <div key={idx} className="flex items-center gap-4 py-2 group">
                     <div className="w-12 h-12 relative rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 flex items-center justify-center border border-gray-200">
-                      {item.image && item.image !== '/images/products/placeholder.webp' ? (
-                        <Image src={getOptimizedImageUrl(item.image, 100)} alt={item.name} fill className="object-cover" unoptimized />
-                      ) : (
-                        <ImageIcon className="w-5 h-5 text-gray-400" />
-                      )}
+                      <SafeImage
+                        src={item.image}
+                        alt={item.name}
+                        fill
+                        optimizeWidth={100}
+                        className="object-cover"
+                      />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-pink-600 transition-colors">{item.name}</p>

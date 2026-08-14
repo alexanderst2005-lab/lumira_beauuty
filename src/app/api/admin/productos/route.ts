@@ -34,11 +34,19 @@ export async function POST(request: Request) {
           Description: { rich_text: [{ text: { content: description || '' } }] },
           Options: { rich_text: [{ text: { content: options ? JSON.stringify(options) : '[]' } }] },
           Image: {
-            files: (images || []).map((url: string, i: number) => ({
-              name: `image_${i}.jpg`,
-              type: 'external',
-              external: { url }
-            }))
+            files: (images || []).map((url: string, i: number) => {
+              let cleanUrl = url;
+              if (cleanUrl.startsWith('/')) {
+                const host = request.headers.get('host') || 'localhost:3000';
+                const protocol = host.includes('localhost') ? 'http' : 'https';
+                cleanUrl = `${protocol}://${host}${cleanUrl}`;
+              }
+              return {
+                name: `image_${i}.jpg`,
+                type: 'external',
+                external: { url: cleanUrl }
+              };
+            })
           }
         }
       })

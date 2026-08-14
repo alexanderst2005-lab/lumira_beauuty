@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 
 import Link from 'next/link';
-import Image from 'next/image';
+import SafeImage from '@/components/common/SafeImage';
 import { ShoppingCart, Heart } from 'lucide-react';
 import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
@@ -12,7 +12,6 @@ import { formatPrice } from '@/utils/whatsapp';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getOptimizedImageUrl } from '@/utils/image';
 import { saveCurrentScrollPosition } from '@/utils/scrollRestoration';
 
 interface ProductCardProps {
@@ -92,19 +91,16 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
       {/* Imagen tipo cover (sin espacios blancos) */}
       <div className="product-image-container aspect-square flex items-center justify-center relative bg-gray-50 overflow-hidden rounded-t-2xl">
         <div className="relative w-full h-full">
-          <Image
-            src={getOptimizedImageUrl(product.image, 400)}
+          <SafeImage
+            src={product.image}
             alt={product.name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             loading={priority ? 'eager' : 'lazy'}
             priority={priority}
             unoptimized={true}
+            optimizeWidth={400}
             className={`object-cover object-center transition-all duration-500 ${!isOutOfStock ? 'group-hover:scale-105' : ''} ${isOutOfStock ? 'grayscale opacity-70' : ''}`}
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-            }}
           />
           {/* Capa oscura si está agotado */}
           {isOutOfStock && (

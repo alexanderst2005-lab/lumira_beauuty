@@ -1,6 +1,6 @@
 'use client';
 
-import Image from 'next/image';
+import SafeImage from '@/components/common/SafeImage';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import { CartItem as CartItemType } from '@/types';
 import { useCart } from '@/context/CartContext';
@@ -17,16 +17,12 @@ export default function CartItem({ item }: CartItemProps) {
     <div className="flex gap-2.5 p-2.5 rounded-xl bg-secondary-100/30 border border-border">
       {/* Image */}
       <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-secondary-100 flex-shrink-0">
-        <Image
+        <SafeImage
           src={item.product.image}
           alt={item.product.name}
           fill
           sizes="80px"
           className="object-cover"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.style.display = 'none';
-          }}
         />
         <div className="absolute inset-0 flex items-center justify-center text-2xl opacity-20">
           💄
