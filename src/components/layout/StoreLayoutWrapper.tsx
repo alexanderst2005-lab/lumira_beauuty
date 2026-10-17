@@ -93,7 +93,7 @@ export default function StoreLayoutWrapper({ children, config }: { children: Rea
         <Suspense fallback={null}><ScrollRestorer isAdmin={isAdmin} /></Suspense>
         <MarqueeBanner />
         <Header config={config} />
-        <main className="min-h-screen">{children}</main>
+        <main className="min-h-screen overflow-x-clip">{children}</main>
         <Footer config={config} />
         <CartDrawer />
         <FavoritesDrawer />

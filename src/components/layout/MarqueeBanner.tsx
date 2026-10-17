@@ -3,7 +3,8 @@
 import { usePathname } from 'next/navigation';
 
 export default function MarqueeBanner() {
-  const isHome = usePathname() === '/';
+  const pathname = usePathname();
+  const isHome = !pathname || pathname === '/' || pathname === '';
   const messages = [
     "ENVÍOS A TODO EL PAÍS",
     "PAGO CONTRA ENTREGA",
@@ -15,11 +16,11 @@ export default function MarqueeBanner() {
   const allMessages = [...messages, ...messages, ...messages, ...messages];
 
   return (
-    <div className={isHome ? 'absolute top-0 inset-x-0 z-[60] h-[2.1rem]' : ''}>
+    <div className={isHome ? 'absolute top-0 inset-x-0 z-[60] h-[2.1rem] pointer-events-none' : ''}>
     <div
       className={`marquee-container ${
         isHome
-          ? 'absolute inset-x-0 top-0 h-[2.1rem] flex items-center bg-transparent'
+          ? 'absolute inset-x-0 top-0 h-[2.1rem] flex items-center bg-transparent pointer-events-none'
           : 'py-2 bg-primary'
       }`}
     >

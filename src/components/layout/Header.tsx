@@ -19,11 +19,14 @@ export default function Header({ config }: { config?: any }) {
   const pathname = usePathname();
   const router = useRouter();
 
+  const isHome = !pathname || pathname === '/' || pathname === '';
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -35,7 +38,7 @@ export default function Header({ config }: { config?: any }) {
   };
 
   // En la portada el header va transparente sobre la hero hasta hacer scroll.
-  const overHero = pathname === '/' && !isScrolled;
+  const overHero = isHome && !isScrolled;
   const iconClass = overHero
     ? 'text-white drop-shadow-md'
     : 'text-txt group-hover:text-primary';
@@ -45,14 +48,14 @@ export default function Header({ config }: { config?: any }) {
     <>
       <header
         className={`${
-          pathname === '/'
-            ? `fixed inset-x-0 z-50 ${isScrolled ? 'top-0' : 'top-[2.1rem]'}`
-            : 'sticky top-0 z-50'
-        } transition-all duration-300 ${
-          isScrolled
-            ? 'glass shadow-lg shadow-primary/5 border-b border-border'
-            : pathname === '/' ? 'bg-transparent' : 'bg-white'
-        }`}
+          isHome
+            ? `fixed inset-x-0 z-50 ${
+                isScrolled
+                  ? 'top-0 bg-white/95 backdrop-blur-md shadow-md border-b border-[#F0E6DE]'
+                  : 'top-[2.1rem] bg-transparent'
+              }`
+            : 'sticky top-0 z-50 bg-white shadow-sm border-b border-[#E5E5E5]'
+        } transition-all duration-300`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20 gap-4">
