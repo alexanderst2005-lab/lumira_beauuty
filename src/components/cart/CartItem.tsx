@@ -56,9 +56,17 @@ export default function CartItem({ item }: CartItemProps) {
               </p>
             ))}
 
-          <p className="text-xs sm:text-sm font-semibold text-primary mt-1 font-sans">
-            {formatPrice(item.product.price)}
-          </p>
+          <div className="flex items-baseline gap-1.5 mt-1 font-sans">
+            <span className="text-xs sm:text-sm font-semibold text-rose-600">
+              {formatPrice(item.product.price)}
+            </span>
+            {item.product.originalPrice && item.product.originalPrice > item.product.price && (
+              <span className="text-[11px] text-txt-secondary line-through">
+                {formatPrice(item.product.originalPrice)}
+              </span>
+            )}
+          </div>
+
         </div>
 
         {/* Quantity Controls (Rectangular Minimalist Pill) */}

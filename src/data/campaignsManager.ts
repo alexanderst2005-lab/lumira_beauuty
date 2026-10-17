@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { PromotionalCampaign, CampaignStatus } from '@/types/campaign';
+import { PromotionalCampaign, CampaignStatus, CampaignProductDiscount } from '@/types/campaign';
 
 const PRIMARY_DATA_FILE = path.join(process.cwd(), 'src', 'data', 'campaigns.json');
 const TMP_DATA_FILE = path.join('/tmp', 'lumira_campaigns.json');
@@ -79,28 +79,23 @@ export function readCampaigns(): PromotionalCampaign[] {
 
 export function writeCampaigns(campaigns: PromotionalCampaign[]): boolean {
   inMemoryCampaigns = [...campaigns];
-  let written = false;
 
-  // 1. Intentar escribir en el archivo principal (funciona en local)
   try {
     const dir = path.dirname(PRIMARY_DATA_FILE);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
     fs.writeFileSync(PRIMARY_DATA_FILE, JSON.stringify(campaigns, null, 2), 'utf-8');
-    written = true;
   } catch (primaryErr) {
-    // En Vercel process.cwd() puede ser de solo lectura
+    // Modo serverless / lectura única
   }
 
-  // 2. Escribir también en /tmp como respaldo para entornos serverless
   try {
     const tmpDir = path.dirname(TMP_DATA_FILE);
     if (!fs.existsSync(tmpDir)) {
       fs.mkdirSync(tmpDir, { recursive: true });
     }
     fs.writeFileSync(TMP_DATA_FILE, JSON.stringify(campaigns, null, 2), 'utf-8');
-    written = true;
   } catch (tmpErr) {
     // Si /tmp falla, aún conservamos inMemoryCampaigns
   }
@@ -125,9 +120,129 @@ export function getActiveCampaign(): PromotionalCampaign | null {
   return null;
 }
 
+/**
+ * Obtiene el mapa de descuentos vigentes de la campaña activa
+ */
+export function getActiveDiscountsMap(): Record<string, CampaignProductDiscount & { campaignId: string; campaignTitle: string }> {
+  const activeCampaign = getActiveCampaign();
+  if (!activeCampaign || !activeCampaign.products || activeCampaign.products.length === 0) {
+    return {};
+  }
+
+  const map: Record<string, CampaignProductDiscount & { campaignId: string; campaignTitle: string }> = {};
+  for (const item of activeCampaign.products) {
+    if (item.productId && item.discountPrice > 0) {
+      map[item.productId] = {
+        ...item,
+        campaignId: activeCampaign.id,
+        campaignTitle: activeCampaign.title
+      };
+    }
+  }
+  return map;
+}
+
+/**
+ * Valida de forma segura el precio de un producto en el backend (para Carrito y Checkout)
+ */
+export function validateItemPrice(productId: string, basePrice: number): {
+  finalPrice: number;
+  originalPrice: number;
+  hasDiscount: boolean;
+  discountPercent: number;
+  savings: number;
+  campaignId?: string;
+  campaignTitle?: string;
+} {
+  const discounts = getActiveDiscountsMap();
+  const discountInfo = discounts[productId];
+
+  if (!discountInfo || basePrice <= 0) {
+    return {
+      finalPrice: basePrice,
+      originalPrice: basePrice,
+      hasDiscount: false,
+      discountPercent: 0,
+      savings: 0
+    };
+  }
+
+  let finalPrice = discountInfo.discountPrice;
+
+  // Si el precio base del producto en catálogo es diferente al momento de configurar la campaña,
+  // recalculamos dinámicamente según la regla seleccionada sin sobreescribir el precio base.
+  if (discountInfo.discountType === 'percentage') {
+    const percent = Math.min(99, Math.max(1, discountInfo.discountValue));
+    finalPrice = Math.round(basePrice * (1 - percent / 100));
+  } else {
+    // Precio fijo promocional
+    finalPrice = Math.round(discountInfo.discountValue);
+  }
+
+  // Validaciones de seguridad
+  if (finalPrice <= 0 || finalPrice >= basePrice) {
+    return {
+      finalPrice: basePrice,
+      originalPrice: basePrice,
+      hasDiscount: false,
+      discountPercent: 0,
+      savings: 0
+    };
+  }
+
+  const savings = Math.max(0, basePrice - finalPrice);
+  const discountPercent = Math.round((savings / basePrice) * 100);
+
+  return {
+    finalPrice,
+    originalPrice: basePrice,
+    hasDiscount: true,
+    discountPercent,
+    savings,
+    campaignId: discountInfo.campaignId,
+    campaignTitle: discountInfo.campaignTitle
+  };
+}
+
 export function saveCampaign(payload: Partial<PromotionalCampaign>): PromotionalCampaign {
   const campaigns = readCampaigns();
   const now = new Date().toISOString();
+
+  // Validar y limpiar productos con descuento
+  const cleanedProducts: CampaignProductDiscount[] = Array.isArray(payload.products)
+    ? payload.products
+        .filter(p => p.productId && p.basePrice > 0)
+        .map(p => {
+          let discPrice = p.discountPrice;
+          let discPercent = p.discountPercent;
+          let savings = p.savings;
+
+          if (p.discountType === 'percentage') {
+            const percent = Math.min(99, Math.max(1, Number(p.discountValue) || 1));
+            discPrice = Math.round(p.basePrice * (1 - percent / 100));
+            savings = Math.max(0, p.basePrice - discPrice);
+            discPercent = percent;
+          } else {
+            const fixedPrice = Math.round(Number(p.discountValue) || p.discountPrice);
+            discPrice = Math.min(fixedPrice, p.basePrice - 1);
+            if (discPrice <= 0) discPrice = Math.round(p.basePrice * 0.9);
+            savings = Math.max(0, p.basePrice - discPrice);
+            discPercent = Math.round((savings / p.basePrice) * 100);
+          }
+
+          return {
+            productId: p.productId,
+            productName: p.productName,
+            productImage: p.productImage || '',
+            basePrice: p.basePrice,
+            discountType: p.discountType || 'percentage',
+            discountValue: Number(p.discountValue) || 0,
+            discountPrice: discPrice,
+            discountPercent: discPercent,
+            savings: savings
+          };
+        })
+    : [];
 
   if (payload.id) {
     const index = campaigns.findIndex(c => c.id === payload.id);
@@ -140,6 +255,7 @@ export function saveCampaign(payload: Partial<PromotionalCampaign>): Promotional
         createdAt: existing.createdAt,
         updatedAt: now,
         enabled: payload.enabled !== undefined ? payload.enabled : existing.enabled,
+        products: cleanedProducts,
         status: 'draft'
       };
       updated.status = evaluateCampaignStatus(updated, new Date());
@@ -161,6 +277,7 @@ export function saveCampaign(payload: Partial<PromotionalCampaign>): Promotional
     enabled: payload.enabled ?? true,
     startDate: payload.startDate || '',
     endDate: payload.endDate || '',
+    products: cleanedProducts,
     status: 'draft',
     createdAt: now,
     updatedAt: now

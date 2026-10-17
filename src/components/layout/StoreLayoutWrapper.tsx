@@ -12,7 +12,9 @@ import CartDrawer from "@/components/cart/CartDrawer";
 import FavoritesDrawer from "@/components/favorites/FavoritesDrawer";
 import WhatsAppButton from "@/components/layout/WhatsAppButton";
 import PromotionalPopup from "@/components/common/PromotionalPopup";
+import { CampaignPromotionsProvider } from "@/context/CampaignPromotionsContext";
 import { Toaster } from "sonner";
+
 
 import { getSavedScrollPosition } from '@/utils/scrollRestoration';
 
@@ -91,20 +93,22 @@ export default function StoreLayoutWrapper({ children, config }: { children: Rea
   const isHome = !pathname || pathname === '/' || pathname === '';
 
   return (
-    <FavoritesProvider>
-      <CartProvider>
-        <Suspense fallback={null}><ScrollRestorer isAdmin={isAdmin} /></Suspense>
-        <MarqueeBanner />
-        <Header config={config} />
-        <main className={`min-h-screen overflow-x-clip ${!isHome ? 'pt-16 sm:pt-20' : ''}`}>{children}</main>
-        <Footer config={config} />
-        <CartDrawer />
-        <FavoritesDrawer />
-        <WhatsAppButton config={config} />
-        <PromotionalPopup />
-        <Toaster {...toasterOptions} />
-
-      </CartProvider>
-    </FavoritesProvider>
+    <CampaignPromotionsProvider>
+      <FavoritesProvider>
+        <CartProvider>
+          <Suspense fallback={null}><ScrollRestorer isAdmin={isAdmin} /></Suspense>
+          <MarqueeBanner />
+          <Header config={config} />
+          <main className={`min-h-screen overflow-x-clip ${!isHome ? 'pt-16 sm:pt-20' : ''}`}>{children}</main>
+          <Footer config={config} />
+          <CartDrawer />
+          <FavoritesDrawer />
+          <WhatsAppButton config={config} />
+          <PromotionalPopup />
+          <Toaster {...toasterOptions} />
+        </CartProvider>
+      </FavoritesProvider>
+    </CampaignPromotionsProvider>
   );
+
 }

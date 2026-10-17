@@ -1,13 +1,13 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-
 import Link from 'next/link';
 import SafeImage from '@/components/common/SafeImage';
-import { ShoppingBag, Heart, Check } from 'lucide-react';
+import { ShoppingBag, Heart } from 'lucide-react';
 import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { useFavorites } from '@/context/FavoritesContext';
+import { useCampaignPromotions } from '@/context/CampaignPromotionsContext';
 import { formatPrice } from '@/utils/whatsapp';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -23,16 +23,17 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
   const router = useRouter();
   const { addToCart, items } = useCart();
   const { toggleFavorite, isFavorite } = useFavorites();
+  const { getProductDiscount } = useCampaignPromotions();
   const [isAdding, setIsAdding] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
+  // Consultar descuento de campaña activa
+  const discountInfo = getProductDiscount(product.id, product.price);
+  const effectivePrice = discountInfo.hasDiscount ? discountInfo.finalPrice : product.price;
+  const originalPrice = discountInfo.hasDiscount ? discountInfo.originalPrice : undefined;
+
   const isOutOfStock = product.stock === 0;
-  // Estado real de favoritos (sincronizado con el contexto y el drawer)
   const isFav = isFavorite(product.id);
-  // Unidades de este producto que ya están en el carrito
-  const inCartQty = items
-    .filter((item) => item.product.id === product.id)
-    .reduce((sum, item) => sum + item.quantity, 0);
 
   const handleFavoriteToggle = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -62,11 +63,19 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
     }
 
     setIsAdding(true);
-    addToCart(product, quantity);
+    addToCart({
+      ...product,
+      price: effectivePrice,
+      originalPrice,
+      discountPercent: discountInfo.discountPercent,
+      hasDiscount: discountInfo.hasDiscount,
+      savings: discountInfo.savings
+    }, quantity);
+
     toast.success('Producto agregado al carrito ✅');
     setTimeout(() => {
       setIsAdding(false);
-      setQuantity(1); // Reset after adding
+      setQuantity(1);
     }, 600);
   };
 
@@ -103,8 +112,16 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
           </div>
         )}
 
-        {/* Nuevo (solo si el producto está marcado como nuevo) */}
-        {product.isNew && !isOutOfStock && (
+        {/* Badge de Oferta si tiene descuento activo */}
+        {discountInfo.hasDiscount && !isOutOfStock && (
+          <span className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-20 bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1">
+            <span>Oferta</span>
+            <span>-{discountInfo.discountPercent}%</span>
+          </span>
+        )}
+
+        {/* Nuevo (solo si el producto está marcado como nuevo y no tiene oferta activa para no sobrecargar) */}
+        {product.isNew && !isOutOfStock && !discountInfo.hasDiscount && (
           <span className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-20 bg-primary text-white text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-[0.14em] shadow-sm">
             Nuevo
           </span>
@@ -116,7 +133,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
           className={`absolute top-2 right-2 sm:top-3 sm:right-3 z-20 w-9 h-9 flex items-center justify-center rounded-full shadow-sm backdrop-blur-md border transition-all duration-300 hover:scale-110 ${
             isFav
               ? 'bg-primary/10 border-primary/30'
-              : 'bg-white/80 border-white hover:bg-white'
+              : 'bg-white/80 border-white/60 hover:bg-white'
           }`}
           aria-label={isFav ? 'Quitar de favoritos' : 'Agregar a favoritos'}
           aria-pressed={isFav}
@@ -147,8 +164,17 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
         </div>
 
         <div className="flex items-center justify-between gap-2 pt-2 border-t border-border-light">
-          <div className="text-[15px] sm:text-base font-semibold text-txt tracking-tight">
-            {formatPrice(product.price)}
+          <div className="flex flex-col">
+            <div className="flex items-baseline gap-1.5 flex-wrap">
+              <span className={`text-[15px] sm:text-base font-bold tracking-tight ${discountInfo.hasDiscount ? 'text-rose-600' : 'text-txt'}`}>
+                {formatPrice(effectivePrice)}
+              </span>
+              {discountInfo.hasDiscount && (
+                <span className="text-xs text-txt-secondary line-through">
+                  {formatPrice(originalPrice!)}
+                </span>
+              )}
+            </div>
           </div>
 
           <button

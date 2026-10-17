@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { readCampaigns } from '@/data/campaignsManager';
+import { getAllProductsFromNotion } from '@/data/notion';
 import CampanasClient from './CampanasClient';
 
 export const metadata: Metadata = {
@@ -10,11 +11,17 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function CampanasPage() {
-  const initialCampaigns = readCampaigns();
+  const [initialCampaigns, availableProducts] = await Promise.all([
+    Promise.resolve(readCampaigns()),
+    getAllProductsFromNotion()
+  ]);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
-      <CampanasClient initialCampaigns={initialCampaigns} />
+      <CampanasClient 
+        initialCampaigns={initialCampaigns} 
+        availableProducts={availableProducts}
+      />
     </div>
   );
 }

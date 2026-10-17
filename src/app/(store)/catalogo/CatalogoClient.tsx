@@ -9,14 +9,17 @@ import Filters from '@/components/catalog/Filters';
 import FilterDrawer from '@/components/catalog/FilterDrawer';
 import ProductGrid from '@/components/catalog/ProductGrid';
 import Pagination from '@/components/catalog/Pagination';
-import { Search, ChevronDown, SlidersHorizontal, X, RotateCcw } from 'lucide-react';
+import { Search, ChevronDown, SlidersHorizontal, X, RotateCcw, Sparkles } from 'lucide-react';
 import { preloadProductImages } from '@/utils/imagePreloader';
+import { useCampaignPromotions } from '@/context/CampaignPromotionsContext';
+
 
 const PRODUCTS_PER_PAGE = 15;
 
 export default function CatalogoClient({ initialProducts }: { initialProducts: Product[] }) {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { activeCampaign, activeDiscounts } = useCampaignPromotions();
 
   const [selectedCategory, setSelectedCategory] = useState('todos');
   const [searchQuery, setSearchQuery] = useState('');
@@ -24,6 +27,10 @@ export default function CatalogoClient({ initialProducts }: { initialProducts: P
   const [priceRange, setPriceRange] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+  const [onlyOffers, setOnlyOffers] = useState(false);
+
+  const isOffersFilterActive = onlyOffers || searchParams.get('ofertas') === 'true' || Boolean(searchParams.get('campana'));
+
 
   // Calcula cantidad de productos por categoría
   const categoryCounts = useMemo(() => {
@@ -82,10 +89,16 @@ export default function CatalogoClient({ initialProducts }: { initialProducts: P
       );
     }
 
+    // Filtrar exclusivamente productos de la campaña en oferta
+    if (isOffersFilterActive) {
+      result = result.filter((p) => Boolean(activeDiscounts[p.id]));
+    }
+
     // Categoría
     if (selectedCategory !== 'todos') {
       result = result.filter((p) => p.category === selectedCategory);
     }
+
 
     // Rango de precio
     if (priceRange === 'under_20k') {
@@ -236,7 +249,34 @@ export default function CatalogoClient({ initialProducts }: { initialProducts: P
             </button>
           )}
         </div>
+
+        {/* Banner de Campaña y Ofertas Activas */}
+        {isOffersFilterActive && (
+          <div className="max-w-xl mx-auto mt-4 p-3 sm:p-4 rounded-2xl bg-gradient-to-r from-rose-500/10 via-pink-50 to-rose-50 border border-rose-200/80 flex items-center justify-between gap-3 text-xs shadow-sm">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-rose-600 flex-shrink-0" />
+              <div className="text-left">
+                <span className="font-bold text-gray-900 block sm:inline">
+                  {activeCampaign ? activeCampaign.title : 'Productos en Oferta'}
+                </span>
+                <span className="text-gray-600 sm:ml-2">
+                  (Precios especiales por tiempo limitado)
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setOnlyOffers(false);
+                router.replace('/catalogo', { scroll: false });
+              }}
+              className="text-rose-600 hover:text-rose-800 font-bold underline whitespace-nowrap"
+            >
+              Ver todo el catálogo
+            </button>
+          </div>
+        )}
       </div>
+
 
       {/* Pestañas de Categorías (Pills completas) */}
       <Filters

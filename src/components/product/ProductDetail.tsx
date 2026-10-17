@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { Product, Tone, ProductOptionValue } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { useFavorites } from '@/context/FavoritesContext';
+import { useCampaignPromotions } from '@/context/CampaignPromotionsContext';
 import { formatPrice } from '@/utils/whatsapp';
 import QuantitySelector from './QuantitySelector';
 import ProductCard from '@/components/catalog/ProductCard';
@@ -24,9 +25,15 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
   const router = useRouter();
   const { addToCart, items } = useCart();
   const { toggleFavorite, isFavorite } = useFavorites();
+  const { getProductDiscount } = useCampaignPromotions();
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+
+  const discountInfo = getProductDiscount(product.id, product.price);
+  const effectivePrice = discountInfo.hasDiscount ? discountInfo.finalPrice : product.price;
+  const originalPrice = discountInfo.hasDiscount ? discountInfo.originalPrice : undefined;
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -126,7 +133,14 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
     }
 
     setIsAdding(true);
-    addToCart(product, quantity, selectedTone || undefined, selectedOptions);
+    addToCart({
+      ...product,
+      price: effectivePrice,
+      originalPrice,
+      discountPercent: discountInfo.discountPercent,
+      hasDiscount: discountInfo.hasDiscount,
+      savings: discountInfo.savings
+    }, quantity, selectedTone || undefined, selectedOptions);
     setIsAdded(true);
     toast.success('Producto agregado al carrito ✅');
     setTimeout(() => {
@@ -144,8 +158,15 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
         return;
       }
     }
-    addToCart(product, quantity, selectedTone || undefined, selectedOptions);
-    const subtotal = product.price * quantity;
+    addToCart({
+      ...product,
+      price: effectivePrice,
+      originalPrice,
+      discountPercent: discountInfo.discountPercent,
+      hasDiscount: discountInfo.hasDiscount,
+      savings: discountInfo.savings
+    }, quantity, selectedTone || undefined, selectedOptions);
+    const subtotal = effectivePrice * quantity;
     const formatNumber = (num: number) =>
       new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(num);
 
@@ -158,8 +179,12 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
         .join(', ');
       msg += ` (${opts})`;
     }
-    msg += ` - ${formatNumber(subtotal)}\n\n`;
-    msg += `*Total:* ${formatNumber(subtotal)}\n\n¿Tienen disponibilidad para despacho?`;
+    msg += ` - ${formatNumber(subtotal)}`;
+    if (discountInfo.hasDiscount) {
+      msg += ` (Descuento -${discountInfo.discountPercent}%)`;
+    }
+    msg += `\n\n*Total:* ${formatNumber(subtotal)}\n\n¿Tienen disponibilidad para despacho?`;
+
 
     window.open(`https://wa.me/573174503716?text=${encodeURIComponent(msg)}`, '_blank');
   };
@@ -298,10 +323,26 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
               {product.name}
             </h1>
 
-            {/* Precio en tono sofisticado */}
-            <div className="text-2xl sm:text-3xl font-semibold text-txt mb-5 tracking-tight font-sans">
-              {formatPrice(product.price)}
+            {/* Precio y Descuento */}
+            <div className="flex items-baseline gap-3 mb-5 flex-wrap">
+              <span className={`text-2xl sm:text-3xl font-bold tracking-tight font-sans ${discountInfo.hasDiscount ? 'text-rose-600' : 'text-txt'}`}>
+                {formatPrice(effectivePrice)}
+              </span>
+              {discountInfo.hasDiscount && (
+                <>
+                  <span className="text-base sm:text-lg text-txt-secondary line-through font-sans">
+                    {formatPrice(originalPrice!)}
+                  </span>
+                  <span className="text-xs text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                    Oferta -{discountInfo.discountPercent}%
+                  </span>
+                  <span className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full font-semibold">
+                    Ahorras {formatPrice(discountInfo.savings)}
+                  </span>
+                </>
+              )}
             </div>
+
 
             {/* Descripción */}
             {(product.description || product.fullDescription) && (

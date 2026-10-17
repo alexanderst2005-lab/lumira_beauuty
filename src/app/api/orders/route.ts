@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { validateItemPrice } from '@/data/campaignsManager';
 
 const TOKEN = process.env.NOTION_SECRET;
 const ORDERS_DB_ID = process.env.NOTION_ORDERS_DB;
@@ -12,18 +13,41 @@ export async function POST(request: Request) {
     const data = await request.json();
     const { formData, items, total } = data;
 
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return NextResponse.json({ error: 'No items in order' }, { status: 400 });
+    }
+
+    // Validación segura de precios en el servidor según campañas activas
+    let backendCalculatedTotal = 0;
+    const validatedItems = items.map((item: any) => {
+      const prodId = item.product?.id || item.id || '';
+      const basePrice = Number(item.product?.price || item.price) || 0;
+      const { finalPrice } = validateItemPrice(prodId, basePrice);
+      const qty = Math.max(1, parseInt(item.quantity, 10) || 1);
+      backendCalculatedTotal += finalPrice * qty;
+      return {
+        ...item,
+        finalPrice,
+        quantity: qty
+      };
+    });
+
     // Crear string de productos consolidado con sus variantes en la misma línea
-    const productsString = items.map((item: any) => {
+    const productsString = validatedItems.map((item: any) => {
+      const productName = item.product?.name || item.name || 'Producto';
       const variants: string[] = [];
-      if (item.selectedTone) variants.push(`Tono: ${item.selectedTone.name}`);
+      if (item.selectedTone?.name) variants.push(`Tono: ${item.selectedTone.name}`);
+      else if (typeof item.selectedTone === 'string') variants.push(`Tono: ${item.selectedTone}`);
       if (item.selectedOptions) {
          Object.entries(item.selectedOptions).forEach(([optName, optVal]: [string, any]) => {
-            variants.push(`${optName}: ${optVal.name}`);
+            const valName = optVal?.name || optVal;
+            if (valName) variants.push(`${optName}: ${valName}`);
          });
       }
       const variantText = variants.length > 0 ? ` (${variants.join(', ')})` : '';
-      return `${item.quantity}x ${item.product.name}${variantText}`;
+      return `${item.quantity}x ${productName}${variantText}`;
     }).join('\n');
+
 
     // Mantener también tonesString para la columna Tones si es necesaria
     const tonesString = items.map((item: any) => {
@@ -88,7 +112,8 @@ export async function POST(request: Request) {
           Neighborhood: { rich_text: [{ text: { content: formData.barrio || '' } }] },
           Products: { rich_text: [{ text: { content: productsString } }] },
           Tones: { rich_text: [{ text: { content: tonesString } }] },
-          Total: { number: total },
+          Total: { number: backendCalculatedTotal },
+
           Status: { select: { name: 'Pendiente' } },
           Date: { date: { start: today.toISOString() } },
           OrderNumber: { rich_text: [{ text: { content: orderNumber } }] }

@@ -42,7 +42,12 @@ export interface Product {
   isNew?: boolean;
   tags?: string[];
   inTrash?: boolean;
+  originalPrice?: number;
+  discountPercent?: number;
+  hasDiscount?: boolean;
+  savings?: number;
 }
+
 
 export interface CartItem {
   id: string; // Unique cart item ID: productId + selected options

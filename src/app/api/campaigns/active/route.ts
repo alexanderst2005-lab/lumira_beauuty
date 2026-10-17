@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getActiveCampaign, readCampaigns } from '@/data/campaignsManager';
+import { getActiveCampaign, readCampaigns, getActiveDiscountsMap } from '@/data/campaignsManager';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,11 +12,19 @@ export async function GET(request: Request) {
       const all = readCampaigns();
       const target = all.find(c => c.id === previewId);
       if (target) {
+        const previewDiscounts: Record<string, any> = {};
+        if (target.products) {
+          target.products.forEach(p => {
+            if (p.productId) previewDiscounts[p.productId] = p;
+          });
+        }
+
         return NextResponse.json({
           campaign: {
             ...target,
-            status: 'active' // Forzar visualización en preview
+            status: 'active'
           },
+          discounts: previewDiscounts,
           isPreview: true
         }, {
           headers: {
@@ -27,9 +35,11 @@ export async function GET(request: Request) {
     }
 
     const active = getActiveCampaign();
+    const discounts = getActiveDiscountsMap();
 
     return NextResponse.json({
       campaign: active,
+      discounts,
       isPreview: false
     }, {
       headers: {
@@ -38,6 +48,6 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error('Error fetching active promotional campaign:', error);
-    return NextResponse.json({ campaign: null, error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ campaign: null, discounts: {}, error: 'Internal server error' }, { status: 500 });
   }
 }
