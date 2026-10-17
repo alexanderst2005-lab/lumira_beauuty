@@ -87,13 +87,15 @@ export default function StoreLayoutWrapper({ children, config }: { children: Rea
     );
   }
 
+  const isHome = !pathname || pathname === '/' || pathname === '';
+
   return (
     <FavoritesProvider>
       <CartProvider>
         <Suspense fallback={null}><ScrollRestorer isAdmin={isAdmin} /></Suspense>
         <MarqueeBanner />
         <Header config={config} />
-        <main className="min-h-screen overflow-x-clip">{children}</main>
+        <main className={`min-h-screen overflow-x-clip ${!isHome ? 'pt-16 sm:pt-20' : ''}`}>{children}</main>
         <Footer config={config} />
         <CartDrawer />
         <FavoritesDrawer />

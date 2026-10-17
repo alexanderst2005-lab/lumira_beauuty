@@ -7,7 +7,8 @@ import InstagramSection from '@/components/home/InstagramSection';
 import FAQSection from '@/components/home/FAQSection';
 import { getAllProductsFromNotion, getStoreConfig } from '@/data/notion';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function Home() {
   const products = await getAllProductsFromNotion();

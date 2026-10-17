@@ -54,7 +54,7 @@ export default function Header({ config }: { config?: any }) {
                   ? 'top-0 bg-white/95 backdrop-blur-md shadow-md border-b border-[#F0E6DE]'
                   : 'top-[2.1rem] bg-transparent'
               }`
-            : 'sticky top-0 z-50 bg-white shadow-sm border-b border-[#E5E5E5]'
+            : 'fixed inset-x-0 top-0 z-50 bg-white shadow-sm border-b border-[#E5E5E5]'
         } transition-all duration-300`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
