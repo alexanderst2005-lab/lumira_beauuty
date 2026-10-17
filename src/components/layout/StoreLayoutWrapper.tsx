@@ -11,6 +11,7 @@ import Footer from "@/components/layout/Footer";
 import CartDrawer from "@/components/cart/CartDrawer";
 import FavoritesDrawer from "@/components/favorites/FavoritesDrawer";
 import WhatsAppButton from "@/components/layout/WhatsAppButton";
+import PromotionalPopup from "@/components/common/PromotionalPopup";
 import { Toaster } from "sonner";
 
 import { getSavedScrollPosition } from '@/utils/scrollRestoration';
@@ -100,7 +101,9 @@ export default function StoreLayoutWrapper({ children, config }: { children: Rea
         <CartDrawer />
         <FavoritesDrawer />
         <WhatsAppButton config={config} />
+        <PromotionalPopup />
         <Toaster {...toasterOptions} />
+
       </CartProvider>
     </FavoritesProvider>
   );
