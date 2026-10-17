@@ -280,22 +280,46 @@ export default function CampanasClient({ initialCampaigns, availableProducts = [
         } else if (field === 'discountValue') {
           // Si el tipo es porcentaje, el usuario escribió un % (ej. 20)
           if (discountType === 'percentage') {
-            const num = Math.min(99, Math.max(1, Number(val) || 0));
-            discountValue = num;
-            discountPercent = num;
-            discountPrice = Math.round(item.basePrice * (1 - num / 100));
-            savings = item.basePrice - discountPrice;
+            if (val === '' || val === null || val === undefined) {
+              discountValue = '' as any;
+              discountPercent = 0;
+              discountPrice = item.basePrice;
+              savings = 0;
+            } else {
+              const cleanVal = String(val).replace(/[^0-9]/g, '');
+              if (cleanVal === '') {
+                discountValue = '' as any;
+                discountPercent = 0;
+                discountPrice = item.basePrice;
+                savings = 0;
+              } else {
+                const num = Math.min(99, Math.max(0, parseInt(cleanVal, 10)));
+                discountValue = num;
+                discountPercent = num;
+                discountPrice = Math.round(item.basePrice * (1 - num / 100));
+                savings = item.basePrice - discountPrice;
+              }
+            }
           } else {
             // Precio fijo promocional
-            const price = Math.round(Number(val) || 0);
-            discountValue = price;
-            discountPrice = price;
-            savings = Math.max(0, item.basePrice - price);
-            discountPercent = item.basePrice > 0 ? Math.round((savings / item.basePrice) * 100) : 0;
+            if (val === '' || val === null || val === undefined) {
+              discountValue = '' as any;
+              discountPrice = item.basePrice;
+              savings = 0;
+              discountPercent = 0;
+            } else {
+              const cleanVal = String(val).replace(/[^0-9]/g, '');
+              const price = cleanVal === '' ? 0 : parseInt(cleanVal, 10);
+              discountValue = price;
+              discountPrice = price;
+              savings = Math.max(0, item.basePrice - price);
+              discountPercent = item.basePrice > 0 ? Math.round((savings / item.basePrice) * 100) : 0;
+            }
           }
         } else if (field === 'discountPrice') {
           // El usuario escribió directamente el precio final
-          const price = Math.round(Number(val) || 0);
+          const cleanVal = String(val).replace(/[^0-9]/g, '');
+          const price = cleanVal === '' ? 0 : parseInt(cleanVal, 10);
           discountPrice = price;
           if (discountType === 'fixed_price') {
             discountValue = price;
@@ -946,29 +970,51 @@ export default function CampanasClient({ initialCampaigns, availableProducts = [
                           </div>
 
                           {/* Entrada de valor */}
-                          <div className="w-28">
+                          <div className="flex flex-col gap-1.5 min-w-[120px]">
                             {item.discountType === 'percentage' ? (
-                              <div className="relative">
-                                <input
-                                  type="number"
-                                  min={1}
-                                  max={99}
-                                  value={item.discountValue}
-                                  onChange={e => handleUpdateProductDiscount(item.productId, 'discountValue', e.target.value)}
-                                  className="w-full pl-3 pr-7 py-1.5 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-pink-400"
-                                />
-                                <span className="absolute right-2.5 top-2 text-xs text-gray-400 font-bold">%</span>
+                              <div>
+                                <div className="relative">
+                                  <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    placeholder="0"
+                                    value={(item.discountValue as any) === '' || !item.discountValue ? '' : item.discountValue}
+                                    onChange={e => handleUpdateProductDiscount(item.productId, 'discountValue', e.target.value)}
+                                    className="w-full pl-3 pr-8 py-1.5 rounded-xl border border-gray-200 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-pink-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
+                                  />
+                                  <span className="absolute right-3 top-2 text-xs text-gray-400 font-bold pointer-events-none">%</span>
+                                </div>
+                                {/* Chips de porcentajes sugeridos */}
+                                <div className="flex items-center gap-1 mt-1">
+                                  {[10, 15, 20, 30, 50].map(pct => (
+                                    <button
+                                      key={pct}
+                                      type="button"
+                                      onClick={() => handleUpdateProductDiscount(item.productId, 'discountValue', pct)}
+                                      className={`px-1.5 py-0.5 rounded text-[10px] font-semibold transition-all ${
+                                        Number(item.discountValue) === pct
+                                          ? 'bg-pink-600 text-white'
+                                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                      }`}
+                                    >
+                                      {pct}%
+                                    </button>
+                                  ))}
+                                </div>
                               </div>
                             ) : (
-                              <div className="relative">
-                                <input
-                                  type="number"
-                                  min={1}
-                                  max={item.basePrice - 1}
-                                  value={item.discountValue}
-                                  onChange={e => handleUpdateProductDiscount(item.productId, 'discountValue', e.target.value)}
-                                  className="w-full px-3 py-1.5 rounded-xl border border-gray-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-pink-400"
-                                />
+                              <div>
+                                <div className="relative">
+                                  <span className="absolute left-3 top-2 text-xs text-gray-400 font-bold pointer-events-none">$</span>
+                                  <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    placeholder="0"
+                                    value={(item.discountValue as any) === '' || !item.discountValue ? '' : item.discountValue}
+                                    onChange={e => handleUpdateProductDiscount(item.productId, 'discountValue', e.target.value)}
+                                    className="w-full pl-7 pr-3 py-1.5 rounded-xl border border-gray-200 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-pink-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
+                                  />
+                                </div>
                               </div>
                             )}
                           </div>

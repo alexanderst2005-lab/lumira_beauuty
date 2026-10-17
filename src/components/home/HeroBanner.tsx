@@ -14,10 +14,11 @@ type SlideType = {
   btnText: string;
   btnHref: string;
   image: string;
+  position?: string;
   isBrandSlide?: boolean;
 };
 
-// Cada diapositiva tiene su propia información y su propia fotografía de fondo.
+// Cada diapositiva tiene su propia información y su propia fotografía de fondo real y responsive.
 const slides: SlideType[] = [
   {
     id: 1,
@@ -26,7 +27,8 @@ const slides: SlideType[] = [
     desc: 'Encuentra maquillaje, skincare, pestañas y accesorios en un solo lugar.',
     btnText: 'Comprar ahora',
     btnHref: '/catalogo',
-    image: '/images/hero/cosmetics.jpg',
+    image: '/images/hero/brands.png',
+    position: 'object-center md:object-[center_35%]',
   },
   {
     id: 2,
@@ -35,7 +37,8 @@ const slides: SlideType[] = [
     desc: 'Descubre Bioaqua, Bloomshell y todos nuestros productos para una rutina facial completa.',
     btnText: 'Ver Skincare',
     btnHref: '/catalogo?categoria=skincare',
-    image: '/images/hero/skincare.jpg',
+    image: '/images/hero/skincare.png',
+    position: 'object-[center_bottom] md:object-[center_60%]',
   },
   {
     id: 3,
@@ -44,7 +47,8 @@ const slides: SlideType[] = [
     desc: 'Pestañas punto a punto, volumen, ojo de gato y mucho más.',
     btnText: 'Ver Pestañas',
     btnHref: '/catalogo?categoria=pestanas-enteras',
-    image: '/images/hero/lashes.jpg',
+    image: '/images/hero/lashes.png',
+    position: 'object-center',
   },
   {
     id: 4,
@@ -54,6 +58,7 @@ const slides: SlideType[] = [
     btnText: 'Ver Makeup',
     btnHref: '/catalogo?categoria=makeup',
     image: '/images/hero/makeup.jpg',
+    position: 'object-center md:object-[center_40%]',
   },
   {
     id: 5,
@@ -62,7 +67,8 @@ const slides: SlideType[] = [
     desc: 'Productos originales y de excelente calidad para realzar tu belleza.',
     btnText: 'Explorar catálogo',
     btnHref: '/catalogo',
-    image: '/images/hero/brands.jpg',
+    image: '/images/hero/brands.png',
+    position: 'object-center md:object-[center_35%]',
     isBrandSlide: true,
   },
 ];
@@ -97,7 +103,6 @@ export default function HeroBanner({ config }: { config?: any }) {
   }, [current, next]);
 
   const slide = dynamicSlides[current];
-  const images = dynamicSlides.map((s) => s.image);
 
   const onTouchStart = (e: React.TouchEvent) => {
     const t = e.touches[0];
@@ -117,38 +122,37 @@ export default function HeroBanner({ config }: { config?: any }) {
   return (
     <section
       id="hero-banner"
-      className="relative w-full overflow-hidden bg-[#7a1f4d] h-[100svh] min-h-[600px]"
+      className="relative w-full overflow-hidden bg-[#7a1f4d] min-h-[580px] h-[100svh] sm:h-[90vh] lg:h-[95vh]"
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      {/* Fondos con transición suave */}
-      {images.map((src, i) => (
+      {/* Fondos con transición suave y centrado responsivo */}
+      {dynamicSlides.map((s, i) => (
         <div
-          key={`${src}-${i}`}
+          key={`${s.image}-${i}`}
           className={`absolute inset-0 transition-opacity duration-[1200ms] ease-in-out ${
             i === current ? 'opacity-100' : 'opacity-0'
           }`}
           aria-hidden={i !== current}
         >
           <Image
-            src={src}
+            src={s.image}
             alt=""
             fill
             priority={i === 0}
             unoptimized
             sizes="100vw"
-            className={`object-cover object-center transition-transform duration-[6000ms] ease-out ${
+            className={`object-cover ${s.position || 'object-center'} transition-transform duration-[6000ms] ease-out ${
               i === current ? 'scale-105' : 'scale-100'
             }`}
           />
         </div>
       ))}
 
-      {/* Capa de contraste con tonalidad rosa fucsia de la marca */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#C2185B]/30 via-[#E91E63]/20 to-[#9C1548]/45" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(233,30,99,0.22),transparent_75%)]" />
-      <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-[#880E4F]/40 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#880E4F]/50 to-transparent" />
+      {/* Capa de contraste con tonalidad rosa fucsia de la marca y oscurecimiento para legibilidad total */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#7a1f4d]/45 via-black/35 to-[#7a1f4d]/50" />
+      <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-black/50 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-black/70 to-transparent" />
 
       {/* Contenido */}
       <div className="relative z-10 h-full flex items-center justify-center px-6 sm:px-12 pt-24 sm:pt-28 pb-20 sm:pb-24">
@@ -215,7 +219,7 @@ export default function HeroBanner({ config }: { config?: any }) {
 
       {/* Indicadores */}
       <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
-        {images.map((_, index) => (
+        {dynamicSlides.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrent(index)}
