@@ -2,34 +2,16 @@ import fs from 'fs';
 import path from 'path';
 import { PromotionalCampaign, CampaignStatus } from '@/types/campaign';
 
-const DATA_FILE = path.join(process.cwd(), 'src', 'data', 'campaigns.json');
+const PRIMARY_DATA_FILE = path.join(process.cwd(), 'src', 'data', 'campaigns.json');
+const TMP_DATA_FILE = path.join('/tmp', 'lumira_campaigns.json');
 
-const DEFAULT_CAMPAIGNS: PromotionalCampaign[] = [
-  {
-    id: 'camp-default-01',
-    title: '¡Descubre la Magia de Lumira Beauty!',
-    description: 'Explora nuestra colección exclusiva de cuidado facial, maquillaje y pestañas. Calidad profesional y atención personalizada.',
-    promoBadge: 'Envío Gratis en Cali',
-    imageUrl: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=1000',
-    buttonText: 'Explorar Catálogo',
-    buttonUrl: '/#catalogo',
-    frequency: 'once_per_session',
-    enabled: false,
-    startDate: '',
-    endDate: '',
-    status: 'draft',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }
-];
+let inMemoryCampaigns: PromotionalCampaign[] | null = null;
 
 export function evaluateCampaignStatus(campaign: PromotionalCampaign, now: Date = new Date()): CampaignStatus {
-  // Si está deshabilitada manualmente por el switch
   if (!campaign.enabled) {
     return campaign.status === 'draft' ? 'draft' : 'paused';
   }
 
-  // Si tiene fecha de inicio futura
   if (campaign.startDate) {
     const start = new Date(campaign.startDate);
     if (!isNaN(start.getTime()) && now < start) {
@@ -37,7 +19,6 @@ export function evaluateCampaignStatus(campaign: PromotionalCampaign, now: Date 
     }
   }
 
-  // Si tiene fecha de fin ya expirada
   if (campaign.endDate) {
     const end = new Date(campaign.endDate);
     if (!isNaN(end.getTime()) && now > end) {
@@ -50,44 +31,87 @@ export function evaluateCampaignStatus(campaign: PromotionalCampaign, now: Date 
 
 export function readCampaigns(): PromotionalCampaign[] {
   try {
-    if (!fs.existsSync(DATA_FILE)) {
-      writeCampaigns(DEFAULT_CAMPAIGNS);
-      return DEFAULT_CAMPAIGNS;
-    }
-    const raw = fs.readFileSync(DATA_FILE, 'utf-8');
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return DEFAULT_CAMPAIGNS;
+    let raw: string | null = null;
 
+    // 1. Revisar si hay copia en memoria
+    if (inMemoryCampaigns !== null) {
+      const now = new Date();
+      return inMemoryCampaigns.map(camp => ({
+        ...camp,
+        status: evaluateCampaignStatus(camp, now)
+      }));
+    }
+
+    // 2. Intentar leer de /tmp (si estamos en serverless y se modificó)
+    if (fs.existsSync(TMP_DATA_FILE)) {
+      try {
+        raw = fs.readFileSync(TMP_DATA_FILE, 'utf-8');
+      } catch {}
+    }
+
+    // 3. Si no hay en /tmp, leer de archivo principal
+    if (!raw && fs.existsSync(PRIMARY_DATA_FILE)) {
+      raw = fs.readFileSync(PRIMARY_DATA_FILE, 'utf-8');
+    }
+
+    if (!raw) {
+      inMemoryCampaigns = [];
+      return [];
+    }
+
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      inMemoryCampaigns = [];
+      return [];
+    }
+
+    inMemoryCampaigns = parsed;
     const now = new Date();
     return parsed.map((camp: PromotionalCampaign) => ({
       ...camp,
       status: evaluateCampaignStatus(camp, now)
     }));
   } catch (error) {
-    console.error('Error reading campaigns file:', error);
-    return DEFAULT_CAMPAIGNS;
+    console.error('Error reading campaigns:', error);
+    return inMemoryCampaigns || [];
   }
 }
 
 export function writeCampaigns(campaigns: PromotionalCampaign[]): boolean {
+  inMemoryCampaigns = [...campaigns];
+  let written = false;
+
+  // 1. Intentar escribir en el archivo principal (funciona en local)
   try {
-    const dir = path.dirname(DATA_FILE);
+    const dir = path.dirname(PRIMARY_DATA_FILE);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    fs.writeFileSync(DATA_FILE, JSON.stringify(campaigns, null, 2), 'utf-8');
-    return true;
-  } catch (error) {
-    console.error('Error writing campaigns file:', error);
-    return false;
+    fs.writeFileSync(PRIMARY_DATA_FILE, JSON.stringify(campaigns, null, 2), 'utf-8');
+    written = true;
+  } catch (primaryErr) {
+    // En Vercel process.cwd() puede ser de solo lectura
   }
+
+  // 2. Escribir también en /tmp como respaldo para entornos serverless
+  try {
+    const tmpDir = path.dirname(TMP_DATA_FILE);
+    if (!fs.existsSync(tmpDir)) {
+      fs.mkdirSync(tmpDir, { recursive: true });
+    }
+    fs.writeFileSync(TMP_DATA_FILE, JSON.stringify(campaigns, null, 2), 'utf-8');
+    written = true;
+  } catch (tmpErr) {
+    // Si /tmp falla, aún conservamos inMemoryCampaigns
+  }
+
+  return true;
 }
 
 export function getActiveCampaign(): PromotionalCampaign | null {
   const campaigns = readCampaigns();
   const now = new Date();
   
-  // Buscar la primera campaña que esté estrictamente activa y vigente
   for (const campaign of campaigns) {
     const status = evaluateCampaignStatus(campaign, now);
     if (status === 'active') {
@@ -106,7 +130,6 @@ export function saveCampaign(payload: Partial<PromotionalCampaign>): Promotional
   const now = new Date().toISOString();
 
   if (payload.id) {
-    // Editar existente
     const index = campaigns.findIndex(c => c.id === payload.id);
     if (index !== -1) {
       const existing = campaigns[index];
@@ -117,7 +140,7 @@ export function saveCampaign(payload: Partial<PromotionalCampaign>): Promotional
         createdAt: existing.createdAt,
         updatedAt: now,
         enabled: payload.enabled !== undefined ? payload.enabled : existing.enabled,
-        status: 'draft' // se recalcula dinámicamente con evaluateCampaignStatus
+        status: 'draft'
       };
       updated.status = evaluateCampaignStatus(updated, new Date());
       campaigns[index] = updated;
@@ -126,7 +149,6 @@ export function saveCampaign(payload: Partial<PromotionalCampaign>): Promotional
     }
   }
 
-  // Crear nueva
   const newCampaign: PromotionalCampaign = {
     id: `camp-${Date.now()}`,
     title: payload.title || 'Nueva Campaña Promocional',
@@ -153,10 +175,8 @@ export function saveCampaign(payload: Partial<PromotionalCampaign>): Promotional
 export function deleteCampaign(id: string): boolean {
   const campaigns = readCampaigns();
   const filtered = campaigns.filter(c => c.id !== id);
-  if (filtered.length !== campaigns.length) {
-    return writeCampaigns(filtered);
-  }
-  return false;
+  writeCampaigns(filtered);
+  return true;
 }
 
 export function toggleCampaign(id: string): PromotionalCampaign | null {

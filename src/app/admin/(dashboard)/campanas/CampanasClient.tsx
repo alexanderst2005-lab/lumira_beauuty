@@ -244,24 +244,29 @@ export default function CampanasClient({ initialCampaigns }: CampanasClientProps
   const handleDelete = async (id: string) => {
     try {
       setLoading(true);
+      // Actualización optimista inmediata en pantalla
+      setCampaigns(prev => prev.filter(c => c.id !== id));
+      setDeleteConfirmId(null);
+
       const res = await fetch('/api/admin/campaigns', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'delete', id })
       });
       const data = await res.json();
-      if (!res.ok || !data.success) {
+      if (!res.ok) {
         throw new Error(data.error || 'Error al eliminar');
       }
       toast.success('Campaña eliminada correctamente');
-      setDeleteConfirmId(null);
       await fetchCampaigns();
     } catch (err: any) {
       toast.error(err.message || 'Error al eliminar');
+      await fetchCampaigns();
     } finally {
       setLoading(false);
     }
   };
+
 
   const handlePreviewCurrent = () => {
     if (!formData.title.trim()) {

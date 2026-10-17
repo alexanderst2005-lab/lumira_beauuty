@@ -60,9 +60,10 @@ export async function POST(request: Request) {
     }
 
     if (action === 'delete' && id) {
-      const deleted = deleteCampaign(id);
-      return NextResponse.json({ success: deleted });
+      deleteCampaign(id);
+      return NextResponse.json({ success: true });
     }
+
 
     if (action === 'save' && data) {
       // Validaciones
