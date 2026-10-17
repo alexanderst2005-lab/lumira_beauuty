@@ -6,8 +6,11 @@ import { motion } from 'framer-motion';
 import { Product } from '@/types';
 import Filters from '@/components/catalog/Filters';
 import ProductGrid from '@/components/catalog/ProductGrid';
+import Pagination from '@/components/catalog/Pagination';
 import { Search, ChevronDown } from 'lucide-react';
 import { preloadProductImages } from '@/utils/imagePreloader';
+
+const PRODUCTS_PER_PAGE = 15;
 
 export default function CatalogoClient({ initialProducts }: { initialProducts: Product[] }) {
   const searchParams = useSearchParams();
@@ -15,14 +18,33 @@ export default function CatalogoClient({ initialProducts }: { initialProducts: P
   const [selectedCategory, setSelectedCategory] = useState('todos');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('');
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Guarda la página en la URL (?pagina=N) sin recargar ni mover el scroll,
+  // para que al volver desde un producto se conserve la misma página.
+  const syncPageToUrl = (page: number) => {
+    if (typeof window === 'undefined') return;
+    const url = new URL(window.location.href);
+    if (page <= 1) url.searchParams.delete('pagina');
+    else url.searchParams.set('pagina', String(page));
+    window.history.replaceState(window.history.state, '', url.toString());
+  };
+
+  // Cualquier cambio de búsqueda, categoría, filtro u orden vuelve a la página 1
+  const resetPage = () => {
+    setCurrentPage(1);
+    syncPageToUrl(1);
+  };
 
   // Leer parámetros de URL al montar el componente
   useEffect(() => {
     const categoria = searchParams.get('categoria');
     const buscar = searchParams.get('buscar');
+    const pagina = parseInt(searchParams.get('pagina') || '1', 10);
     
     if (categoria) setSelectedCategory(categoria);
     if (buscar) setSearchQuery(buscar);
+    setCurrentPage(Number.isFinite(pagina) && pagina > 0 ? pagina : 1);
   }, [searchParams]);
 
   // Precargar las primeras imágenes de la página al cargar o cambiar el listado
@@ -56,16 +78,41 @@ export default function CatalogoClient({ initialProducts }: { initialProducts: P
     }
 
     return result;
-  }, [selectedCategory, searchQuery, sortOrder]);
+  }, [initialProducts, selectedCategory, searchQuery, sortOrder]);
 
-  // Precargar imágenes del resultado filtrado
+  // Paginación: 15 productos por página (el catálogo se carga completo en el cliente)
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE));
+  const safePage = Math.min(Math.max(currentPage, 1), totalPages);
+  const pageStart = (safePage - 1) * PRODUCTS_PER_PAGE;
+  const pageProducts = useMemo(
+    () => filteredProducts.slice(pageStart, pageStart + PRODUCTS_PER_PAGE),
+    [filteredProducts, pageStart]
+  );
+  const nextPageProducts = useMemo(
+    () => filteredProducts.slice(pageStart + PRODUCTS_PER_PAGE, pageStart + PRODUCTS_PER_PAGE * 2),
+    [filteredProducts, pageStart]
+  );
+
+  const handlePageChange = (page: number) => {
+    const target = Math.min(Math.max(page, 1), totalPages);
+    if (target === safePage) return;
+    setCurrentPage(target);
+    syncPageToUrl(target);
+    // Llevar la vista al inicio del listado (no al inicio absoluto de la web)
+    setTimeout(() => {
+      document.getElementById('productos-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  };
+
+  // Precargar imágenes de la página visible
   useEffect(() => {
-    preloadProductImages(filteredProducts, 0, 24, 400);
-  }, [filteredProducts]);
+    preloadProductImages(pageProducts, 0, PRODUCTS_PER_PAGE, 400);
+  }, [pageProducts]);
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
     setSearchQuery(''); // Limpiar búsqueda al cambiar categoría
+    setCurrentPage(1);
     
     // Update URL without scrolling
     const params = new URLSearchParams(searchParams.toString());
@@ -75,6 +122,7 @@ export default function CatalogoClient({ initialProducts }: { initialProducts: P
       params.set('categoria', category);
     }
     params.delete('buscar');
+    params.delete('pagina');
     router.replace(`/catalogo?${params.toString()}`, { scroll: false });
     
     // Smooth scroll a la grilla de productos
@@ -106,7 +154,7 @@ export default function CatalogoClient({ initialProducts }: { initialProducts: P
             id="catalog-search-input"
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => { setSearchQuery(e.target.value); resetPage(); }}
             placeholder="Buscar en todo el catálogo en tiempo real..."
             className="w-full pl-14 pr-4 py-4 rounded-full bg-white border-2 border-border focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 shadow-sm transition-all text-txt placeholder-txt-secondary/60 text-base font-medium"
           />
@@ -136,12 +184,15 @@ export default function CatalogoClient({ initialProducts }: { initialProducts: P
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 px-2">
           <p className="text-txt-secondary text-sm font-medium mb-4 sm:mb-0">
             {filteredProducts.length} productos
+            {totalPages > 1 && (
+              <span className="text-txt-secondary/70"> · Página {safePage} de {totalPages}</span>
+            )}
           </p>
           
           <div className="relative group">
             <select
               value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc' | '')}
+              onChange={(e) => { setSortOrder(e.target.value as 'asc' | 'desc' | ''); resetPage(); }}
               className="appearance-none bg-white border border-border hover:border-primary/50 rounded-full pl-5 pr-12 py-2.5 text-sm font-medium text-txt focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 cursor-pointer shadow-sm transition-all"
             >
               <option value="">Ordenar por</option>
@@ -152,12 +203,15 @@ export default function CatalogoClient({ initialProducts }: { initialProducts: P
           </div>
         </div>
         {filteredProducts.length > 0 ? (
-          <ProductGrid products={filteredProducts} />
+          <>
+            <ProductGrid products={pageProducts} nextPageProducts={nextPageProducts} />
+            <Pagination currentPage={safePage} totalPages={totalPages} onPageChange={handlePageChange} />
+          </>
         ) : (
           <div className="text-center py-20 bg-white rounded-3xl border border-border mt-8">
             <p className="text-txt-secondary text-lg">No encontramos productos que coincidan con tu búsqueda.</p>
             <button 
-              onClick={() => { setSearchQuery(''); setSelectedCategory('todos'); }}
+              onClick={() => { setSearchQuery(''); setSelectedCategory('todos'); resetPage(); }}
               className="mt-4 text-primary font-medium hover:underline"
             >
               Ver todos los productos

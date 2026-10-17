@@ -34,13 +34,24 @@ export default function Header({ config }: { config?: any }) {
     }
   };
 
+  // En la portada el header va transparente sobre la hero hasta hacer scroll.
+  const overHero = pathname === '/' && !isScrolled;
+  const iconClass = overHero
+    ? 'text-white drop-shadow-md'
+    : 'text-txt group-hover:text-primary';
+  const btnHover = overHero ? 'hover:bg-white/20' : 'hover:bg-secondary-100';
+
   return (
     <>
       <header
-        className={`sticky top-0 z-50 transition-all duration-300 ${
+        className={`${
+          pathname === '/'
+            ? `fixed inset-x-0 z-50 ${isScrolled ? 'top-0' : 'top-[2.1rem]'}`
+            : 'sticky top-0 z-50'
+        } transition-all duration-300 ${
           isScrolled
             ? 'glass shadow-lg shadow-primary/5 border-b border-border'
-            : 'bg-white'
+            : pathname === '/' ? 'bg-transparent' : 'bg-white'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -49,35 +60,26 @@ export default function Header({ config }: { config?: any }) {
             <div className="flex-1 flex items-center justify-start">
               <button
                 onClick={() => setIsMenuOpen(true)}
-                className="p-2 -ml-2 rounded-full hover:bg-secondary-100 transition-colors duration-200 group"
+                className={`p-2 -ml-2 rounded-full ${btnHover} transition-colors duration-200 group`}
                 aria-label="Menú"
                 id="menu-button"
               >
-                <Menu className="w-5 h-5 sm:w-6 sm:h-6 text-txt group-hover:text-primary transition-colors duration-200" />
+                <Menu className={`w-5 h-5 sm:w-6 sm:h-6 transition-colors duration-200 ${iconClass}`} />
               </button>
             </div>
 
             {/* Center: Logo */}
             <Link href="/" className="flex-none transition-transform duration-300 hover:scale-105">
-              {config?.logo ? (
-                <Image
-                  src={config.logo}
-                  alt={config.storeName || "Lumira Beauty"}
-                  width={160}
-                  height={60}
-                  className="h-12 sm:h-14 w-auto object-contain"
-                  priority
-                />
-              ) : (
-                <Image
-                  src="/images/logo.png"
-                  alt={config?.storeName || "Lumira Beauty"}
-                  width={160}
-                  height={60}
-                  className="h-12 sm:h-14 w-auto object-contain"
-                  priority
-                />
-              )}
+              <Image
+                src="/images/logo-transparent.png"
+                alt={config?.storeName || "Lumira Beauty"}
+                width={160}
+                height={60}
+                className={`h-12 sm:h-14 w-auto object-contain ${
+                  overHero ? 'drop-shadow-[0_2px_6px_rgba(90,10,50,0.45)]' : ''
+                }`}
+                priority
+              />
             </Link>
 
             {/* Right: Actions */}
@@ -94,20 +96,20 @@ export default function Header({ config }: { config?: any }) {
                     router.push('/catalogo');
                   }
                 }}
-                className="p-2 rounded-full hover:bg-secondary-100 transition-colors duration-200 group"
+                className={`p-2 rounded-full ${btnHover} transition-colors duration-200 group`}
                 aria-label="Buscar"
               >
-                <Search className="w-5 h-5 sm:w-6 sm:h-6 text-txt group-hover:text-primary transition-colors duration-200" />
+                <Search className={`w-5 h-5 sm:w-6 sm:h-6 transition-colors duration-200 ${iconClass}`} />
               </button>
 
               {/* Favorites */}
               <button
                 onClick={() => setIsFavoritesOpen(true)}
-                className="relative p-2 rounded-full hover:bg-secondary-100 transition-all duration-200 group"
+                className={`relative p-2 rounded-full ${btnHover} transition-all duration-200 group`}
                 aria-label="Favoritos"
                 id="favorites-button"
               >
-                <Heart className="w-5 h-5 sm:w-6 sm:h-6 text-txt group-hover:text-primary transition-colors duration-200" />
+                <Heart className={`w-5 h-5 sm:w-6 sm:h-6 transition-colors duration-200 ${iconClass}`} />
                 {favoritesCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] sm:text-xs font-bold w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center animate-pulse-soft shadow-sm">
                     {favoritesCount}
@@ -118,11 +120,11 @@ export default function Header({ config }: { config?: any }) {
               {/* Cart */}
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="relative p-2 rounded-full hover:bg-secondary-100 transition-all duration-200 group"
+                className={`relative p-2 rounded-full ${btnHover} transition-all duration-200 group`}
                 aria-label="Carrito de compras"
                 id="cart-button"
               >
-                <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-txt group-hover:text-primary transition-colors duration-200" />
+                <ShoppingCart className={`w-5 h-5 sm:w-6 sm:h-6 transition-colors duration-200 ${iconClass}`} />
                 {itemCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] sm:text-xs font-bold w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center animate-pulse-soft shadow-sm">
                     {itemCount}

@@ -1,6 +1,9 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
+
 export default function MarqueeBanner() {
+  const isHome = usePathname() === '/';
   const messages = [
     "ENVÍOS A TODO EL PAÍS",
     "PAGO CONTRA ENTREGA",
@@ -12,7 +15,14 @@ export default function MarqueeBanner() {
   const allMessages = [...messages, ...messages, ...messages, ...messages];
 
   return (
-    <div className="bg-primary py-2 marquee-container">
+    <div className={isHome ? 'absolute top-0 inset-x-0 z-[60] h-[2.1rem]' : ''}>
+    <div
+      className={`marquee-container ${
+        isHome
+          ? 'absolute inset-x-0 top-0 h-[2.1rem] flex items-center bg-transparent'
+          : 'py-2 bg-primary'
+      }`}
+    >
       <div className="marquee-content">
         {allMessages.map((msg, index) => (
           <span
@@ -24,6 +34,7 @@ export default function MarqueeBanner() {
           </span>
         ))}
       </div>
+    </div>
     </div>
   );
 }

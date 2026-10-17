@@ -52,7 +52,7 @@ export default function SafeImage({
 
   if (fill) {
     return (
-      <div className="relative w-full h-full flex items-center justify-center bg-gray-50">
+      <div className="relative w-full h-full flex items-center justify-center bg-transparent">
         <Image
           src={imgSrc}
           alt={alt || 'Producto Lumira Beauty'}

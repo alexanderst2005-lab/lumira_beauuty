@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import SafeImage from '@/components/common/SafeImage';
-import { getOptimizedImageUrl } from '@/utils/image';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 type SlideType = {
   id: number;
@@ -14,13 +13,11 @@ type SlideType = {
   desc: string;
   btnText: string;
   btnHref: string;
-  bg: string;
-  emoji: string;
-  decorEmoji: string;
-  image?: string | null;
+  image: string;
   isBrandSlide?: boolean;
 };
 
+// Cada diapositiva tiene su propia información y su propia fotografía de fondo.
 const slides: SlideType[] = [
   {
     id: 1,
@@ -29,9 +26,7 @@ const slides: SlideType[] = [
     desc: 'Encuentra maquillaje, skincare, pestañas y accesorios en un solo lugar.',
     btnText: 'Comprar ahora',
     btnHref: '/catalogo',
-    bg: 'linear-gradient(135deg, #FFFFFF 0%, #FFF5F9 50%, #FFE6F0 100%)',
-    emoji: '💖',
-    decorEmoji: '✨',
+    image: '/images/hero/cosmetics.jpg',
   },
   {
     id: 2,
@@ -40,9 +35,7 @@ const slides: SlideType[] = [
     desc: 'Descubre Bioaqua, Bloomshell y todos nuestros productos para una rutina facial completa.',
     btnText: 'Ver Skincare',
     btnHref: '/catalogo?categoria=skincare',
-    bg: 'linear-gradient(135deg, #FAFAFA 0%, #FFF5F9 50%, #FFEDF4 100%)',
-    emoji: '🧴',
-    decorEmoji: '🌸',
+    image: '/images/hero/skincare.jpg',
   },
   {
     id: 3,
@@ -51,9 +44,7 @@ const slides: SlideType[] = [
     desc: 'Pestañas punto a punto, volumen, ojo de gato y mucho más.',
     btnText: 'Ver Pestañas',
     btnHref: '/catalogo?categoria=pestanas-enteras',
-    bg: 'linear-gradient(135deg, #FFFFFF 0%, #FFEDF4 40%, #FFF5F9 100%)',
-    emoji: '👁️',
-    decorEmoji: '💫',
+    image: '/images/hero/lashes.jpg',
   },
   {
     id: 4,
@@ -62,9 +53,7 @@ const slides: SlideType[] = [
     desc: 'Correctores, rubores, gloss, polvos, tintas y mucho más para completar tu maquillaje.',
     btnText: 'Ver Makeup',
     btnHref: '/catalogo?categoria=makeup',
-    bg: 'linear-gradient(135deg, #FAFAFA 0%, #FFF5F9 60%, #FFEDF4 100%)',
-    emoji: '💄',
-    decorEmoji: '💋',
+    image: '/images/hero/makeup.jpg',
   },
   {
     id: 5,
@@ -73,193 +62,174 @@ const slides: SlideType[] = [
     desc: 'Productos originales y de excelente calidad para realzar tu belleza.',
     btnText: 'Explorar catálogo',
     btnHref: '/catalogo',
-    bg: 'linear-gradient(135deg, #FFFFFF 0%, #FFF5F9 30%, #FFEDF4 100%)',
-    emoji: '🛍️',
-    decorEmoji: '🌟',
+    image: '/images/hero/brands.jpg',
     isBrandSlide: true,
   },
 ];
 
 const brands = ['BLOOMSHELL', 'BIOAQUA', 'ANIK', 'TRENDY', 'PURPURE'];
 
-export default function HeroBanner({ config }: { config?: any }) {
-  const [current, setCurrent] = useState(0);
+const AUTOPLAY_MS = 5000;
+const SWIPE_MIN_PX = 50;
 
-  // Override first slide with config if provided
+export default function HeroBanner({ config }: { config?: any }) {
+  // Primera diapositiva configurable desde el panel de administración.
   const dynamicSlides = [...slides];
-  if (config && (config.bannerTitle || config.bannerText || config.bannerPromo)) {
+  if (config && (config.bannerTitle || config.bannerText || config.bannerPromo || config.bannerImage)) {
     dynamicSlides[0] = {
       ...dynamicSlides[0],
       title: config.bannerTitle || dynamicSlides[0].title,
       desc: config.bannerText || dynamicSlides[0].desc,
-      badge: '✨ Tu belleza, tu momento',
-      image: config.bannerImage || null,
-      bg: dynamicSlides[0].bg
+      image: config.bannerImage || dynamicSlides[0].image,
     };
   }
+  const total = dynamicSlides.length;
+  const [current, setCurrent] = useState(0);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
 
-  const next = useCallback(() => {
-    setCurrent((prev) => (prev + 1) % dynamicSlides.length);
-  }, [dynamicSlides.length]);
+  const next = useCallback(() => setCurrent((p) => (p + 1) % total), [total]);
+  const prev = useCallback(() => setCurrent((p) => (p - 1 + total) % total), [total]);
 
-  const prev = useCallback(() => {
-    setCurrent((prev) => (prev - 1 + dynamicSlides.length) % dynamicSlides.length);
-  }, [dynamicSlides.length]);
-
+  // Reinicia el temporizador en cada cambio (manual o automático).
   useEffect(() => {
-    const timer = setInterval(next, 5000);
-    return () => clearInterval(timer);
-  }, [next]);
+    const timer = setTimeout(next, AUTOPLAY_MS);
+    return () => clearTimeout(timer);
+  }, [current, next]);
+
+  const slide = dynamicSlides[current];
+  const images = dynamicSlides.map((s) => s.image);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    touchStart.current = { x: t.clientX, y: t.clientY };
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStart.current) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStart.current.x;
+    const dy = t.clientY - touchStart.current.y;
+    touchStart.current = null;
+    if (Math.abs(dx) > SWIPE_MIN_PX && Math.abs(dx) > Math.abs(dy)) {
+      dx < 0 ? next() : prev();
+    }
+  };
 
   return (
-    <section className="relative overflow-hidden w-full" id="hero-banner">
-      <div className="relative min-h-[500px] sm:min-h-[540px] md:min-h-[600px] lg:min-h-[640px] w-full">
+    <section
+      id="hero-banner"
+      className="relative w-full overflow-hidden bg-[#7a1f4d] h-[100svh] min-h-[600px]"
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+    >
+      {/* Fondos con transición suave */}
+      {images.map((src, i) => (
+        <div
+          key={`${src}-${i}`}
+          className={`absolute inset-0 transition-opacity duration-[1200ms] ease-in-out ${
+            i === current ? 'opacity-100' : 'opacity-0'
+          }`}
+          aria-hidden={i !== current}
+        >
+          <Image
+            src={src}
+            alt=""
+            fill
+            priority={i === 0}
+            unoptimized
+            sizes="100vw"
+            className={`object-cover object-center transition-transform duration-[6000ms] ease-out ${
+              i === current ? 'scale-105' : 'scale-100'
+            }`}
+          />
+        </div>
+      ))}
+
+      {/* Capa de contraste con tonalidad rosa fucsia de la marca */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#C2185B]/30 via-[#E91E63]/20 to-[#9C1548]/45" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(233,30,99,0.22),transparent_75%)]" />
+      <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-[#880E4F]/40 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#880E4F]/50 to-transparent" />
+
+      {/* Contenido */}
+      <div className="relative z-10 h-full flex items-center justify-center px-6 sm:px-12 pt-24 sm:pt-28 pb-20 sm:pb-24">
         <AnimatePresence mode="wait">
           <motion.div
-            key={current}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8, ease: 'easeInOut' }}
-            className="absolute inset-0 w-full"
-            style={{ background: dynamicSlides[current].bg }}
+            key={slide.id}
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+            className="w-full max-w-[21rem] sm:max-w-2xl lg:max-w-3xl text-center flex flex-col items-center"
           >
-            {dynamicSlides[current].image && (
-              <SafeImage
-                src={dynamicSlides[current].image}
-                alt={dynamicSlides[current].title}
-                fill
-                priority={current === 0}
-                unoptimized={true}
-                className="object-cover absolute inset-0 z-0 opacity-90"
-              />
-            )}
-            
-            {/* Decorative circles */}
-            <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-white/20 blur-3xl z-0" />
-            <div className="absolute -bottom-32 -left-20 w-96 h-96 rounded-full bg-white/25 blur-3xl z-0" />
-            <div className="absolute top-1/4 right-1/4 w-40 h-40 rounded-full bg-primary/10 blur-2xl animate-float z-0" />
+            <span className="inline-flex items-center px-4 py-1.5 mb-5 sm:mb-6 rounded-full bg-white/10 backdrop-blur-sm border border-white/35 text-[10px] sm:text-xs font-medium text-white uppercase tracking-[0.2em] font-sans">
+              {slide.badge}
+            </span>
 
-            {/* Floating decorative emojis */}
-            <motion.div
-              className="absolute top-[15%] right-[5%] lg:right-[15%] text-7xl sm:text-8xl md:text-9xl opacity-30 select-none drop-shadow-xl"
-              animate={{ y: [-15, 15, -15], rotate: [-4, 4, -4] }}
-              transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              {dynamicSlides[current].emoji}
-            </motion.div>
-            <motion.div
-              className="absolute bottom-[20%] right-[10%] lg:right-[20%] text-5xl sm:text-6xl opacity-20 select-none drop-shadow-md"
-              animate={{ y: [10, -15, 10], rotate: [5, -5, 5] }}
-              transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-            >
-              {dynamicSlides[current].decorEmoji}
-            </motion.div>
+            <h1 className="text-[2.1rem] leading-[1.12] tracking-[0.005em] sm:text-5xl lg:text-6xl font-display font-medium text-white mb-4 sm:mb-5 [text-wrap:balance] [text-shadow:0_2px_18px_rgba(74,15,46,0.45)]">
+              {slide.title}
+            </h1>
 
-            {/* Content */}
-            <div className="absolute inset-0 flex items-center pb-16 sm:pb-0">
-              <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 w-full">
-                <div className="max-w-2xl relative z-10">
-                  {/* Badge */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 16, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ delay: 0.2, duration: 0.5 }}
-                    className="inline-flex items-center gap-2 mb-6 px-5 py-2 bg-white/80 backdrop-blur-md rounded-full border border-white/50 shadow-sm"
+            {slide.isBrandSlide && (
+              <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2 mb-4 sm:mb-5">
+                {brands.map((brand) => (
+                  <span
+                    key={brand}
+                    className="px-3 py-1 rounded-full bg-white/90 text-[10px] sm:text-[11px] font-semibold text-primary-dark tracking-[0.18em] shadow-sm"
                   >
-                    <span className="text-sm font-semibold text-primary-dark tracking-wide font-sans">
-                      {dynamicSlides[current].badge}
-                    </span>
-                  </motion.div>
-
-                  {/* Heading */}
-                  <motion.h1
-                    initial={{ opacity: 0, y: 28 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3, duration: 0.6 }}
-                    className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-bold leading-[1.15] mb-6 text-txt"
-                  >
-                    {dynamicSlides[current].title}
-                  </motion.h1>
-
-                  {/* Optional Brands for Slide 5 */}
-                  {dynamicSlides[current].isBrandSlide && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.4, duration: 0.6 }}
-                      className="flex flex-wrap gap-2 mb-6"
-                    >
-                      {brands.map((brand) => (
-                        <span 
-                          key={brand}
-                          className="px-4 py-1.5 bg-white/60 backdrop-blur-sm border border-white rounded-full text-xs sm:text-sm font-bold text-txt-secondary tracking-wider shadow-sm"
-                        >
-                          {brand}
-                        </span>
-                      ))}
-                    </motion.div>
-                  )}
-
-                  {/* Subtitle */}
-                  <motion.p
-                    initial={{ opacity: 0, y: 28 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: dynamicSlides[current].isBrandSlide ? 0.5 : 0.4, duration: 0.6 }}
-                    className="text-base sm:text-lg md:text-xl text-txt-secondary leading-relaxed mb-10 max-w-lg font-sans font-medium"
-                  >
-                    {dynamicSlides[current].desc}
-                  </motion.p>
-
-                  {/* CTA Button */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 28 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: dynamicSlides[current].isBrandSlide ? 0.6 : 0.5, duration: 0.6 }}
-                    className="flex flex-wrap gap-4 mt-4"
-                  >
-                    <Link href={dynamicSlides[current].btnHref} className="btn-primary text-lg font-bold px-10 py-4 shadow-primary/40 shadow-xl hover:shadow-primary/50 hover:scale-105 transition-all">
-                      <span>{dynamicSlides[current].btnText}</span>
-                      <ChevronRight className="w-5 h-5 ml-1" />
-                    </Link>
-                  </motion.div>
-                </div>
+                    {brand}
+                  </span>
+                ))}
               </div>
-            </div>
+            )}
+
+            <p className="text-[0.95rem] sm:text-lg text-white/90 leading-relaxed mb-7 sm:mb-9 max-w-[19rem] sm:max-w-lg font-sans font-light tracking-[0.01em] [text-wrap:pretty] [text-shadow:0_1px_10px_rgba(74,15,46,0.5)]">
+              {slide.desc}
+            </p>
+
+            <Link
+              href={slide.btnHref}
+              className="btn-primary inline-flex items-center justify-center text-[13px] sm:text-sm font-semibold uppercase tracking-[0.14em] px-8 sm:px-10 py-3.5 shadow-lg shadow-black/20 hover:scale-[1.03] transition-all"
+            >
+              <span>{slide.btnText}</span>
+              <ChevronRight className="w-4 h-4 ml-2" />
+            </Link>
           </motion.div>
         </AnimatePresence>
+      </div>
 
-        {/* Navigation Arrows */}
-        <button
-          onClick={prev}
-          className="absolute left-0 sm:left-6 top-1/2 -translate-y-1/2 p-4 sm:p-3 rounded-full bg-transparent sm:bg-white/20 backdrop-blur-none sm:backdrop-blur-md hover:bg-white/10 sm:hover:bg-white/50 shadow-none sm:shadow-sm hover:shadow-md transition-all duration-300 sm:hover:scale-110 z-20 border border-transparent sm:border-white/30"
-          aria-label="Anterior"
-        >
-          <ChevronLeft className="w-6 h-6 sm:w-5 sm:h-5 text-txt/30 sm:text-txt/70 drop-shadow-sm" />
-        </button>
-        <button
-          onClick={next}
-          className="absolute right-0 sm:right-6 top-1/2 -translate-y-1/2 p-4 sm:p-3 rounded-full bg-transparent sm:bg-white/20 backdrop-blur-none sm:backdrop-blur-md hover:bg-white/10 sm:hover:bg-white/50 shadow-none sm:shadow-sm hover:shadow-md transition-all duration-300 sm:hover:scale-110 z-20 border border-transparent sm:border-white/30"
-          aria-label="Siguiente"
-        >
-          <ChevronRight className="w-6 h-6 sm:w-5 sm:h-5 text-txt/30 sm:text-txt/70 drop-shadow-sm" />
-        </button>
+      {/* Flechas (visibles desde tablet; en móvil se desliza) */}
+      <button
+        onClick={prev}
+        aria-label="Anterior"
+        className="hidden sm:flex absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-white/15 backdrop-blur-md border border-white/30 text-white hover:bg-white/30 transition-all"
+      >
+        <ChevronLeft className="w-5 h-5" />
+      </button>
+      <button
+        onClick={next}
+        aria-label="Siguiente"
+        className="hidden sm:flex absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-white/15 backdrop-blur-md border border-white/30 text-white hover:bg-white/30 transition-all"
+      >
+        <ChevronRight className="w-5 h-5" />
+      </button>
 
-        {/* Dots */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2.5 z-20">
-          {dynamicSlides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrent(index)}
-              className={`rounded-full transition-all duration-500 ${
-                index === current
-                  ? 'w-10 h-3 bg-gradient-to-r from-primary to-primary-dark shadow-md shadow-primary/30'
-                  : 'w-3 h-3 bg-white/60 hover:bg-white border border-white/40'
+      {/* Indicadores */}
+      <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+        {images.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrent(index)}
+            aria-label={`Ir a slide ${index + 1}`}
+            aria-current={index === current}
+            className="group py-3"
+          >
+            <span
+              className={`block h-[3px] rounded-full transition-all duration-500 ${
+                index === current ? 'w-8 bg-white' : 'w-4 bg-white/40 group-hover:bg-white/70'
               }`}
-              aria-label={`Ir a slide ${index + 1}`}
             />
-          ))}
-        </div>
+          </button>
+        ))}
       </div>
     </section>
   );

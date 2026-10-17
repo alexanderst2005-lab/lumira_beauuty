@@ -14,68 +14,77 @@ export default function CartItem({ item }: CartItemProps) {
   const { updateQuantity, removeFromCart } = useCart();
 
   return (
-    <div className="flex gap-2.5 p-2.5 rounded-xl bg-secondary-100/30 border border-border">
-      {/* Image */}
-      <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-secondary-100 flex-shrink-0">
+    <div className="flex gap-3 p-3 rounded-[2px] bg-white border border-[#E5E5E5] transition-all hover:border-[#D4D4D8]">
+      {/* Product Image */}
+      <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-[2px] overflow-hidden bg-white border border-[#F0E6DE] flex-shrink-0">
         <SafeImage
           src={item.product.image}
           alt={item.product.name}
           fill
           sizes="80px"
-          className="object-cover"
+          className="object-contain p-1"
         />
-        <div className="absolute inset-0 flex items-center justify-center text-2xl opacity-20">
-          💄
-        </div>
       </div>
 
       {/* Info */}
-      <div className="flex-1 min-w-0">
-        <h4 className="text-[11px] font-bold uppercase text-text line-clamp-1">
-          {item.product.name}
-        </h4>
-        {item.selectedTone && (
-          <p className="text-[10px] text-txt-secondary mt-0.5">
-            Tono: <span className="font-medium text-txt">{item.selectedTone.name}</span>
-          </p>
-        )}
-        {item.selectedOptions && Object.entries(item.selectedOptions).map(([optName, optVal]) => (
-          <p key={optName} className="text-[10px] text-txt-secondary mt-0.5">
-            {optName}: <span className="font-medium text-txt">{optVal.name}</span>
-          </p>
-        ))}
-        <p className="text-xs font-bold text-primary mt-0.5">
-          {formatPrice(item.product.price)}
-        </p>
-
-        <div className="flex items-center justify-between mt-1.5">
-          {/* Quantity Controls */}
-          <div className="flex items-center gap-1">
+      <div className="flex-1 min-w-0 flex flex-col justify-between">
+        <div>
+          <div className="flex items-start justify-between gap-2">
+            <h4 className="text-xs sm:text-sm font-semibold uppercase tracking-wide text-txt line-clamp-1 font-sans">
+              {item.product.name}
+            </h4>
             <button
-              onClick={() => updateQuantity(item.id, item.quantity - 1)}
-              className="w-6 h-6 rounded-full bg-white border border-border flex items-center justify-center hover:border-primary/30 hover:text-primary transition-colors"
-              aria-label="Disminuir cantidad"
+              onClick={() => removeFromCart(item.id)}
+              className="text-txt-secondary hover:text-red-600 transition-colors p-0.5"
+              aria-label={`Eliminar ${item.product.name}`}
+              title="Eliminar producto"
             >
-              <Minus className="w-3 h-3" />
-            </button>
-            <span className="w-6 text-center text-[11px] font-semibold">{item.quantity}</span>
-            <button
-              onClick={() => updateQuantity(item.id, item.quantity + 1)}
-              className="w-6 h-6 rounded-full bg-white border border-border flex items-center justify-center hover:border-primary/30 hover:text-primary transition-colors"
-              aria-label="Aumentar cantidad"
-            >
-              <Plus className="w-3 h-3" />
+              <Trash2 className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          {/* Remove */}
-          <button
-            onClick={() => removeFromCart(item.id)}
-            className="p-1.5 rounded-full hover:bg-red-50 text-text-light hover:text-red-500 transition-colors"
-            aria-label={`Eliminar ${item.product.name}`}
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
+          {item.selectedTone && (
+            <p className="text-[11px] text-txt-secondary mt-0.5 font-sans">
+              Tono: <span className="font-semibold text-txt">{item.selectedTone.name}</span>
+            </p>
+          )}
+
+          {item.selectedOptions &&
+            Object.entries(item.selectedOptions).map(([optName, optVal]) => (
+              <p key={optName} className="text-[11px] text-txt-secondary font-sans">
+                {optName}: <span className="font-semibold text-txt">{optVal.name}</span>
+              </p>
+            ))}
+
+          <p className="text-xs sm:text-sm font-semibold text-primary mt-1 font-sans">
+            {formatPrice(item.product.price)}
+          </p>
+        </div>
+
+        {/* Quantity Controls (Rectangular Minimalist Pill) */}
+        <div className="flex items-center justify-between mt-2 pt-1 border-t border-[#F2E8E0]">
+          <span className="text-[10px] uppercase tracking-wider text-txt-secondary font-semibold font-sans">
+            Cant.
+          </span>
+          <div className="inline-flex items-center justify-between w-24 h-7 bg-white border border-[#D4D4D8] rounded-[2px] px-1.5 select-none">
+            <button
+              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+              className="w-5 h-5 flex items-center justify-center text-[#111111] hover:opacity-60 transition-opacity"
+              aria-label="Disminuir cantidad"
+            >
+              <Minus className="w-3 h-3 stroke-[2]" />
+            </button>
+            <span className="text-xs font-semibold font-sans text-txt min-w-[16px] text-center">
+              {item.quantity}
+            </span>
+            <button
+              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+              className="w-5 h-5 flex items-center justify-center text-[#111111] hover:opacity-60 transition-opacity"
+              aria-label="Aumentar cantidad"
+            >
+              <Plus className="w-3 h-3 stroke-[2]" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -4,14 +4,14 @@ import { useRouter } from 'next/navigation';
 
 import Link from 'next/link';
 import SafeImage from '@/components/common/SafeImage';
-import { ShoppingCart, Heart } from 'lucide-react';
+import { ShoppingBag, Heart, Check } from 'lucide-react';
 import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { useFavorites } from '@/context/FavoritesContext';
 import { formatPrice } from '@/utils/whatsapp';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { saveCurrentScrollPosition } from '@/utils/scrollRestoration';
 
 interface ProductCardProps {
@@ -21,20 +21,24 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, priority = false }: ProductCardProps) {
   const router = useRouter();
-  const { addToCart } = useCart();
-  const { toggleFavorite } = useFavorites();
+  const { addToCart, items } = useCart();
+  const { toggleFavorite, isFavorite } = useFavorites();
   const [isAdding, setIsAdding] = useState(false);
   const [quantity, setQuantity] = useState(1);
-  const [isLocalFav, setIsLocalFav] = useState(false);
 
   const isOutOfStock = product.stock === 0;
+  // Estado real de favoritos (sincronizado con el contexto y el drawer)
+  const isFav = isFavorite(product.id);
+  // Unidades de este producto que ya están en el carrito
+  const inCartQty = items
+    .filter((item) => item.product.id === product.id)
+    .reduce((sum, item) => sum + item.quantity, 0);
 
   const handleFavoriteToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     toggleFavorite(product);
-    setIsLocalFav(!isLocalFav);
-    if (!isLocalFav) {
+    if (!isFav) {
       toast.success('Agregado a tus favoritos ❤️', {
         icon: '❤️'
       });
@@ -66,120 +70,108 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
     }, 600);
   };
 
-  const handleDecrease = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setQuantity((prev) => Math.max(1, prev - 1));
-  };
-
-  const handleIncrease = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setQuantity((prev) => prev + 1);
-  };
-
   return (
     <Link
       href={`/producto/${product.id}`}
       scroll={false}
-      className="card-premium block group flex flex-col h-full bg-white"
+      className="block group flex flex-col h-full bg-white rounded-2xl border border-border-light shadow-[0_2px_12px_rgba(122,31,77,0.04)] overflow-hidden transition-all duration-300 hover:shadow-[0_12px_32px_rgba(122,31,77,0.10)] hover:-translate-y-0.5 hover:border-primary/20"
       id={`product-${product.id}`}
       onClick={() => {
         saveCurrentScrollPosition();
       }}
     >
-      {/* Imagen tipo cover (sin espacios blancos) */}
-      <div className="product-image-container aspect-square flex items-center justify-center relative bg-gray-50 overflow-hidden rounded-t-2xl">
-        <div className="relative w-full h-full">
-          <SafeImage
-            src={product.image}
-            alt={product.name}
-            fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            loading={priority ? 'eager' : 'lazy'}
-            priority={priority}
-            unoptimized={true}
-            optimizeWidth={400}
-            className={`object-cover object-center transition-all duration-500 ${!isOutOfStock ? 'group-hover:scale-105' : ''} ${isOutOfStock ? 'grayscale opacity-70' : ''}`}
-          />
-          {/* Capa oscura si está agotado */}
-          {isOutOfStock && (
-            <div className="absolute inset-0 bg-black/40 z-10" />
-          )}
-        </div>
+      {/* Imagen: contenedor uniforme, el producto se muestra completo sin recortes */}
+      <div className="product-image-container aspect-square relative !bg-white overflow-hidden [&>div]:!bg-transparent">
+        <SafeImage
+          src={product.image}
+          alt={product.name}
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          loading={priority ? 'eager' : 'lazy'}
+          priority={priority}
+          unoptimized={true}
+          optimizeWidth={400}
+          className={`object-contain object-center p-2 sm:p-3 transition-transform duration-500 ${!isOutOfStock ? 'group-hover:scale-105' : ''} ${isOutOfStock ? 'grayscale opacity-60' : ''}`}
+        />
 
-        {/* Agotado Badge (GIGANTE) */}
+        {/* Agotado */}
         {isOutOfStock && (
-          <div className="absolute inset-0 z-30 flex items-center justify-center">
-            <div className="bg-black/80 backdrop-blur-sm text-white px-6 py-2 rounded-lg -rotate-12 border border-white/20 shadow-2xl">
-              <span className="text-lg sm:text-xl font-bold tracking-widest uppercase">
-                Agotado
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Nuevo Badge */}
-        {product.isNew && !isOutOfStock && (
-          <div className="absolute top-4 left-4 z-20">
-            <span className="bg-pink-500 text-white text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wide shadow-sm">
-              Nuevo
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/40">
+            <span className="bg-txt/85 text-white px-4 py-1.5 rounded-full text-[11px] sm:text-xs font-semibold tracking-[0.18em] uppercase">
+              Agotado
             </span>
           </div>
         )}
 
-        {/* Favorite Button Minimalista */}
+        {/* Nuevo (solo si el producto está marcado como nuevo) */}
+        {product.isNew && !isOutOfStock && (
+          <span className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-20 bg-primary text-white text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-[0.14em] shadow-sm">
+            Nuevo
+          </span>
+        )}
+
+        {/* Favoritos */}
         <button
           onClick={handleFavoriteToggle}
-          className="absolute top-4 right-4 z-20 p-2.5 bg-white/70 backdrop-blur-md rounded-full shadow-sm transition-all duration-300 hover:scale-110 hover:bg-white"
-          aria-label={isLocalFav ? "Quitar de favoritos" : "Agregar a favoritos"}
+          className={`absolute top-2 right-2 sm:top-3 sm:right-3 z-20 w-9 h-9 flex items-center justify-center rounded-full shadow-sm backdrop-blur-md border transition-all duration-300 hover:scale-110 ${
+            isFav
+              ? 'bg-primary/10 border-primary/30'
+              : 'bg-white/80 border-white hover:bg-white'
+          }`}
+          aria-label={isFav ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+          aria-pressed={isFav}
         >
           <motion.div
-            animate={isLocalFav ? { scale: [1, 1.2, 1] } : { scale: 1 }}
+            animate={isFav ? { scale: [1, 1.25, 1] } : { scale: 1 }}
             transition={{ duration: 0.3 }}
           >
-            <Heart 
-              strokeWidth={1.5}
-              className={`w-4 h-4 transition-colors duration-300 ${
-                isLocalFav ? 'fill-primary text-primary' : 'text-txt-secondary hover:text-txt'
-              }`} 
+            <Heart
+              strokeWidth={1.6}
+              className={`w-[18px] h-[18px] transition-colors duration-300 ${
+                isFav ? 'fill-primary text-primary' : 'text-txt-secondary'
+              }`}
             />
           </motion.div>
         </button>
       </div>
 
-      {/* Contenido Minimalista */}
-      <div className="p-3 sm:p-4 flex flex-col gap-2 sm:gap-3 bg-white z-10 flex-1 border-t border-border-light rounded-b-2xl">
-        <div className="space-y-0.5 flex-1">
-          <h3 className="font-sans font-bold uppercase tracking-wide text-xs sm:text-sm text-txt line-clamp-2 group-hover:text-primary transition-colors duration-200 leading-snug">
+      {/* Información */}
+      <div className="p-3 sm:p-4 flex flex-col gap-2 flex-1">
+        <div className="flex-1 space-y-1">
+          <h3 className="font-sans font-semibold text-[13px] sm:text-sm text-txt line-clamp-2 min-h-[2.5rem] group-hover:text-primary transition-colors duration-200 leading-snug">
             {product.name}
           </h3>
-          <p className="text-[10px] sm:text-xs text-txt-secondary/70 line-clamp-1">
+          <p className="text-[11px] sm:text-xs text-txt-secondary/70 line-clamp-1 min-h-[1rem]">
             {product.description}
           </p>
         </div>
-        
-        <div className="flex items-center justify-between mt-auto pt-1">
-          <div className="text-sm sm:text-base font-semibold text-txt">
+
+        <div className="flex items-center justify-between gap-2 pt-2 border-t border-border-light">
+          <div className="text-[15px] sm:text-base font-semibold text-txt tracking-tight">
             {formatPrice(product.price)}
           </div>
-          
+
           <button
             onClick={isOutOfStock ? (e) => { e.preventDefault(); e.stopPropagation(); } : handleAddToCart}
             disabled={isAdding || isOutOfStock}
-            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+            className={`relative h-8 sm:h-9 px-3 sm:px-3.5 rounded-full flex items-center justify-center gap-1.5 text-xs font-semibold transition-all duration-300 ${
               isOutOfStock
-                ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                : isAdding
-                ? 'bg-green-500 text-white scale-95'
-                : 'bg-txt text-white hover:bg-txt-secondary hover:shadow-md active:scale-95'
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-primary hover:bg-primary-dark text-white shadow-sm hover:shadow-md active:scale-95'
             }`}
-            aria-label={isOutOfStock ? 'Producto Agotado' : `Agregar ${product.name} al carrito`}
+            aria-label={
+              isOutOfStock
+                ? 'Producto agotado'
+                : `Agregar ${product.name} al carrito`
+            }
           >
             {isOutOfStock ? (
-              <span className="text-[10px] font-bold uppercase tracking-wider">Agotado</span>
+              <span className="text-[10px] uppercase tracking-wider">Agotado</span>
             ) : (
-              <ShoppingCart className="w-4 h-4" />
+              <>
+                <ShoppingBag className="w-3.5 h-3.5 stroke-[2]" />
+                <span>Agregar</span>
+              </>
             )}
           </button>
         </div>

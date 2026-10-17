@@ -15,15 +15,15 @@
   --color-rose-500: #E75480;
   --color-rose-600: #D6336C;
   --color-bg: #FFFFFF;
-  --color-surface: #FAFAFA;
+  --color-surface: #FFFFFF;
   --color-txt: #2C2825; /* Sophisticated dark beige-grey */
   --color-txt-secondary: #706760; /* Softer complementary secondary text */
   --color-border: #F0E4EA;
   --color-border-light: #F8F0F4;
 
   /* Fonts */
-  --font-sans: var(--font-inter), 'Inter', system-ui, sans-serif;
-  --font-display: var(--font-inter), 'Inter', system-ui, sans-serif;
+  --font-sans: var(--font-body), 'DM Sans', system-ui, sans-serif;
+  --font-display: var(--font-heading), 'Cormorant Garamond', Georgia, serif;
 
   /* Animations */
   --animate-marquee: marquee 25s linear infinite;
@@ -75,6 +75,14 @@ html {
 body {
   background: var(--color-bg);
   color: var(--color-txt);
+  font-family: var(--font-sans);
+}
+
+@layer base {
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
 }
 
 /* ===== CUSTOM SCROLLBAR ===== */

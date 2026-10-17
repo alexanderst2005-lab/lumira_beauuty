@@ -1,6 +1,10 @@
 import HeroBanner from '@/components/home/HeroBanner';
 import Categories from '@/components/home/Categories';
+import EditorialSection from '@/components/home/EditorialSection';
 import FeaturedProducts from '@/components/home/FeaturedProducts';
+import StoreBenefits from '@/components/home/StoreBenefits';
+import InstagramSection from '@/components/home/InstagramSection';
+import FAQSection from '@/components/home/FAQSection';
 import { getAllProductsFromNotion, getStoreConfig } from '@/data/notion';
 
 export const revalidate = 3600;
@@ -13,7 +17,11 @@ export default async function Home() {
     <>
       <HeroBanner config={config} />
       <Categories />
+      <EditorialSection />
       <FeaturedProducts initialProducts={products} />
+      <StoreBenefits />
+      <InstagramSection />
+      <FAQSection />
     </>
   );
 }

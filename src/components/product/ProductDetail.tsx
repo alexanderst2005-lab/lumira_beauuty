@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import SafeImage from '@/components/common/SafeImage';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Heart, ShoppingCart, ArrowLeft, Check, Truck, CreditCard } from 'lucide-react';
+import { Heart, ShoppingBag, ArrowLeft, Check, Truck, ShieldCheck, Sparkles, MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Product, Tone, ProductOptionValue } from '@/types';
 import { useCart } from '@/context/CartContext';
@@ -13,7 +12,6 @@ import { formatPrice } from '@/utils/whatsapp';
 import QuantitySelector from './QuantitySelector';
 import ProductCard from '@/components/catalog/ProductCard';
 import { toast } from 'sonner';
-import { getOptimizedImageUrl } from '@/utils/image';
 import { preloadProductImages, preloadSingleImage } from '@/utils/imagePreloader';
 import { getLastCatalogUrl } from '@/utils/scrollRestoration';
 
@@ -24,17 +22,22 @@ interface ProductDetailProps {
 
 export default function ProductDetail({ product, relatedProducts }: ProductDetailProps) {
   const router = useRouter();
-  const { addToCart } = useCart();
-  const { toggleFavorite } = useFavorites();
+  const { addToCart, items } = useCart();
+  const { toggleFavorite, isFavorite } = useFavorites();
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
-  const [isLocalFav, setIsLocalFav] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [selectedTone, setSelectedTone] = useState<Tone | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, ProductOptionValue>>({});
   const [overrideImage, setOverrideImage] = useState<string | null>(null);
+
+  const isFav = isFavorite(product.id);
+  const inCartQty = items
+    .filter((item) => item.product.id === product.id)
+    .reduce((sum, item) => sum + item.quantity, 0);
 
   const handleBack = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -48,44 +51,40 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
     }
   };
 
-  // Precargar las imágenes principales y los productos relacionados de inmediato
+  // Precargar las imágenes principales y los productos relacionados
   useEffect(() => {
     if (product) {
       const displayImgs = product.images || [product.image];
-      displayImgs.forEach(img => preloadSingleImage(img, 800));
+      displayImgs.forEach((img) => preloadSingleImage(img, 800));
     }
     if (relatedProducts && relatedProducts.length > 0) {
       preloadProductImages(relatedProducts, 0, relatedProducts.length, 400);
     }
   }, [product, relatedProducts]);
 
-  // Auto-scroll to top on mount
+  // Auto-scroll al inicio al montar
   useEffect(() => {
     const scrollToTop = () => {
       window.scrollTo({ top: 0, behavior: 'instant' });
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
     };
-    
     scrollToTop();
     const timer = setTimeout(scrollToTop, 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [product.id]);
 
   const isOutOfStock = product.stock === 0;
 
-  // Swipe logic
+  // Lógica táctil para galería
   const minSwipeDistance = 50;
-  
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
   };
-
   const onTouchMove = (e: React.TouchEvent) => {
     setTouchEnd(e.targetTouches[0].clientX);
   };
-
   const onTouchEndHandler = () => {
     if (!touchStart || !touchEnd) return;
     const distance = touchStart - touchEnd;
@@ -94,17 +93,16 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
 
     const displayImages = product.images || [product.image];
     if (isLeftSwipe && currentImageIndex < displayImages.length - 1) {
-      setCurrentImageIndex(prev => prev + 1);
+      setCurrentImageIndex((prev) => prev + 1);
     }
     if (isRightSwipe && currentImageIndex > 0) {
-      setCurrentImageIndex(prev => prev - 1);
+      setCurrentImageIndex((prev) => prev - 1);
     }
   };
 
   const handleFavoriteToggle = () => {
     toggleFavorite(product);
-    setIsLocalFav(!isLocalFav);
-    if (!isLocalFav) {
+    if (!isFav) {
       toast.success('Agregado a tus favoritos ❤️', { icon: '❤️' });
     } else {
       toast('Eliminado de tus favoritos', { icon: '💔' });
@@ -112,326 +110,396 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
   };
 
   const handleAddToCart = () => {
-    if (isOutOfStock) return;
-    
-    // Legacy support
+    if (isOutOfStock || isAdding) return;
+
     if (product.tones && product.tones.length > 0 && !selectedTone) {
       toast.error('Selecciona un tono antes de agregar este producto al carrito.', { icon: '🎨' });
       return;
     }
 
-    // New options support
     if (product.options && product.options.length > 0) {
-      const missingOptions = product.options.filter(opt => !selectedOptions[opt.name]);
+      const missingOptions = product.options.filter((opt) => !selectedOptions[opt.name]);
       if (missingOptions.length > 0) {
         toast.error(`Selecciona ${missingOptions[0].name} antes de agregar al carrito.`, { icon: '⚠️' });
         return;
       }
     }
 
+    setIsAdding(true);
     addToCart(product, quantity, selectedTone || undefined, selectedOptions);
     setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
+    toast.success('Producto agregado al carrito ✅');
+    setTimeout(() => {
+      setIsAdded(false);
+      setIsAdding(false);
+    }, 1200);
+  };
+
+  const handleBuyNow = () => {
+    if (isOutOfStock) return;
+    if (product.options && product.options.length > 0) {
+      const missingOptions = product.options.filter((opt) => !selectedOptions[opt.name]);
+      if (missingOptions.length > 0) {
+        toast.error(`Selecciona ${missingOptions[0].name} antes de comprar.`, { icon: '⚠️' });
+        return;
+      }
+    }
+    addToCart(product, quantity, selectedTone || undefined, selectedOptions);
+    const subtotal = product.price * quantity;
+    const formatNumber = (num: number) =>
+      new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(num);
+
+    let msg = `Hola Lumira Beauty ✨ Quisiera comprar ahora:\n\n`;
+    msg += `• *${product.name}* x${quantity}`;
+    if (selectedTone) msg += ` (Tono: ${selectedTone.name})`;
+    if (selectedOptions && Object.keys(selectedOptions).length > 0) {
+      const opts = Object.entries(selectedOptions)
+        .map(([k, v]) => `${k}: ${v.name}`)
+        .join(', ');
+      msg += ` (${opts})`;
+    }
+    msg += ` - ${formatNumber(subtotal)}\n\n`;
+    msg += `*Total:* ${formatNumber(subtotal)}\n\n¿Tienen disponibilidad para despacho?`;
+
+    window.open(`https://wa.me/573174503716?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
   const handleOptionSelect = (optionName: string, value: ProductOptionValue) => {
-    setSelectedOptions(prev => ({ ...prev, [optionName]: value }));
+    setSelectedOptions((prev) => ({ ...prev, [optionName]: value }));
     if (value.image) {
       setOverrideImage(value.image);
     }
   };
 
-  const displayImages = product.images || [product.image];
+  const displayImages = product.images && product.images.length > 0 ? product.images : [product.image];
+  const activeImage = overrideImage || displayImages[currentImageIndex] || product.image;
+
+  // Filtrar productos relacionados: excluir el actual y evitar duplicados
+  const filteredRelated = relatedProducts
+    .filter((p) => p.id !== product.id)
+    .slice(0, 10);
 
   return (
-    <div className="min-h-screen bg-bg">
-      {/* Botón de retroceso */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-        <button 
+    <div className="min-h-screen bg-white">
+      {/* Barra de navegación secundaria */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4">
+        <button
           onClick={handleBack}
-          className="inline-flex items-center gap-2 text-txt-secondary hover:text-primary transition-colors text-sm font-medium"
+          className="inline-flex items-center gap-2 text-txt-secondary hover:text-primary transition-colors text-sm font-medium font-sans group"
         >
-          <ArrowLeft className="w-4 h-4" />
-          Volver
+          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+          <span>Volver al catálogo</span>
         </button>
       </div>
 
-      {/* Aumentamos pb-24 sm:pb-32 para que el botón de WhatsApp no tape contenido */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 sm:pb-32">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-10 items-start">
-          {/* Galería del Producto */}
-          <div className="flex flex-col gap-4 max-w-[340px] sm:max-w-sm lg:max-w-md xl:max-w-lg mx-auto w-full">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
+      {/* Detalle principal */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+          {/* Columna Izquierda: Galería */}
+          <div className="lg:col-span-6 flex flex-col gap-3">
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative w-full aspect-square md:aspect-auto md:min-h-[400px] lg:min-h-[500px] rounded-2xl overflow-hidden bg-white border border-border-light shadow-sm touch-pan-y flex items-center justify-center"
+              transition={{ duration: 0.4 }}
+              className="relative w-full aspect-[4/5] sm:aspect-square max-h-[560px] rounded-[2px] overflow-hidden bg-white border border-[#E5E5E5] touch-pan-y flex items-center justify-center"
               onTouchStart={onTouchStart}
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEndHandler}
             >
               <SafeImage
-                src={overrideImage || displayImages[currentImageIndex]}
+                src={activeImage}
                 alt={product.name}
                 fill
                 priority={true}
                 unoptimized={true}
                 optimizeWidth={800}
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className={`object-contain p-2 sm:p-4 transition-opacity duration-300 ${isOutOfStock ? 'grayscale opacity-60' : ''}`}
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className={`object-contain transition-transform duration-500 hover:scale-105 ${
+                  isOutOfStock ? 'grayscale opacity-60' : ''
+                }`}
               />
-              {/* Fallback decorativo */}
-              <div className="absolute inset-0 flex items-center justify-center text-9xl opacity-10 pointer-events-none">
-                ✨
+
+              {/* Badges */}
+              <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
+                {product.isNew && !isOutOfStock && (
+                  <span className="bg-primary text-white text-[10px] sm:text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-[0.15em] font-sans shadow-sm">
+                    Nuevo
+                  </span>
+                )}
+                {isOutOfStock && (
+                  <span className="bg-txt/85 text-white text-[10px] sm:text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-[0.15em] font-sans shadow-sm">
+                    Agotado
+                  </span>
+                )}
               </div>
-
-              {/* Capa oscura si está agotado */}
-              {isOutOfStock && (
-                <div className="absolute inset-0 bg-black/20 z-10 pointer-events-none" />
-              )}
-
-              {/* Agotado Badge (GIGANTE) */}
-              {isOutOfStock && (
-                <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
-                  <div className="bg-black/80 backdrop-blur-sm text-white px-8 py-3 rounded-xl -rotate-12 border border-white/20 shadow-2xl">
-                    <span className="text-2xl sm:text-4xl font-bold tracking-widest uppercase">
-                      Agotado
-                    </span>
-                  </div>
-                </div>
-              )}
-              
-              {/* Indicadores de swipe */}
-              {displayImages.length > 1 && (
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10 md:hidden">
-                  {displayImages.map((_, idx) => (
-                    <div 
-                      key={idx} 
-                      className={`h-1.5 rounded-full transition-all duration-300 ${currentImageIndex === idx ? 'w-4 bg-primary' : 'w-1.5 bg-border-light'}`}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {/* Favorite Button Minimalista */}
-              <button
-                onClick={handleFavoriteToggle}
-                className="absolute top-6 right-6 z-20 p-2 bg-transparent transition-transform duration-300 hover:scale-110"
-                aria-label={isLocalFav ? "Quitar de favoritos" : "Agregar a favoritos"}
-              >
-                <motion.div
-                  animate={isLocalFav ? { scale: [1, 1.2, 1] } : { scale: 1 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Heart 
-                    strokeWidth={1.5}
-                    className={`w-6 h-6 sm:w-7 sm:h-7 transition-colors duration-300 ${
-                      isLocalFav ? 'fill-primary text-primary' : 'text-txt-secondary hover:text-txt'
-                    }`} 
-                  />
-                </motion.div>
-              </button>
             </motion.div>
 
-            {/* Thumbnails */}
+            {/* Indicadores en móvil limpios, centrados y 100% redondos (NUNCA CORTADOS) */}
             {displayImages.length > 1 && (
-              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                {displayImages.map((img, idx) => (
+              <div className="flex justify-center items-center gap-2 py-2 sm:hidden">
+                {displayImages.map((_, idx) => (
                   <button
                     key={idx}
                     onClick={() => {
                       setCurrentImageIndex(idx);
                       setOverrideImage(null);
                     }}
-                    className={`relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all duration-200 ${
-                      (currentImageIndex === idx && !overrideImage) ? 'border-primary' : 'border-transparent opacity-60 hover:opacity-100'
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      currentImageIndex === idx ? 'w-6 bg-[#111111]' : 'w-2 bg-[#D4D4D8]'
                     }`}
-                  >
-                    <SafeImage
-                      src={img}
-                      alt={`Vista ${idx + 1}`}
-                      fill
-                      optimizeWidth={150}
-                      className="object-cover"
-                    />
-                  </button>
+                    aria-label={`Ver foto ${idx + 1}`}
+                  />
                 ))}
+              </div>
+            )}
+
+            {/* Miniaturas */}
+            {displayImages.length > 1 && (
+              <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-hide">
+                {displayImages.map((img, idx) => {
+                  const isSelected = currentImageIndex === idx && !overrideImage;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setCurrentImageIndex(idx);
+                        setOverrideImage(null);
+                      }}
+                      className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-[2px] overflow-hidden flex-shrink-0 bg-white border transition-all duration-200 ${
+                        isSelected
+                          ? 'border-[#111111] ring-1 ring-[#111111]'
+                          : 'border-[#E5E5E5] opacity-70 hover:opacity-100 hover:border-gray-400'
+                      }`}
+                      aria-label={`Ver foto ${idx + 1}`}
+                    >
+                      <SafeImage
+                        src={img}
+                        alt={`Miniatura ${idx + 1}`}
+                        fill
+                        optimizeWidth={160}
+                        className="object-contain p-1"
+                      />
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
 
-        {/* Información del Producto */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
-          className="flex flex-col justify-center"
-        >
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-display font-bold text-txt mb-1.5 lg:mb-2 leading-tight uppercase">
-            {product.name}
-          </h1>
+          {/* Columna Derecha: Información y Compra */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="lg:col-span-6 flex flex-col pt-1"
+          >
+            {/* Nombre con tipografía editorial */}
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-display font-medium text-txt mb-2 leading-tight tracking-tight">
+              {product.name}
+            </h1>
 
-          {(product.description || product.fullDescription) && (
-            <p className="text-xs sm:text-sm text-txt-secondary leading-relaxed mb-4 max-w-prose">
-              {product.description || product.fullDescription}
-            </p>
-          )}
+            {/* Precio en tono sofisticado */}
+            <div className="text-2xl sm:text-3xl font-semibold text-txt mb-5 tracking-tight font-sans">
+              {formatPrice(product.price)}
+            </div>
 
-          <div className="text-lg sm:text-xl lg:text-2xl font-display font-extrabold text-primary mb-5 drop-shadow-sm">
-            {formatPrice(product.price)}
-          </div>
+            {/* Descripción */}
+            {(product.description || product.fullDescription) && (
+              <div className="text-sm sm:text-base text-txt-secondary leading-relaxed mb-6 font-sans font-normal border-b border-[#F0E6DE] pb-6">
+                <p>{product.description || product.fullDescription}</p>
+              </div>
+            )}
 
-          <div className="bg-white rounded-3xl p-4 sm:p-5 border border-border-light shadow-sm flex flex-col gap-4">
-            
-            {/* Opciones de Tonos */}
-            {product.tones && product.tones.length > 0 && (
-              <div className="w-full">
-                <label className="block text-xs font-bold text-txt-secondary mb-3 uppercase tracking-wider">
-                  Tono seleccionado: <span className="text-txt font-semibold">{selectedTone ? selectedTone.name : 'Ninguno'}</span>
-                </label>
-                <div className="flex flex-wrap gap-3">
-                  {product.tones.map((tone) => (
-                    <button
-                      key={tone.name}
-                      onClick={() => setSelectedTone(tone)}
-                      className={`w-10 h-10 rounded-full border-2 transition-all duration-200 shadow-sm hover:scale-110 ${
-                        selectedTone?.name === tone.name
-                          ? 'border-primary ring-2 ring-primary/20 scale-110'
-                          : 'border-border hover:border-txt-secondary'
-                      }`}
-                      style={{ backgroundColor: tone.hex }}
-                      aria-label={`Seleccionar tono ${tone.name}`}
-                      title={tone.name}
-                    />
+            {/* Caja de Opciones y Compra */}
+            <div className="bg-white rounded-[2px] p-5 sm:p-6 border border-[#E5E5E5] flex flex-col gap-5">
+              {/* Opciones de Tonos */}
+              {product.tones && product.tones.length > 0 && (
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-txt-secondary mb-2.5 font-sans">
+                    Tono:{' '}
+                    <span className="text-txt font-bold">
+                      {selectedTone ? selectedTone.name : 'Selecciona un tono'}
+                    </span>
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {product.tones.map((tone) => {
+                      const isSelected = selectedTone?.name === tone.name;
+                      return (
+                        <button
+                          key={tone.name}
+                          onClick={() => setSelectedTone(tone)}
+                          className={`w-8 h-8 rounded-full border-2 transition-all duration-200 ${
+                            isSelected
+                              ? 'border-[#111111] ring-2 ring-black/20 scale-110'
+                              : 'border-border hover:border-txt'
+                          }`}
+                          style={{ backgroundColor: tone.hex }}
+                          aria-label={`Seleccionar tono ${tone.name}`}
+                          title={tone.name}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Opciones Dinámicas */}
+              {product.options && product.options.length > 0 && (
+                <div className="space-y-3.5">
+                  {product.options.map((option) => (
+                    <div key={option.name}>
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-txt-secondary mb-2 font-sans">
+                        {option.name}:{' '}
+                        <span className="text-txt font-bold">
+                          {selectedOptions[option.name]?.name || 'Seleccionar...'}
+                        </span>
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {option.values.map((val) => {
+                          const isSelected = selectedOptions[option.name]?.name === val.name;
+                          return (
+                            <button
+                              key={val.name}
+                              onClick={() => handleOptionSelect(option.name, val)}
+                              className={`px-3 py-1.5 rounded-[2px] border text-xs font-medium transition-all duration-200 ${
+                                isSelected
+                                  ? 'border-[#111111] bg-[#111111] text-white'
+                                  : 'border-[#D4D4D8] text-txt hover:border-black'
+                              }`}
+                            >
+                              {val.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {/* Opciones Dinámicas */}
-            {product.options && product.options.length > 0 && (
-              <div className="w-full space-y-6">
-                {product.options.map((option) => (
-                  <div key={option.name}>
-                    <label className="block text-xs font-bold text-txt-secondary mb-3 uppercase tracking-wider">
-                      {option.name}: <span className="text-txt font-semibold">{selectedOptions[option.name] ? selectedOptions[option.name].name : 'Seleccionar...'}</span>
-                    </label>
-                    <div className="flex flex-wrap gap-3">
-                      {option.values.map((val) => {
-                        const isSelected = selectedOptions[option.name]?.name === val.name;
-                        return (
-                          <button
-                            key={val.name}
-                            onClick={() => handleOptionSelect(option.name, val)}
-                            className={`px-4 py-2 rounded-xl border-2 transition-all duration-200 text-sm font-medium ${
-                              isSelected
-                                ? 'border-primary bg-primary/5 text-primary'
-                                : 'border-border hover:border-txt-secondary text-txt-secondary hover:text-txt'
-                            }`}
-                          >
-                            {val.name}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 mt-1">
-              {/* Selector de Cantidad */}
-            <div className="w-full sm:w-auto">
-              <label className="block text-[10px] sm:text-xs font-bold text-txt-secondary mb-2 uppercase tracking-wider text-center sm:text-left">
-                Cantidad
-              </label>
-              <QuantitySelector quantity={quantity} onChange={setQuantity} />
-            </div>
-
-            {/* Botón Agregar al Carrito */}
-            <button
-              onClick={isOutOfStock ? (e) => e.preventDefault() : handleAddToCart}
-              disabled={isAdded || isOutOfStock}
-              className={`w-full py-2.5 px-5 rounded-full font-semibold text-xs sm:text-sm transition-all duration-300 flex items-center justify-center gap-2 ${
-                isOutOfStock
-                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                  : isAdded
-                  ? 'bg-green-500 text-white shadow-sm scale-95'
-                  : 'btn-primary flex-1'
-              }`}
-              id="add-to-cart"
-            >
-              {isOutOfStock ? (
-                <span className="font-bold tracking-wider uppercase text-[10px] sm:text-xs">Agotado - No Disponible</span>
-              ) : isAdded ? (
-                <>
-                  <Check className="w-4 h-4" />
-                  ¡Agregado al carrito!
-                </>
-              ) : (
-                <>
-                  <ShoppingCart className="w-4 h-4" />
-                  Agregar al carrito
-                </>
               )}
-            </button>
-            </div>
 
-            {/* Opciones de entrega */}
-            <div className="mt-8 pt-6 border-t border-border/50">
-              <h4 className="text-sm font-bold text-txt mb-4 font-sans">Opciones de entrega:</h4>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 bg-secondary-50/50 rounded-xl p-3 border border-border/30">
-                  <div className="bg-gray-200/80 p-2.5 rounded-full flex-shrink-0">
-                    <Truck className="w-5 h-5 text-txt" />
+              {/* Fila 1: Cantidad (Idéntica a la imagen de referencia) */}
+              <div>
+                <QuantitySelector quantity={quantity} onChange={setQuantity} />
+              </div>
+
+              {/* Fila 2: AÑADIR AL CARRITO + Botón de Corazón (Idéntica a la imagen de referencia) */}
+              <div className="flex items-center gap-2.5 w-full">
+                <button
+                  onClick={isOutOfStock ? (e) => e.preventDefault() : handleAddToCart}
+                  disabled={isAdding || isOutOfStock}
+                  className={`flex-1 h-12 border border-[#111111] bg-white text-[#111111] hover:bg-[#111111] hover:text-white rounded-[2px] transition-all duration-200 font-sans font-medium text-xs sm:text-sm uppercase tracking-[0.15em] flex items-center justify-center ${
+                    isOutOfStock
+                      ? 'opacity-40 cursor-not-allowed'
+                      : isAdded
+                      ? 'bg-emerald-700 text-white border-emerald-700'
+                      : ''
+                  }`}
+                  id="add-to-cart"
+                  aria-label={
+                    isOutOfStock
+                      ? 'Producto agotado'
+                      : `Añadir ${product.name} al carrito`
+                  }
+                >
+                  {isOutOfStock ? (
+                    'Agotado'
+                  ) : isAdded ? (
+                    <span className="inline-flex items-center gap-2">
+                      <Check className="w-4 h-4 stroke-[2.5]" />
+                      <span>Añadido al carrito</span>
+                    </span>
+                  ) : (
+                    <span>Añadir al carrito</span>
+                  )}
+                </button>
+
+                <button
+                  onClick={handleFavoriteToggle}
+                  className={`w-12 h-12 border border-[#111111] bg-white hover:bg-gray-50 rounded-[2px] flex items-center justify-center shrink-0 transition-all duration-200 ${
+                    isFav ? 'border-primary' : ''
+                  }`}
+                  aria-label={isFav ? 'Quitar de favoritos' : 'Añadir a favoritos'}
+                  aria-pressed={isFav}
+                >
+                  <Heart
+                    strokeWidth={1.5}
+                    className={`w-5 h-5 transition-colors duration-200 ${
+                      isFav ? 'fill-primary text-primary' : 'text-[#111111]'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {/* Fila 3: COMPRAR AHORA (Idéntica a la imagen de referencia) */}
+              <button
+                onClick={handleBuyNow}
+                disabled={isOutOfStock}
+                className={`w-full h-12 bg-[#111111] hover:bg-black text-white rounded-[2px] font-sans font-medium text-xs sm:text-sm uppercase tracking-[0.15em] flex items-center justify-center transition-all duration-200 shadow-sm ${
+                  isOutOfStock ? 'opacity-40 cursor-not-allowed' : 'active:scale-[0.99]'
+                }`}
+                id="buy-now"
+                aria-label={`Comprar ahora ${product.name}`}
+              >
+                <span>Comprar ahora</span>
+              </button>
+
+              {/* Beneficios Destacados - Contra Entrega Cali & Envíos Nacionales (Logos en color fucsia de la marca) */}
+              <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div className="flex items-center gap-3 p-3 bg-white border border-[#E5E5E5] rounded-[2px] shadow-sm">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <MapPin className="w-4 h-4 text-primary" strokeWidth={2} />
                   </div>
-                  <div className="text-sm font-sans flex flex-wrap gap-2 items-center">
-                    <span className="font-semibold text-txt">Contra Entrega</span>
-                    <span className="text-txt-secondary">Cali</span>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-txt font-sans">
+                      Contra Entrega Cali
+                    </span>
+                    <span className="text-[11px] text-txt-secondary font-sans">
+                      Pagas al recibir tu producto
+                    </span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 bg-secondary-50/50 rounded-xl p-3 border border-border/30">
-                  <div className="bg-gray-200/80 p-2.5 rounded-full flex-shrink-0">
-                    <CreditCard className="w-5 h-5 text-txt" />
+                <div className="flex items-center gap-3 p-3 bg-white border border-[#E5E5E5] rounded-[2px] shadow-sm">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <Truck className="w-4 h-4 text-primary" strokeWidth={2} />
                   </div>
-                  <div className="text-sm font-sans flex flex-wrap gap-2 items-center">
-                    <span className="font-semibold text-txt">Envíos Nacionales</span>
-                    <span className="text-txt-secondary">Colombia</span>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-txt font-sans">
+                      Envíos Nacionales Colombia
+                    </span>
+                    <span className="text-[11px] text-txt-secondary font-sans">
+                      Despachos a todo el país
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
-
-          </div>
-        </motion.div>
+          </motion.div>
         </div>
       </div>
 
-      {/* Productos Relacionados */}
-      {relatedProducts.length > 0 && (
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-100px' }}
-          transition={{ duration: 0.6 }}
-          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16"
-        >
-          <div className="text-center mb-10">
-            <h2 className="text-2xl sm:text-3xl font-display font-bold text-txt">
-              También te podría <span className="text-gradient">interesar</span>
-            </h2>
+      {/* Sección «También te puede interesar» (Grid de Varias Columnas) */}
+      {filteredRelated.length > 0 && (
+        <section className="border-t border-[#E5E5E5] bg-white py-14 sm:py-20" id="relacionados">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-8 sm:mb-12">
+              <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-primary font-sans block mb-2">
+                Recomendaciones
+              </span>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-medium text-txt tracking-tight">
+                También te puede <span className="text-gradient italic">interesar</span>
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5 lg:gap-6">
+              {filteredRelated.map((p) => (
+                <div key={p.id} className="h-full">
+                  <ProductCard product={p} />
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="flex overflow-x-auto gap-3 sm:gap-4 lg:gap-6 pb-6 pt-2 px-4 -mx-4 sm:mx-0 sm:px-0 snap-x snap-mandatory scroll-smooth scrollbar-hide">
-            {relatedProducts.slice(0, 8).map((p) => (
-              <div 
-                key={p.id} 
-                className="min-w-[55vw] sm:min-w-[calc(33.333%-0.66rem)] lg:min-w-[calc(25%-1.125rem)] xl:min-w-[calc(20%-1.2rem)] snap-center sm:snap-start flex-shrink-0 transition-transform duration-300 hover:-translate-y-1"
-              >
-                <ProductCard product={p} />
-              </div>
-            ))}
-          </div>
-        </motion.section>
+        </section>
       )}
     </div>
   );

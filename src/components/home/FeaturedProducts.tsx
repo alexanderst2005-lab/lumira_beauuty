@@ -23,9 +23,8 @@ const getFeaturedAndNewProducts = (productsList: Product[], count: number) => {
       !p.isNew && !p.featured
     );
     
-    // Sort remaining randomly or keep them
-    const shuffledRemaining = remainingProducts.sort(() => 0.5 - Math.random());
-    result = [...result, ...shuffledRemaining];
+    // Keep remaining in stable order to avoid SSR hydration mismatch
+    result = [...result, ...remainingProducts];
   }
 
   // Si hay más del count requerido, cortamos
@@ -33,7 +32,7 @@ const getFeaturedAndNewProducts = (productsList: Product[], count: number) => {
 };
 
 export default function FeaturedProducts({ initialProducts }: { initialProducts: Product[] }) {
-  const featured = getFeaturedAndNewProducts(initialProducts, 8);
+  const featured = getFeaturedAndNewProducts(initialProducts, 10);
 
   useEffect(() => {
     if (featured && featured.length > 0) {
@@ -58,7 +57,7 @@ export default function FeaturedProducts({ initialProducts }: { initialProducts:
   }, []);
 
   return (
-    <section className="py-16 sm:py-20 bg-gradient-to-b from-white to-secondary-100/30" id="featured">
+    <section className="py-16 sm:py-20 bg-white" id="featured">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -67,15 +66,15 @@ export default function FeaturedProducts({ initialProducts }: { initialProducts:
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold text-text mb-3">
-            Productos <span className="text-gradient">destacados</span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-medium text-txt mb-3">
+            Productos <span className="text-gradient italic">destacados</span>
           </h2>
-          <p className="text-text-light text-sm sm:text-base max-w-md mx-auto">
+          <p className="text-txt-secondary text-sm sm:text-base max-w-md mx-auto font-sans">
             Los favoritos de nuestras clientas
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5 lg:gap-6">
           {featured.map((product, index) => (
             <motion.div
               key={product.id}

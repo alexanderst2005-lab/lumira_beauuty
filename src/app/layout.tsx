@@ -1,11 +1,20 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Cormorant_Garamond, DM_Sans } from "next/font/google";
 import "./globals.css";
 import StoreLayoutWrapper from "@/components/layout/StoreLayoutWrapper";
 
-const inter = Inter({
+const poppins = DM_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-body",
+  display: "swap",
+});
+
+const playfair = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-heading",
   display: "swap",
 });
 
@@ -37,7 +46,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const config = await getStoreConfig();
 
   return (
-    <html lang="es" className={`${inter.variable}`}>
+    <html lang="es" className={`${poppins.variable} ${playfair.variable}`}>
       <body className="font-sans antialiased text-txt bg-bg selection:bg-rose-200 selection:text-primary-darker">
         <StoreLayoutWrapper config={config}>
           {children}
