@@ -21,6 +21,17 @@ function ScrollRestorer({ isAdmin }: { isAdmin: boolean }) {
 
   useEffect(() => {
     if (!isAdmin && typeof window !== 'undefined') {
+      // En la página principal (/), SIEMPRE comenzar desde arriba en la Hero
+      if (pathname === '/') {
+        try {
+          sessionStorage.removeItem('lumira_scroll_pos_/');
+        } catch {}
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+        return;
+      }
+
       const savedY = getSavedScrollPosition();
       if (savedY !== null && savedY > 0) {
         const restore = () => {
@@ -29,10 +40,9 @@ function ScrollRestorer({ isAdmin }: { isAdmin: boolean }) {
         requestAnimationFrame(() => {
           restore();
           setTimeout(restore, 50);
-          setTimeout(restore, 150);
         });
       } else {
-        window.scrollTo(0, 0);
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
         document.body.scrollTop = 0;
         document.documentElement.scrollTop = 0;
       }
@@ -48,7 +58,7 @@ export default function StoreLayoutWrapper({ children, config }: { children: Rea
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      window.history.scrollRestoration = 'auto';
+      window.history.scrollRestoration = 'manual';
     }
   }, []);
 

@@ -2,7 +2,8 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
-import { X, Home, ShoppingBag, MessageCircle, Phone } from 'lucide-react';
+import Image from 'next/image';
+import { X, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface MobileMenuProps {
@@ -11,10 +12,10 @@ interface MobileMenuProps {
 }
 
 const menuItems = [
-  { href: '/', label: 'Inicio', icon: Home },
-  { href: '/catalogo', label: 'Catálogo', icon: ShoppingBag },
-  { href: '/contacto', label: 'Contacto', icon: MessageCircle },
-  { href: 'https://wa.me/573011675661', label: 'WhatsApp', icon: Phone, external: true },
+  { href: '/', label: 'Inicio' },
+  { href: '/catalogo', label: 'Catálogo' },
+  { href: '/contacto', label: 'Contacto' },
+  { href: 'https://wa.me/573011675661', label: 'WhatsApp', external: true },
 ];
 
 export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
@@ -32,76 +33,80 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
-          {/* Overlay */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/40 z-[60] backdrop-blur-sm"
-            onClick={onClose}
-          />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.98 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+          className="fixed inset-0 w-full h-full bg-white z-[80] flex flex-col justify-between overflow-y-auto px-6 py-8 sm:px-12 sm:py-10"
+        >
+          {/* Top Bar with Logo and Close Button */}
+          <div className="w-full flex items-center justify-between">
+            <Link href="/" onClick={onClose} className="inline-block">
+              <Image
+                src="/images/logo-transparent.png"
+                alt="Lumira Beauty"
+                width={140}
+                height={50}
+                className="h-10 sm:h-12 w-auto object-contain"
+              />
+            </Link>
 
-          {/* Menu Panel */}
-          <motion.div
-            initial={{ x: '-100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '-100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white z-[70] shadow-2xl"
-          >
-            <div className="flex flex-col h-full">
-              {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-border">
-                <h2 className="text-lg font-heading font-semibold text-gradient">Menú</h2>
-                <button
-                  onClick={onClose}
-                  className="p-2 rounded-full hover:bg-secondary-100 transition-colors"
-                  aria-label="Cerrar menú"
+            <button
+              onClick={onClose}
+              className="w-11 h-11 rounded-full bg-neutral-100 hover:bg-neutral-200 text-txt flex items-center justify-center transition-all duration-200 active:scale-95"
+              aria-label="Cerrar menú"
+            >
+              <X className="w-5 h-5 stroke-[2]" />
+            </button>
+          </div>
+
+          {/* Centered Navigation Links */}
+          <nav className="my-auto py-10 flex flex-col items-center justify-center text-center gap-7 sm:gap-9">
+            {menuItems.map((item, index) => {
+              const props = item.external
+                ? { target: '_blank', rel: 'noopener noreferrer' }
+                : {};
+
+              return (
+                <motion.div
+                  key={item.href}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05 + index * 0.06, duration: 0.3 }}
                 >
-                  <X className="w-5 h-5 text-text" />
-                </button>
-              </div>
+                  <Link
+                    href={item.href}
+                    onClick={onClose}
+                    className="group relative inline-block font-display text-3xl sm:text-4xl md:text-5xl font-medium tracking-tight text-txt hover:text-primary transition-all duration-300"
+                    {...props}
+                  >
+                    <span>{item.label}</span>
+                    <span className="block h-[2px] w-0 bg-primary mx-auto transition-all duration-300 group-hover:w-full mt-1 rounded-full" />
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </nav>
 
-              {/* Navigation */}
-              <nav className="flex-1 py-6">
-                {menuItems.map((item, index) => {
-                  const Icon = item.icon;
-                  const props = item.external
-                    ? { target: '_blank', rel: 'noopener noreferrer' }
-                    : {};
+          {/* Bottom Info & Contact */}
+          <div className="w-full pt-6 border-t border-[#F0E6DE] flex flex-col items-center text-center gap-3">
+            <a
+              href="https://wa.me/573011675661?text=Hola%20Lumira%20Beauty,%20quisiera%20asesor%C3%ADa%20personalizada"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={onClose}
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all duration-300 text-xs sm:text-sm font-sans font-semibold tracking-wide"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span>Chatear con una asesora</span>
+            </a>
 
-                  return (
-                    <motion.div
-                      key={item.href}
-                      initial={{ opacity: 0, x: 30 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.08 }}
-                    >
-                      <Link
-                        href={item.href}
-                        onClick={onClose}
-                        className="flex items-center gap-4 px-6 py-4 text-text hover:bg-secondary-100 hover:text-primary transition-all duration-200 group"
-                        {...props}
-                      >
-                        <Icon className="w-5 h-5 text-primary/60 group-hover:text-primary transition-colors" />
-                        <span className="font-medium text-base">{item.label}</span>
-                      </Link>
-                    </motion.div>
-                  );
-                })}
-              </nav>
-
-              {/* Footer */}
-              <div className="p-6 border-t border-border">
-                <p className="text-xs text-text-light text-center">
-                  © 2026 Lumira Beauty
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        </>
+            <p className="text-xs text-txt-secondary/70 font-sans tracking-wide">
+              © 2026 Lumira Beauty. Todos los derechos reservados.
+            </p>
+          </div>
+        </motion.div>
       )}
     </AnimatePresence>
   );
