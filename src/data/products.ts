@@ -1,14 +1,14 @@
 import { Product, CategoryInfo } from '@/types';
 
 export const categories: CategoryInfo[] = [
+  { id: 'todos', name: 'Todos los Productos', emoji: '✨', slug: 'todos' },
   { id: 'pestanas-punto-a-punto', name: 'Pestañas Punto a Punto', emoji: '👁️', slug: 'pestanas-punto-a-punto' },
   { id: 'pestanas-enteras', name: 'Pestañas Enteras', emoji: '👁️', slug: 'pestanas-enteras' },
-  { id: 'makeup', name: 'Makeup', emoji: '💄', slug: 'makeup' },
+  { id: 'makeup', name: 'Maquillaje', emoji: '💄', slug: 'makeup' },
   { id: 'skincare', name: 'Skincare', emoji: '🧴', slug: 'skincare' },
-  { id: 'corporal', name: 'Corporal', emoji: '🧴', slug: 'corporal' },
-  { id: 'productos-cabello', name: 'Productos para el Cabello', emoji: '💇', slug: 'productos-cabello' },
+  { id: 'corporal', name: 'Corporal', emoji: '🌸', slug: 'corporal' },
+  { id: 'productos-cabello', name: 'Cuidado Capilar', emoji: '💇', slug: 'productos-cabello' },
   { id: 'accesorios', name: 'Accesorios', emoji: '🎀', slug: 'accesorios' },
-  { id: 'todos', name: 'Todos los Productos', emoji: '⭐', slug: 'todos' },
 ];
 
 export const products: Product[] = [
