@@ -14,9 +14,7 @@ export async function sendBrevoEmail({ toEmail, toName, subject, htmlContent }: 
   // En Brevo, el remitente debe ser un correo verificado de la cuenta para que el relay no lo rechace en cola.
   // alexanderst2005@gmail.com es el remitente verificado y muestra el nombre oficial "Lumira Beauty".
   const envSender = process.env.BREVO_SENDER_EMAIL?.trim();
-  const senderEmail = (envSender && !envSender.includes('lumirabeauty')) 
-    ? envSender 
-    : 'alexanderst2005@gmail.com';
+  const senderEmail = envSender || 'alexanderst2005@gmail.com';
   const senderName = process.env.BREVO_SENDER_NAME || 'Lumira Beauty';
 
   if (!apiKey) {
