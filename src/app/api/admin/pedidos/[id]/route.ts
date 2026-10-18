@@ -13,11 +13,17 @@ export async function PATCH(
   }
 
   try {
-    const { status, inTrash } = await request.json();
+    const { status, inTrash, shippingCompany, trackingNumber } = await request.json();
 
     const properties: any = {};
     if (status !== undefined) properties.Status = { select: { name: status } };
     if (inTrash !== undefined) properties['En Papelera'] = { checkbox: inTrash };
+    if (shippingCompany !== undefined) {
+      properties.ShippingCompany = { rich_text: [{ text: { content: shippingCompany || '' } }] };
+    }
+    if (trackingNumber !== undefined) {
+      properties.TrackingNumber = { rich_text: [{ text: { content: trackingNumber || '' } }] };
+    }
 
     const response = await fetch(`https://api.notion.com/v1/pages/${id}`, {
       method: 'PATCH',

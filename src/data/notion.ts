@@ -161,6 +161,8 @@ export async function getAllOrdersFromNotion(includeTrash = false) {
         status: props.Status?.select?.name || "Pendiente",
         date: props.Date?.date?.start || page.created_time,
         inTrash: props['En Papelera']?.checkbox ?? false,
+        shippingCompany: props.ShippingCompany?.rich_text?.[0]?.plain_text || "",
+        trackingNumber: props.TrackingNumber?.rich_text?.[0]?.plain_text || "",
       };
     }).filter(o => includeTrash ? true : !o.inTrash);
   } catch (error) {
