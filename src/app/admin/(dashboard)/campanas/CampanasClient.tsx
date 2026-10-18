@@ -381,6 +381,27 @@ export default function CampanasClient({ initialCampaigns, availableProducts = [
         throw new Error(data.error || 'Error al guardar campaña');
       }
 
+      // 1. Actualizar estado local inmediatamente para visibilidad instantánea en la lista
+      if (data.campaign) {
+        setCampaigns(prev => {
+          const exists = prev.some(c => c.id === data.campaign.id);
+          if (exists) {
+            return prev.map(c => c.id === data.campaign.id ? data.campaign : c);
+          }
+          return [data.campaign, ...prev];
+        });
+      }
+
+      // 2. Limpiar marcas de sesión previas para que la tienda pública muestre el popup de inmediato
+      try {
+        Object.keys(sessionStorage).forEach(k => {
+          if (k.startsWith('lumira_promo_seen_')) sessionStorage.removeItem(k);
+        });
+        Object.keys(localStorage).forEach(k => {
+          if (k.startsWith('lumira_promo_seen_')) localStorage.removeItem(k);
+        });
+      } catch {}
+
       toast.success(editingCampaign ? 'Campaña y descuentos actualizados' : 'Campaña publicada con éxito');
       setIsModalOpen(false);
       await fetchCampaigns();

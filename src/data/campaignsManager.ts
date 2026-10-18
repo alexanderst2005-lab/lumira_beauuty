@@ -16,7 +16,8 @@ export function evaluateCampaignStatus(campaign: PromotionalCampaign, now: Date 
 
   if (campaign.startDate) {
     const start = new Date(campaign.startDate);
-    if (!isNaN(start.getTime()) && now < start) {
+    // Tolerancia de 15 minutos para evitar que desfases horarios cliente-servidor marquen la campaña como programada en vez de activa
+    if (!isNaN(start.getTime()) && (start.getTime() - now.getTime()) > 15 * 60 * 1000) {
       return 'scheduled';
     }
   }

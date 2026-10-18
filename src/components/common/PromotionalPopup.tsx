@@ -39,6 +39,11 @@ export default function PromotionalPopup({
   const shouldShowCampaign = useCallback((camp: PromotionalCampaign): boolean => {
     if (isPreview) return true;
     try {
+      // Si es el administrador navegando en la tienda, permitir ver siempre el popup para pruebas inmediatas
+      if (typeof document !== 'undefined' && document.cookie.includes('admin_session=authenticated')) {
+        return true;
+      }
+
       const storageKey = `lumira_promo_seen_${camp.id}_${camp.updatedAt || 'v1'}`;
       if (camp.frequency === 'once_per_session') {
         return !sessionStorage.getItem(storageKey);

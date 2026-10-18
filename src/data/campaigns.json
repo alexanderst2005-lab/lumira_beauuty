@@ -1,1 +1,19 @@
-[]
+[
+  {
+    "id": "camp-1792292901521",
+    "title": "¡Descuentos de Temporada Lumira Beauty!",
+    "description": "Descubre nuestros productos favoritos con promociones especiales por tiempo limitado.",
+    "promoBadge": "Hasta 30% OFF",
+    "imageUrl": "",
+    "buttonText": "Explorar Ofertas",
+    "buttonUrl": "/catalogo?ofertas=true",
+    "frequency": "always",
+    "enabled": true,
+    "startDate": "",
+    "endDate": "",
+    "products": [],
+    "status": "active",
+    "createdAt": "2026-10-18T03:08:21.515Z",
+    "updatedAt": "2026-10-18T03:08:21.515Z"
+  }
+]
