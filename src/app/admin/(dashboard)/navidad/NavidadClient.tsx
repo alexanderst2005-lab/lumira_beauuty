@@ -38,7 +38,8 @@ export default function NavidadClient({ initialConfig }: NavidadClientProps) {
     }));
   };
 
-  const handleSaveChanges = async () => {
+  const handleSaveChanges = async (customData?: ChristmasConfig) => {
+    const dataToSave = customData || formData;
     setIsSaving(true);
     try {
       const response = await fetch('/api/admin/christmas', {
@@ -46,7 +47,7 @@ export default function NavidadClient({ initialConfig }: NavidadClientProps) {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(dataToSave)
       });
 
       if (!response.ok) {
@@ -58,7 +59,7 @@ export default function NavidadClient({ initialConfig }: NavidadClientProps) {
         setSavedConfig(data.config);
         setFormData(data.config);
         toast.success(
-          formData.enabled 
+          dataToSave.enabled 
             ? '✨ ¡Modo navideño activado y guardado correctamente!' 
             : '🤍 Configuración guardada. Modo navideño desactivado.'
         );
@@ -102,7 +103,7 @@ export default function NavidadClient({ initialConfig }: NavidadClientProps) {
 
           <button
             type="button"
-            onClick={handleSaveChanges}
+            onClick={() => handleSaveChanges()}
             disabled={isSaving || !hasUnsavedChanges}
             className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm ${
               hasUnsavedChanges
@@ -134,7 +135,7 @@ export default function NavidadClient({ initialConfig }: NavidadClientProps) {
           </div>
           <button
             type="button"
-            onClick={handleSaveChanges}
+            onClick={() => handleSaveChanges()}
             disabled={isSaving}
             className="underline font-bold hover:text-amber-950 ml-4 flex-shrink-0"
           >
@@ -367,13 +368,14 @@ export default function NavidadClient({ initialConfig }: NavidadClientProps) {
         </p>
       </div>
 
-      {/* Modal de Vista Previa */}
+      {/* Modal de Vista Previa Real */}
       <ChristmasPreviewModal
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
         config={formData}
+        onChangeConfig={(newCfg) => setFormData(newCfg)}
         onSaveAndPublish={async () => {
-          await handleSaveChanges();
+          await handleSaveChanges(formData);
           setIsPreviewOpen(false);
         }}
         saving={isSaving}

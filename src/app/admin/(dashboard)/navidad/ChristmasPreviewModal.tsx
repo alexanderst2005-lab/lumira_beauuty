@@ -1,16 +1,28 @@
 'use client';
 
-import React, { useState } from 'react';
-import { X, Laptop, Tablet, Smartphone, Sparkles, Gift, Eye } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { 
+  X, 
+  Laptop, 
+  Tablet, 
+  Smartphone, 
+  Eye, 
+  RefreshCw, 
+  Save, 
+  Snowflake, 
+  Lightbulb, 
+  Sparkles, 
+  Gift, 
+  Heart,
+  ExternalLink
+} from 'lucide-react';
 import { ChristmasConfig } from '@/types/christmas';
-import ChristmasCanvasEffects from '@/components/christmas/ChristmasCanvasEffects';
-import ChristmasLights from '@/components/christmas/ChristmasLights';
-import ChristmasExtraDecor from '@/components/christmas/ChristmasExtraDecor';
 
 interface ChristmasPreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   config: ChristmasConfig;
+  onChangeConfig: (newConfig: ChristmasConfig) => void;
   onSaveAndPublish: () => void;
   saving: boolean;
 }
@@ -19,37 +31,67 @@ export default function ChristmasPreviewModal({
   isOpen,
   onClose,
   config,
+  onChangeConfig,
   onSaveAndPublish,
   saving
 }: ChristmasPreviewModalProps) {
   const [device, setDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
+  const [iframeKey, setIframeKey] = useState(0);
+  const [isLoadingIframe, setIsLoadingIframe] = useState(true);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+
+  // Sincronizar cambios por postMessage directamente al iframe sin recargar
+  useEffect(() => {
+    if (iframeRef.current && iframeRef.current.contentWindow) {
+      iframeRef.current.contentWindow.postMessage(
+        {
+          type: 'LUMIRA_CHRISTMAS_PREVIEW',
+          config
+        },
+        '*'
+      );
+    }
+  }, [config]);
 
   if (!isOpen) return null;
 
+  const toggleOption = (key: keyof Omit<ChristmasConfig, 'updatedAt'>) => {
+    const updated = {
+      ...config,
+      [key]: !config[key]
+    };
+    onChangeConfig(updated);
+  };
+
+  const previewUrl = `/?preview_christmas=1&enabled=${config.enabled}&snow=${config.snow}&lights=${config.lights}&sparkles=${config.sparkles}&giftSection=${config.giftSection}&extraDecor=${config.extraDecor}`;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/75 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white rounded-2xl shadow-2xl flex flex-col w-full max-w-6xl h-[92vh] overflow-hidden border border-gray-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+      <div className="bg-[#12121A] rounded-2xl shadow-2xl flex flex-col w-full max-w-[96vw] h-[95vh] overflow-hidden border border-gray-800">
+        
         {/* Barra superior de control de la vista previa */}
-        <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3.5 bg-gray-900 text-white border-b border-gray-800">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-[#1A1A24] text-white border-b border-gray-800">
+          
+          {/* Identificador y título */}
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-pink-500/20 border border-pink-500/40 flex items-center justify-center text-pink-400">
               <Eye className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-sm sm:text-base text-white">Vista Previa Navideña</h3>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                  Simulación sin publicar
+                <h3 className="font-semibold text-sm sm:text-base text-white">Vista Previa Real de la Tienda</h3>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-pink-500/20 text-pink-300 border border-pink-500/30">
+                  Simulación en Vivo
                 </span>
               </div>
-              <p className="text-xs text-gray-400 hidden sm:block">
-                Comprueba en tiempo real cómo verán la tienda tus clientes con la configuración actual.
+              <p className="text-xs text-gray-400 hidden md:block">
+                Esta es la página principal real de Lumira Beauty. Los cambios que pruebes aquí no afectan a tus visitantes hasta que guardes.
               </p>
             </div>
           </div>
 
           {/* Selector de Dispositivo */}
-          <div className="flex items-center gap-1 bg-gray-800 p-1 rounded-xl border border-gray-700">
+          <div className="flex items-center gap-1 bg-[#12121A] p-1 rounded-xl border border-gray-800">
             <button
               type="button"
               onClick={() => setDevice('desktop')}
@@ -88,20 +130,34 @@ export default function ChristmasPreviewModal({
             </button>
           </div>
 
-          {/* Acciones */}
+          {/* Acciones principales */}
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setIsLoadingIframe(true);
+                setIframeKey((prev) => prev + 1);
+              }}
+              title="Recargar vista previa"
+              className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoadingIframe ? 'animate-spin' : ''}`} />
+            </button>
+
             <button
               type="button"
               onClick={onSaveAndPublish}
               disabled={saving}
-              className="px-3.5 py-1.5 rounded-lg bg-pink-500 hover:bg-pink-600 text-white text-xs font-medium transition-all shadow-sm active:scale-95 disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-xs sm:text-sm font-semibold transition-all shadow-md shadow-pink-600/30 active:scale-95 disabled:opacity-50"
             >
-              {saving ? 'Guardando...' : 'Guardar y Publicar'}
+              <Save className="w-4 h-4" />
+              <span>{saving ? 'Guardando...' : 'Guardar y Publicar'}</span>
             </button>
+
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+              className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
               aria-label="Cerrar vista previa"
             >
               <X className="w-5 h-5" />
@@ -109,149 +165,154 @@ export default function ChristmasPreviewModal({
           </div>
         </div>
 
-        {/* Resumen de efectos activos en la vista previa */}
-        <div className="bg-gray-50 border-b border-gray-200 px-4 sm:px-6 py-2 flex flex-wrap items-center gap-2 text-xs">
-          <span className="text-gray-500 font-medium">Efectos en esta vista:</span>
-          <span className={`px-2 py-0.5 rounded-md font-medium ${config.enabled ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-200 text-gray-700'}`}>
-            {config.enabled ? '● Temporada Activada' : '○ Temporada Desactivada'}
-          </span>
-          {config.enabled && (
-            <>
-              <span className={`px-2 py-0.5 rounded-md font-medium ${config.snow ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-gray-100 text-gray-400'}`}>
-                ❄️ Nieve: {config.snow ? 'Sí' : 'No'}
-              </span>
-              <span className={`px-2 py-0.5 rounded-md font-medium ${config.lights ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-gray-100 text-gray-400'}`}>
-                💡 Luces: {config.lights ? 'Sí' : 'No'}
-              </span>
-              <span className={`px-2 py-0.5 rounded-md font-medium ${config.sparkles ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-gray-100 text-gray-400'}`}>
-                ✨ Destellos: {config.sparkles ? 'Sí' : 'No'}
-              </span>
-              <span className={`px-2 py-0.5 rounded-md font-medium ${config.giftSection ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-gray-100 text-gray-400'}`}>
-                🎁 Regala Belleza: {config.giftSection ? 'Sí' : 'No'}
-              </span>
-              <span className={`px-2 py-0.5 rounded-md font-medium ${config.extraDecor ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-gray-100 text-gray-400'}`}>
-                🎀 Decoración Extra: {config.extraDecor ? 'Sí' : 'No'}
-              </span>
-            </>
-          )}
+        {/* Barra interactiva de interruptores en tiempo real */}
+        <div className="bg-[#161622] border-b border-gray-800/80 px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-gray-400 font-medium mr-1">Probar efectos en vivo:</span>
+
+            {/* Interruptor Maestro */}
+            <button
+              type="button"
+              onClick={() => toggleOption('enabled')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-xs transition-all shadow-sm ${
+                config.enabled
+                  ? 'bg-emerald-500 text-white shadow-emerald-500/20'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              <span>{config.enabled ? '🎄 Navidad: ACTIVADA' : '○ Navidad: DESACTIVADA'}</span>
+            </button>
+
+            {/* Switch Nieve */}
+            <button
+              type="button"
+              onClick={() => toggleOption('snow')}
+              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition-colors ${
+                config.snow && config.enabled
+                  ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
+                  : 'bg-gray-800 text-gray-400 hover:text-gray-300 border border-gray-700'
+              }`}
+            >
+              <Snowflake className="w-3.5 h-3.5" />
+              <span>Nieve: {config.snow ? 'ON' : 'OFF'}</span>
+            </button>
+
+            {/* Switch Luces */}
+            <button
+              type="button"
+              onClick={() => toggleOption('lights')}
+              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition-colors ${
+                config.lights && config.enabled
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                  : 'bg-gray-800 text-gray-400 hover:text-gray-300 border border-gray-700'
+              }`}
+            >
+              <Lightbulb className="w-3.5 h-3.5" />
+              <span>Luces: {config.lights ? 'ON' : 'OFF'}</span>
+            </button>
+
+            {/* Switch Destellos */}
+            <button
+              type="button"
+              onClick={() => toggleOption('sparkles')}
+              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition-colors ${
+                config.sparkles && config.enabled
+                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+                  : 'bg-gray-800 text-gray-400 hover:text-gray-300 border border-gray-700'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Destellos: {config.sparkles ? 'ON' : 'OFF'}</span>
+            </button>
+
+            {/* Switch Regala Belleza */}
+            <button
+              type="button"
+              onClick={() => toggleOption('giftSection')}
+              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition-colors ${
+                config.giftSection && config.enabled
+                  ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                  : 'bg-gray-800 text-gray-400 hover:text-gray-300 border border-gray-700'
+              }`}
+            >
+              <Gift className="w-3.5 h-3.5" />
+              <span>Regala Belleza: {config.giftSection ? 'ON' : 'OFF'}</span>
+            </button>
+
+            {/* Switch Decoración Extra */}
+            <button
+              type="button"
+              onClick={() => toggleOption('extraDecor')}
+              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition-colors ${
+                config.extraDecor && config.enabled
+                  ? 'bg-pink-500/20 text-pink-300 border border-pink-500/40'
+                  : 'bg-gray-800 text-gray-400 hover:text-gray-300 border border-gray-700'
+              }`}
+            >
+              <Heart className="w-3.5 h-3.5" />
+              <span>Detalles: {config.extraDecor ? 'ON' : 'OFF'}</span>
+            </button>
+          </div>
+
+          <div className="text-gray-400 text-[11px] hidden lg:block">
+            {config.enabled 
+              ? '✨ Modo navideño activado en la simulación.' 
+              : '🤍 Navidad desactivada; la tienda se muestra con su aspecto original.'}
+          </div>
         </div>
 
-        {/* Área del lienzo de previsualización interactiva */}
-        <div className="flex-1 overflow-y-auto bg-gray-100 p-2 sm:p-6 flex items-start justify-center">
+        {/* Área del iframe con el tamaño del dispositivo seleccionado */}
+        <div className="flex-1 overflow-hidden bg-[#0A0A0F] p-2 sm:p-4 flex items-center justify-center relative">
+          {isLoadingIframe && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0A0A0F]/80 z-20 gap-3 text-gray-400">
+              <RefreshCw className="w-8 h-8 text-pink-500 animate-spin" />
+              <span className="text-sm font-medium">Cargando la tienda real de Lumira Beauty...</span>
+            </div>
+          )}
+
           <div
-            className={`transition-all duration-300 relative bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden min-h-[600px] ${
+            className={`transition-all duration-300 h-full flex flex-col items-center justify-center ${
               device === 'mobile'
-                ? 'w-[375px]'
+                ? 'w-[390px]'
                 : device === 'tablet'
                 ? 'w-[768px]'
-                : 'w-full max-w-5xl'
+                : 'w-full'
             }`}
           >
-            {/* Efectos navideños activos dentro del marco */}
-            {config.enabled && (
-              <>
-                {(config.snow || config.sparkles) && (
-                  <ChristmasCanvasEffects
-                    showSnow={config.snow}
-                    showSparkles={config.sparkles}
-                  />
-                )}
-                {config.lights && <ChristmasLights />}
-                {config.extraDecor && <ChristmasExtraDecor />}
-              </>
-            )}
-
-            {/* Simulación visual de la tienda Lumira Beauty */}
-            {/* 1. Header de la tienda */}
-            <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
-              <div className="font-heading font-bold text-xl text-txt">
-                Lumira <span className="text-pink-500 font-sans text-xs tracking-widest font-semibold uppercase">Beauty</span>
-              </div>
-              <div className="flex items-center gap-4 text-xs text-txt-secondary">
-                <span className="hidden sm:inline">Catálogo</span>
-                <span className="hidden sm:inline">Skincare</span>
-                <span className="hidden sm:inline">Pestañas</span>
-                <span className="p-2 rounded-full bg-rose-50 text-pink-600 font-bold">🛒 0</span>
-              </div>
-            </div>
-
-            {/* 2. Hero banner simulado con estética de la tienda */}
-            <div className="relative bg-gradient-to-r from-[#FFF0F5] via-[#FFF9FB] to-[#FFF5F0] py-14 px-6 text-center border-b border-[#F5E6EC]">
-              <span className="inline-block px-3 py-1 rounded-full bg-white/80 border border-pink-200 text-pink-600 text-xs font-semibold uppercase tracking-wider mb-3">
-                Lujo & Cuidado Femenino
-              </span>
-              <h1 className="text-3xl sm:text-4xl font-display font-medium text-txt mb-2">
-                Realza tu belleza natural
-              </h1>
-              <p className="text-txt-secondary text-sm max-w-md mx-auto">
-                Cosméticos, skincare y pestañas premium seleccionados especialmente para ti.
-              </p>
-            </div>
-
-            {/* 3. Sección "Regala belleza" (si está activa) */}
-            {config.enabled && config.giftSection && (
-              <div className="py-10 px-6 bg-gradient-to-b from-[#FFFDF9] via-[#FFF5F8] to-white border-y border-[#F7E6EC] text-center">
-                <div className="max-w-2xl mx-auto p-6 sm:p-8 rounded-2xl bg-white border border-[#F5DFE8] shadow-md">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFF1F6] border border-[#FAD0E2] text-[11px] font-semibold text-[#C4437B] uppercase tracking-wider mb-3">
-                    <Gift className="w-3 h-3 text-[#E5A852]" />
-                    <span>Temporada Especial</span>
-                    <Sparkles className="w-3 h-3 text-[#E5A852]" />
-                  </div>
-                  <h2 className="text-2xl sm:text-3xl font-display font-medium text-txt mb-2">
-                    Esta Navidad, <span className="italic text-gradient bg-gradient-to-r from-[#D6336C] via-[#FF5C9D] to-[#E6A64C] bg-clip-text text-transparent">regala belleza</span>
-                  </h2>
-                  <p className="text-txt-secondary text-xs sm:text-sm max-w-md mx-auto mb-5">
-                    Encuentra ese detalle especial y sorprende con fragancias y productos que enamoran.
-                  </p>
-                  <button
-                    type="button"
-                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-[#E75480] via-[#FF5C9D] to-[#E6A64C] text-white text-xs font-medium shadow-md shadow-pink-500/20"
-                  >
-                    <span>Descubrir productos</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* 4. Mini catálogo simulado */}
-            <div className="p-6">
-              <div className="text-center mb-6">
-                <h3 className="text-lg font-display font-medium text-txt">Productos Destacados</h3>
-                <p className="text-xs text-txt-secondary">Calidad y elegancia en cada detalle</p>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {[1, 2, 3].map((num) => (
-                  <div key={num} className="bg-gray-50 border border-gray-100 rounded-xl p-3 flex flex-col items-center text-center">
-                    <div className="w-full aspect-square bg-rose-100/50 rounded-lg mb-2 flex items-center justify-center text-rose-400 text-xs">
-                      Foto de Producto
-                    </div>
-                    <span className="font-medium text-xs text-txt truncate w-full">Producto Lumira #{num}</span>
-                    <span className="text-pink-600 font-bold text-xs mt-1">$45.000</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 5. Footer simulado */}
-            <div className="bg-gray-900 text-gray-400 py-6 px-6 text-center text-xs mt-6">
-              <p className="text-gray-300 font-medium mb-1">Lumira Beauty © 2026</p>
-              <p className="text-[11px] text-gray-500">Envíos a todo Colombia • Pagos Seguros</p>
+            <div className="w-full h-full bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-800 relative">
+              <iframe
+                key={iframeKey}
+                ref={iframeRef}
+                src={previewUrl}
+                title="Vista previa real de la tienda Lumira Beauty"
+                className="w-full h-full border-0 bg-white"
+                onLoad={() => {
+                  setIsLoadingIframe(false);
+                  // Enviar estado actual tras cargar
+                  if (iframeRef.current && iframeRef.current.contentWindow) {
+                    iframeRef.current.contentWindow.postMessage(
+                      {
+                        type: 'LUMIRA_CHRISTMAS_PREVIEW',
+                        config
+                      },
+                      '*'
+                    );
+                  }
+                }}
+              />
             </div>
           </div>
         </div>
 
         {/* Pie del modal */}
-        <div className="px-6 py-3.5 bg-white border-t border-gray-100 flex items-center justify-between">
-          <span className="text-xs text-gray-500">
-            {config.enabled
-              ? '✨ Modo navideño activo en la simulación.'
-              : '⚠️ El modo navideño está apagado; la tienda se muestra con su aspecto original.'}
+        <div className="px-6 py-3 bg-[#1A1A24] border-t border-gray-800 flex items-center justify-between">
+          <span className="text-xs text-gray-400 flex items-center gap-2">
+            <span>Puedes navegar e interactuar con la tienda tal cual como la ven tus clientes.</span>
           </span>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+            className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-300 bg-gray-800 hover:bg-gray-700 transition-colors"
           >
             Cerrar Vista Previa
           </button>

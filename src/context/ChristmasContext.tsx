@@ -56,6 +56,40 @@ export function ChristmasProvider({
     }
   }, [initialConfig]);
 
+  // Soporte de previsualización en vivo (mediante query param o postMessage)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // 1. Leer parámetros iniciales si se carga dentro del iframe con preview_christmas=1
+    try {
+      const search = window.location.search;
+      if (search && search.includes('preview_christmas=1')) {
+        const params = new URLSearchParams(search);
+        const previewCfg: ChristmasConfig = {
+          enabled: params.get('enabled') === 'true',
+          snow: params.get('snow') !== 'false',
+          lights: params.get('lights') !== 'false',
+          sparkles: params.get('sparkles') !== 'false',
+          giftSection: params.get('giftSection') !== 'false',
+          extraDecor: params.get('extraDecor') !== 'false',
+        };
+        setPreviewConfig(previewCfg);
+      }
+    } catch (e) {
+      console.error('Error reading preview query params:', e);
+    }
+
+    // 2. Escuchar cambios instantáneos por postMessage desde el modal de administración
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'LUMIRA_CHRISTMAS_PREVIEW' && event.data?.config) {
+        setPreviewConfig({ ...event.data.config });
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
   const activeConfig = useMemo(() => {
     return previewConfig || config;
   }, [previewConfig, config]);
