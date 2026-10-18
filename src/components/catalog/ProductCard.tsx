@@ -27,8 +27,8 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
   const [isAdding, setIsAdding] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
-  // Consultar descuento de campaña activa
-  const discountInfo = getProductDiscount(product.id, product.price);
+  // Consultar descuento activo (campaña o individual con resolución de mejor oferta)
+  const discountInfo = getProductDiscount(product.id, product.price, product.originalPrice);
   const effectivePrice = discountInfo.hasDiscount ? discountInfo.finalPrice : product.price;
   const originalPrice = discountInfo.hasDiscount ? discountInfo.originalPrice : undefined;
 

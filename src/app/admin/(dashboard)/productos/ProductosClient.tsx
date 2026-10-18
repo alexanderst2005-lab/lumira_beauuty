@@ -158,6 +158,11 @@ export default function ProductosClient({ initialProducts }: { initialProducts: 
               />
               
               <div className="absolute top-1.5 left-1.5 flex flex-col gap-0.5">
+                {product.originalPrice && product.originalPrice > product.price && (
+                  <span className="bg-rose-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-sm shadow-xs">
+                    -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+                  </span>
+                )}
                 {product.stock !== undefined && product.stock <= 5 && product.stock > 0 && (
                   <span className="bg-yellow-100 text-yellow-700 text-[9px] font-bold px-1.5 py-0.5 rounded-sm">Stock {product.stock}</span>
                 )}
@@ -170,7 +175,14 @@ export default function ProductosClient({ initialProducts }: { initialProducts: 
             <div className="flex-1 flex flex-col min-h-[3.5rem]">
               <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-0.5 truncate">{product.category}</p>
               <h3 className="font-semibold text-xs text-gray-900 line-clamp-2 leading-tight flex-1">{product.name}</h3>
-              <p className="font-bold text-sm text-gray-900 mt-1">{formatPrice(product.price)}</p>
+              <div className="flex items-baseline gap-1.5 mt-1 flex-wrap">
+                <p className="font-bold text-sm text-gray-900">{formatPrice(product.price)}</p>
+                {product.originalPrice && product.originalPrice > product.price && (
+                  <span className="text-[11px] text-gray-400 line-through">
+                    {formatPrice(product.originalPrice)}
+                  </span>
+                )}
+              </div>
             </div>
             
             <div className="mt-2 pt-2 border-t border-gray-50 flex items-center justify-end gap-1">

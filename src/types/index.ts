@@ -43,6 +43,7 @@ export interface Product {
   tags?: string[];
   inTrash?: boolean;
   originalPrice?: number;
+  precioAnterior?: number;
   discountPercent?: number;
   hasDiscount?: boolean;
   savings?: number;

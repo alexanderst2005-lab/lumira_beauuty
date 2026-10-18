@@ -22,7 +22,8 @@ export async function POST(request: Request) {
     const validatedItems = items.map((item: any) => {
       const prodId = item.product?.id || item.id || '';
       const basePrice = Number(item.product?.price || item.price) || 0;
-      const { finalPrice } = validateItemPrice(prodId, basePrice);
+      const originalPrice = item.product?.originalPrice ? Number(item.product.originalPrice) : undefined;
+      const { finalPrice } = validateItemPrice(prodId, basePrice, originalPrice);
       const qty = Math.max(1, parseInt(item.quantity, 10) || 1);
       backendCalculatedTotal += finalPrice * qty;
       return {

@@ -11,7 +11,9 @@ export async function POST(request: Request) {
 
   try {
     const data = await request.json();
-    const { name, price, category, stock, active, images, description, featured, isNew, options } = data;
+    const { name, price, originalPrice, precioAnterior, category, stock, active, images, description, featured, isNew, options } = data;
+    const finalOriginalPrice = originalPrice !== undefined ? originalPrice : precioAnterior;
+    const origNumber = finalOriginalPrice ? Number(finalOriginalPrice) : null;
 
     const response = await fetch('https://api.notion.com/v1/pages', {
       method: 'POST',
@@ -26,6 +28,7 @@ export async function POST(request: Request) {
           Name: { title: [{ text: { content: name } }] },
           Id: { rich_text: [{ text: { content: crypto.randomUUID() } }] },
           Price: { number: Number(price) },
+          PrecioAnterior: origNumber ? { number: origNumber } : { number: null },
           Category: { select: { name: category } },
           Stock: { number: Number(stock) },
           Active: { checkbox: active },

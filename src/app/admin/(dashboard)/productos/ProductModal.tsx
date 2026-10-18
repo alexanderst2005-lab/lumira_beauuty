@@ -59,6 +59,7 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
   const [formData, setFormData] = useState({
     name: product?.name || '',
     price: (product?.price !== undefined && product.price !== 0) ? String(product.price) : '',
+    originalPrice: (product?.originalPrice !== undefined && product.originalPrice !== 0) ? String(product.originalPrice) : (product?.precioAnterior ? String(product.precioAnterior) : ''),
     category: product?.category || 'makeup',
     stock: product?.stock ?? 10,
     active: product?.active ?? true,
@@ -168,9 +169,23 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (formData.price === '') {
-      toast.error('Por favor, ingresa un precio.');
+    const currentPrice = Number(formData.price) || 0;
+    if (currentPrice <= 0) {
+      toast.error('Por favor, ingresa un precio actual de venta válido mayor a 0.');
       return;
+    }
+
+    let origPriceNum: number | null = null;
+    if (formData.originalPrice && formData.originalPrice.trim() !== '') {
+      origPriceNum = Number(formData.originalPrice) || 0;
+      if (origPriceNum <= 0) {
+        toast.error('El precio anterior debe ser mayor a 0.');
+        return;
+      }
+      if (origPriceNum <= currentPrice) {
+        toast.error(`El precio anterior ($${origPriceNum.toLocaleString()} COP) debe ser mayor al precio actual ($${currentPrice.toLocaleString()} COP) para ser una oferta.`);
+        return;
+      }
     }
 
     setIsSaving(true);
@@ -178,7 +193,9 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
     try {
       const dataToSave = {
         ...formData,
-        price: Number(formData.price)
+        price: currentPrice,
+        originalPrice: origPriceNum,
+        precioAnterior: origPriceNum
       };
 
       const targetId = product ? (product.notionId || product.id) : '';
@@ -217,35 +234,104 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-                <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2" />
+                <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-medium" />
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              {/* Sección de Precios: Actual y Anterior */}
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Precio ($)</label>
-                  <input 
-                    required 
-                    type="text" 
-                    value={formData.price} 
-                    onChange={e => {
-                      // Permitir solo números y punto decimal
-                      const val = e.target.value.replace(/[^0-9.]/g, '');
-                      setFormData({...formData, price: val});
-                    }} 
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2" 
-                  />
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Precio Actual (Venta) *
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-2.5 top-2 text-xs text-gray-400 font-bold">$</span>
+                    <input 
+                      required 
+                      type="text" 
+                      inputMode="numeric"
+                      placeholder="35000"
+                      value={formData.price} 
+                      onChange={e => {
+                        const val = e.target.value.replace(/[^0-9]/g, '');
+                        setFormData({...formData, price: val});
+                      }} 
+                      className="w-full border border-gray-200 rounded-lg pl-6 pr-2.5 py-2 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-pink-400 focus:outline-none" 
+                    />
+                  </div>
+                  <p className="text-[10px] text-gray-400 mt-0.5">Precio que pagará el cliente.</p>
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Disponibilidad</label>
-                  <select 
-                    value={formData.stock > 0 ? 'disponible' : 'agotado'} 
-                    onChange={e => setFormData({...formData, stock: e.target.value === 'disponible' ? 10 : 0})} 
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 bg-white font-medium"
-                  >
-                    <option value="disponible">✅ Disponible</option>
-                    <option value="agotado">❌ Agotado</option>
-                  </select>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-semibold text-gray-700">
+                      Precio Anterior
+                    </label>
+                    {formData.originalPrice && (
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, originalPrice: '' })}
+                        className="text-[10px] text-rose-500 hover:underline font-semibold"
+                      >
+                        Quitar
+                      </button>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <span className="absolute left-2.5 top-2 text-xs text-gray-400 font-bold">$</span>
+                    <input 
+                      type="text" 
+                      inputMode="numeric"
+                      placeholder="Opcional (Tachado)"
+                      value={formData.originalPrice} 
+                      onChange={e => {
+                        const val = e.target.value.replace(/[^0-9]/g, '');
+                        setFormData({...formData, originalPrice: val});
+                      }} 
+                      className="w-full border border-gray-200 rounded-lg pl-6 pr-2.5 py-2 text-sm font-semibold text-gray-700 focus:ring-2 focus:ring-pink-400 focus:outline-none" 
+                    />
+                  </div>
+                  <p className="text-[10px] text-gray-400 mt-0.5">Original (se mostrará tachado).</p>
                 </div>
+              </div>
+
+              {/* Vista previa en vivo del descuento individual */}
+              {formData.originalPrice && formData.price && (
+                <div className={`p-2.5 rounded-xl border text-xs ${
+                  Number(formData.originalPrice) > Number(formData.price)
+                    ? 'bg-emerald-50/80 border-emerald-200 text-emerald-800'
+                    : 'bg-rose-50/80 border-rose-200 text-rose-800'
+                }`}>
+                  {Number(formData.originalPrice) > Number(formData.price) ? (
+                    <div className="flex items-center justify-between gap-1">
+                      <div className="flex items-center gap-1.5 font-bold">
+                        <span className="px-1.5 py-0.5 rounded bg-emerald-600 text-white text-[10px]">
+                          -{Math.round(((Number(formData.originalPrice) - Number(formData.price)) / Number(formData.originalPrice)) * 100)}%
+                        </span>
+                        <span>Oferta individual activa</span>
+                      </div>
+                      <span className="font-semibold text-[11px]">
+                        Ahorro: ${(Number(formData.originalPrice) - Number(formData.price)).toLocaleString()} COP
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="font-semibold text-[11px] text-rose-700">
+                      ⚠️ El precio anterior debe ser mayor al precio actual ($ {Number(formData.price).toLocaleString()}).
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Disponibilidad */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Disponibilidad</label>
+                <select 
+                  value={formData.stock > 0 ? 'disponible' : 'agotado'} 
+                  onChange={e => setFormData({...formData, stock: e.target.value === 'disponible' ? 10 : 0})} 
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 bg-white font-medium text-sm"
+                >
+                  <option value="disponible">✅ Disponible</option>
+                  <option value="agotado">❌ Agotado</option>
+                </select>
               </div>
               
               <div>

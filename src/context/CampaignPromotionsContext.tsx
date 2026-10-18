@@ -10,13 +10,14 @@ interface ProductDiscountResult {
   originalPrice: number;
   discountPercent: number;
   savings: number;
+  discountSource?: 'campaign' | 'individual' | 'best_offer';
   campaignTitle?: string;
 }
 
 interface CampaignPromotionsContextType {
   activeCampaign: PromotionalCampaign | null;
   activeDiscounts: Record<string, CampaignProductDiscount>;
-  getProductDiscount: (productId: string, basePrice: number) => ProductDiscountResult;
+  getProductDiscount: (productId: string, price: number, individualOriginalPrice?: number) => ProductDiscountResult;
   applyDiscountToProduct: (product: Product) => Product;
   refreshCampaigns: () => Promise<void>;
   isLoading: boolean;
@@ -25,13 +26,18 @@ interface CampaignPromotionsContextType {
 const defaultContextValue: CampaignPromotionsContextType = {
   activeCampaign: null,
   activeDiscounts: {},
-  getProductDiscount: (_id: string, basePrice: number) => ({
-    hasDiscount: false,
-    finalPrice: basePrice,
-    originalPrice: basePrice,
-    discountPercent: 0,
-    savings: 0
-  }),
+  getProductDiscount: (_id: string, basePrice: number, individualOriginalPrice?: number) => {
+    const hasInd = Boolean(individualOriginalPrice && individualOriginalPrice > basePrice);
+    const orig = hasInd && individualOriginalPrice ? individualOriginalPrice : basePrice;
+    const sav = hasInd ? orig - basePrice : 0;
+    return {
+      hasDiscount: hasInd,
+      finalPrice: basePrice,
+      originalPrice: orig,
+      discountPercent: hasInd ? Math.round((sav / orig) * 100) : 0,
+      savings: sav
+    };
+  },
   applyDiscountToProduct: (product: Product) => product,
   refreshCampaigns: async () => {},
   isLoading: false
@@ -64,54 +70,95 @@ export function CampaignPromotionsProvider({ children }: { children: React.React
     fetchActivePromotions();
   }, [fetchActivePromotions]);
 
-  const getProductDiscount = useCallback((productId: string, basePrice: number): ProductDiscountResult => {
-    const disc = activeDiscounts[productId];
-    if (!disc || basePrice <= 0) {
+  const getProductDiscount = useCallback((
+    productId: string, 
+    price: number, 
+    individualOriginalPrice?: number
+  ): ProductDiscountResult => {
+    // 1. Verificar si tiene oferta individual válida
+    const hasValidIndividual = Boolean(
+      individualOriginalPrice && 
+      Number(individualOriginalPrice) > Number(price) && 
+      Number(price) > 0
+    );
+    const individualOrig = hasValidIndividual && individualOriginalPrice ? Number(individualOriginalPrice) : price;
+    const individualPrice = Number(price);
+
+    // 2. Verificar si tiene oferta por campaña activa
+    const campDisc = activeDiscounts[productId];
+    let hasValidCampaign = false;
+    let campaignFinalPrice = individualOrig;
+
+    if (campDisc && individualOrig > 0) {
+      if (campDisc.discountType === 'percentage') {
+        const percent = Math.min(99, Math.max(1, campDisc.discountValue));
+        campaignFinalPrice = Math.round(individualOrig * (1 - percent / 100));
+      } else {
+        campaignFinalPrice = Math.round(campDisc.discountValue);
+      }
+
+      if (campaignFinalPrice > 0 && campaignFinalPrice < individualOrig) {
+        hasValidCampaign = true;
+      }
+    }
+
+    // Caso A: Ambos descuentos existen -> Regla de prioridad: Menor precio promocional (mejor oferta para el cliente)
+    if (hasValidCampaign && hasValidIndividual) {
+      const bestPrice = Math.min(campaignFinalPrice, individualPrice);
+      const savings = Math.max(0, individualOrig - bestPrice);
+      const discountPercent = Math.round((savings / individualOrig) * 100);
       return {
-        hasDiscount: false,
-        finalPrice: basePrice,
-        originalPrice: basePrice,
-        discountPercent: 0,
-        savings: 0
+        hasDiscount: true,
+        finalPrice: bestPrice,
+        originalPrice: individualOrig,
+        discountPercent,
+        savings,
+        discountSource: bestPrice === campaignFinalPrice ? 'campaign' : 'individual',
+        campaignTitle: bestPrice === campaignFinalPrice ? activeCampaign?.title : undefined
       };
     }
 
-    let finalPrice = disc.discountPrice;
-
-    // Recálculo dinámico seguro si el precio base en catálogo cambió
-    if (disc.discountType === 'percentage') {
-      const percent = Math.min(99, Math.max(1, disc.discountValue));
-      finalPrice = Math.round(basePrice * (1 - percent / 100));
-    } else {
-      finalPrice = Math.round(disc.discountValue);
-    }
-
-    // Validación estricta
-    if (finalPrice <= 0 || finalPrice >= basePrice) {
+    // Caso B: Solo campaña activa válida
+    if (hasValidCampaign) {
+      const savings = Math.max(0, individualOrig - campaignFinalPrice);
+      const discountPercent = Math.round((savings / individualOrig) * 100);
       return {
-        hasDiscount: false,
-        finalPrice: basePrice,
-        originalPrice: basePrice,
-        discountPercent: 0,
-        savings: 0
+        hasDiscount: true,
+        finalPrice: campaignFinalPrice,
+        originalPrice: individualOrig,
+        discountPercent,
+        savings,
+        discountSource: 'campaign',
+        campaignTitle: activeCampaign?.title
       };
     }
 
-    const savings = Math.max(0, basePrice - finalPrice);
-    const discountPercent = Math.round((savings / basePrice) * 100);
+    // Caso C: Solo oferta individual válida
+    if (hasValidIndividual) {
+      const savings = Math.max(0, individualOrig - individualPrice);
+      const discountPercent = Math.round((savings / individualOrig) * 100);
+      return {
+        hasDiscount: true,
+        finalPrice: individualPrice,
+        originalPrice: individualOrig,
+        discountPercent,
+        savings,
+        discountSource: 'individual'
+      };
+    }
 
+    // Caso D: Sin descuento vigente
     return {
-      hasDiscount: true,
-      finalPrice,
-      originalPrice: basePrice,
-      discountPercent,
-      savings,
-      campaignTitle: activeCampaign?.title
+      hasDiscount: false,
+      finalPrice: price,
+      originalPrice: price,
+      discountPercent: 0,
+      savings: 0
     };
   }, [activeDiscounts, activeCampaign]);
 
   const applyDiscountToProduct = useCallback((product: Product): Product => {
-    const disc = getProductDiscount(product.id, product.price);
+    const disc = getProductDiscount(product.id, product.price, product.originalPrice);
     if (!disc.hasDiscount) return product;
 
     return {

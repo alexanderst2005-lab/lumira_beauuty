@@ -89,9 +89,9 @@ export default function CatalogoClient({ initialProducts }: { initialProducts: P
       );
     }
 
-    // Filtrar exclusivamente productos de la campaña en oferta
+    // Filtrar exclusivamente productos con oferta activa (campaña o descuento individual)
     if (isOffersFilterActive) {
-      result = result.filter((p) => Boolean(activeDiscounts[p.id]));
+      result = result.filter((p) => Boolean(activeDiscounts[p.id]) || Boolean(p.originalPrice && p.originalPrice > p.price));
     }
 
     // Categoría

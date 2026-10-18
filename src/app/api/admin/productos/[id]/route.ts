@@ -15,11 +15,16 @@ export async function PATCH(
 
   try {
     const data = await request.json();
-    const { name, price, category, stock, active, images, description, featured, isNew, inTrash, options } = data;
+    const { name, price, originalPrice, precioAnterior, category, stock, active, images, description, featured, isNew, inTrash, options } = data;
 
     const properties: any = {};
     if (name !== undefined) properties.Name = { title: [{ text: { content: name } }] };
     if (price !== undefined) properties.Price = { number: Number(price) };
+    const finalOriginalPrice = originalPrice !== undefined ? originalPrice : precioAnterior;
+    if (finalOriginalPrice !== undefined) {
+      const origNum = finalOriginalPrice ? Number(finalOriginalPrice) : null;
+      properties.PrecioAnterior = origNum ? { number: origNum } : { number: null };
+    }
     if (category !== undefined) properties.Category = { select: { name: category } };
     if (stock !== undefined) properties.Stock = { number: Number(stock) };
     if (active !== undefined) properties.Active = { checkbox: active };

@@ -1,5 +1,6 @@
 import HeroBanner from '@/components/home/HeroBanner';
 import Categories from '@/components/home/Categories';
+import SaleFavoritesSection from '@/components/home/SaleFavoritesSection';
 import EditorialSection from '@/components/home/EditorialSection';
 import FeaturedProducts from '@/components/home/FeaturedProducts';
 import StoreBenefits from '@/components/home/StoreBenefits';
@@ -18,6 +19,7 @@ export default async function Home() {
     <>
       <HeroBanner config={config} />
       <Categories />
+      <SaleFavoritesSection initialProducts={products} />
       <EditorialSection />
       <FeaturedProducts initialProducts={products} />
       <StoreBenefits />

@@ -83,13 +83,25 @@ export async function getAllProductsFromNotion(includeTrash = false): Promise<Pr
         }
       }
 
+      const price = props.Price?.number || 0;
+      const rawOriginalPrice = props.PrecioAnterior?.number ? Number(props.PrecioAnterior.number) : undefined;
+      const hasDiscount = Boolean(rawOriginalPrice && rawOriginalPrice > price);
+      const originalPrice = hasDiscount ? rawOriginalPrice : undefined;
+      const savings = hasDiscount && originalPrice ? (originalPrice - price) : undefined;
+      const discountPercent = hasDiscount && originalPrice ? Math.round((savings! / originalPrice) * 100) : undefined;
+
       return {
         id: props.Id?.rich_text[0]?.plain_text || page.id,
         notionId: page.id,
         name: name,
         description: props.Description?.rich_text[0]?.plain_text || '',
         fullDescription: props.FullDescription?.rich_text[0]?.plain_text || '',
-        price: props.Price?.number || 0,
+        price: price,
+        originalPrice: originalPrice,
+        precioAnterior: originalPrice,
+        hasDiscount: hasDiscount,
+        discountPercent: discountPercent,
+        savings: savings,
         category: props.Category?.select?.name || '',
         image: imageUrl,
         images: imagesList,

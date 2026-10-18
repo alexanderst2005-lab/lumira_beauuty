@@ -145,62 +145,101 @@ export function getActiveDiscountsMap(): Record<string, CampaignProductDiscount 
 /**
  * Valida de forma segura el precio de un producto en el backend (para Carrito y Checkout)
  */
-export function validateItemPrice(productId: string, basePrice: number): {
+export function validateItemPrice(
+  productId: string, 
+  basePrice: number, 
+  individualOriginalPrice?: number
+): {
   finalPrice: number;
   originalPrice: number;
   hasDiscount: boolean;
   discountPercent: number;
   savings: number;
+  discountSource?: 'campaign' | 'individual' | 'best_offer';
   campaignId?: string;
   campaignTitle?: string;
 } {
+  const hasValidIndividual = Boolean(
+    individualOriginalPrice && 
+    Number(individualOriginalPrice) > Number(basePrice) && 
+    Number(basePrice) > 0
+  );
+  const individualOrig = hasValidIndividual && individualOriginalPrice ? Number(individualOriginalPrice) : basePrice;
+  const individualPrice = Number(basePrice);
+
   const discounts = getActiveDiscountsMap();
   const discountInfo = discounts[productId];
 
-  if (!discountInfo || basePrice <= 0) {
+  let hasValidCampaign = false;
+  let campaignFinalPrice = individualOrig;
+
+  if (discountInfo && individualOrig > 0) {
+    if (discountInfo.discountType === 'percentage') {
+      const percent = Math.min(99, Math.max(1, discountInfo.discountValue));
+      campaignFinalPrice = Math.round(individualOrig * (1 - percent / 100));
+    } else {
+      campaignFinalPrice = Math.round(discountInfo.discountValue);
+    }
+
+    if (campaignFinalPrice > 0 && campaignFinalPrice < individualOrig) {
+      hasValidCampaign = true;
+    }
+  }
+
+  // Caso A: Ambos existen -> Regla explícita: aplicar el menor precio promocional (mejor oferta)
+  if (hasValidCampaign && hasValidIndividual) {
+    const bestPrice = Math.min(campaignFinalPrice, individualPrice);
+    const savings = Math.max(0, individualOrig - bestPrice);
+    const discountPercent = Math.round((savings / individualOrig) * 100);
     return {
-      finalPrice: basePrice,
-      originalPrice: basePrice,
-      hasDiscount: false,
-      discountPercent: 0,
-      savings: 0
+      finalPrice: bestPrice,
+      originalPrice: individualOrig,
+      hasDiscount: true,
+      discountPercent,
+      savings,
+      discountSource: bestPrice === campaignFinalPrice ? 'campaign' : 'individual',
+      campaignId: bestPrice === campaignFinalPrice ? discountInfo?.campaignId : undefined,
+      campaignTitle: bestPrice === campaignFinalPrice ? discountInfo?.campaignTitle : undefined
     };
   }
 
-  let finalPrice = discountInfo.discountPrice;
-
-  // Si el precio base del producto en catálogo es diferente al momento de configurar la campaña,
-  // recalculamos dinámicamente según la regla seleccionada sin sobreescribir el precio base.
-  if (discountInfo.discountType === 'percentage') {
-    const percent = Math.min(99, Math.max(1, discountInfo.discountValue));
-    finalPrice = Math.round(basePrice * (1 - percent / 100));
-  } else {
-    // Precio fijo promocional
-    finalPrice = Math.round(discountInfo.discountValue);
-  }
-
-  // Validaciones de seguridad
-  if (finalPrice <= 0 || finalPrice >= basePrice) {
+  // Caso B: Solo campaña válida
+  if (hasValidCampaign && discountInfo) {
+    const savings = Math.max(0, individualOrig - campaignFinalPrice);
+    const discountPercent = Math.round((savings / individualOrig) * 100);
     return {
-      finalPrice: basePrice,
-      originalPrice: basePrice,
-      hasDiscount: false,
-      discountPercent: 0,
-      savings: 0
+      finalPrice: campaignFinalPrice,
+      originalPrice: individualOrig,
+      hasDiscount: true,
+      discountPercent,
+      savings,
+      discountSource: 'campaign',
+      campaignId: discountInfo.campaignId,
+      campaignTitle: discountInfo.campaignTitle
     };
   }
 
-  const savings = Math.max(0, basePrice - finalPrice);
-  const discountPercent = Math.round((savings / basePrice) * 100);
+  // Caso C: Solo oferta individual válida
+  if (hasValidIndividual) {
+    const savings = Math.max(0, individualOrig - individualPrice);
+    const discountPercent = Math.round((savings / individualOrig) * 100);
+    return {
+      finalPrice: individualPrice,
+      originalPrice: individualOrig,
+      hasDiscount: true,
+      discountPercent,
+      savings,
+      discountSource: 'individual'
+    };
+  }
 
+  // Caso D: Sin descuento
   return {
-    finalPrice,
+    finalPrice: basePrice,
     originalPrice: basePrice,
-    hasDiscount: true,
-    discountPercent,
-    savings,
-    campaignId: discountInfo.campaignId,
-    campaignTitle: discountInfo.campaignTitle
+    hasDiscount: false,
+    discountPercent: 0,
+    savings: 0
   };
 }
 

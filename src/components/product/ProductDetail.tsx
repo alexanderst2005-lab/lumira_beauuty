@@ -30,7 +30,8 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
   const [isAdded, setIsAdded] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
 
-  const discountInfo = getProductDiscount(product.id, product.price);
+  // Consultar descuento activo (campaña o individual con resolución de mejor oferta)
+  const discountInfo = getProductDiscount(product.id, product.price, product.originalPrice);
   const effectivePrice = discountInfo.hasDiscount ? discountInfo.finalPrice : product.price;
   const originalPrice = discountInfo.hasDiscount ? discountInfo.originalPrice : undefined;
 
