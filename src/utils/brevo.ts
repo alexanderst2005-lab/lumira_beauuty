@@ -11,7 +11,7 @@ interface SendEmailParams {
 
 export async function sendBrevoEmail({ toEmail, toName, subject, htmlContent }: SendEmailParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const apiKey = process.env.BREVO_API_KEY;
-  const senderEmail = process.env.BREVO_SENDER_EMAIL || 'notificaciones@lumirabeauty.com';
+  const senderEmail = process.env.BREVO_SENDER_EMAIL || 'lumirabeauty26@gmail.com';
   const senderName = process.env.BREVO_SENDER_NAME || 'Lumira Beauty';
 
   if (!apiKey) {
@@ -25,7 +25,7 @@ export async function sendBrevoEmail({ toEmail, toName, subject, htmlContent }: 
   }
 
   try {
-    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+    let res = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -50,7 +50,39 @@ export async function sendBrevoEmail({ toEmail, toName, subject, htmlContent }: 
 
     if (!res.ok) {
       const errBody = await res.text();
-      console.error('[Brevo Error]', res.status, errBody);
+      console.warn('[Brevo Warning] Falló primer intento con', senderEmail, errBody);
+
+      // Si falló por validación de remitente, reintentar con el correo verificado de la cuenta
+      if (senderEmail !== 'alexanderst2005@gmail.com') {
+        const retryRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'api-key': apiKey
+          },
+          body: JSON.stringify({
+            sender: {
+              name: senderName,
+              email: 'alexanderst2005@gmail.com'
+            },
+            to: [
+              {
+                email: toEmail.trim(),
+                name: toName?.trim() || toEmail.split('@')[0]
+              }
+            ],
+            subject: subject,
+            htmlContent: htmlContent
+          })
+        });
+
+        if (retryRes.ok) {
+          const retryData = await retryRes.json();
+          return { success: true, messageId: retryData.messageId };
+        }
+      }
+
       return { success: false, error: `Error Brevo: ${res.status} ${errBody}` };
     }
 
