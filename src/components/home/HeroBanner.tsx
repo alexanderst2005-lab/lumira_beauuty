@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useChristmas } from '@/context/ChristmasContext';
 
 type SlideType = {
   id: number;
@@ -75,13 +76,58 @@ const slides: SlideType[] = [
 
 const brands = ['BLOOMSHELL', 'BIOAQUA', 'ANIK', 'TRENDY', 'PURPURE'];
 
+const christmasSlides: SlideType[] = [
+  {
+    id: 101,
+    badge: '🎄 Especial Navidad • Lumira Beauty',
+    title: 'Esta Navidad, regala belleza y amor ✨',
+    desc: 'Descubre los mejores sets de maquillaje, skincare y detalles inolvidables para obsequiar.',
+    btnText: 'Ver Regalos de Navidad',
+    btnHref: '/catalogo',
+    image: '/images/hero/christmas_hero_gifts.jpg',
+    position: 'object-center md:object-[center_35%]',
+  },
+  {
+    id: 102,
+    badge: '🎁 Kits & Cuidados Festivos',
+    title: 'Piel radiante para todas tus celebraciones 🧴',
+    desc: 'Rutinas completas de skincare, sueros y mascarillas ideales para consentirte y regalar.',
+    btnText: 'Kits de Skincare',
+    btnHref: '/catalogo?categoria=skincare',
+    image: '/images/hero/christmas_hero_skincare.jpg',
+    position: 'object-center md:object-[center_45%]',
+  },
+  {
+    id: 103,
+    badge: '✨ Mirada Deslumbrante de Fiesta',
+    title: 'Luce unas pestañas de ensueño en Navidad 👁️',
+    desc: 'Pestañas punto a punto y volumen ruso para brillar en Nochebuena y Año Nuevo.',
+    btnText: 'Pestañas de Fiesta',
+    btnHref: '/catalogo?categoria=pestanas-enteras',
+    image: '/images/hero/christmas_hero_lashes.jpg',
+    position: 'object-center md:object-[center_30%]',
+  },
+  {
+    id: 104,
+    badge: '💄 Glamour & Iluminación Navideña',
+    title: 'El maquillaje perfecto para tus fiestas 🥂',
+    desc: 'Labiales, iluminadores champagne, sombras y rubores para un look navideño inolvidable.',
+    btnText: 'Makeup Navideño',
+    btnHref: '/catalogo?categoria=makeup',
+    image: '/images/hero/christmas_hero_makeup.jpg',
+    position: 'object-center md:object-[center_40%]',
+  },
+];
+
 const AUTOPLAY_MS = 5000;
 const SWIPE_MIN_PX = 50;
 
 export default function HeroBanner({ config }: { config?: any }) {
-  // Primera diapositiva configurable desde el panel de administración.
-  const dynamicSlides = [...slides];
-  if (config && (config.bannerTitle || config.bannerText || config.bannerPromo || config.bannerImage)) {
+  const { isChristmasActive } = useChristmas();
+  // Primera diapositiva configurable desde el panel de administración si no está en modo navideño
+  const baseSlides = isChristmasActive ? christmasSlides : slides;
+  const dynamicSlides = [...baseSlides];
+  if (!isChristmasActive && config && (config.bannerTitle || config.bannerText || config.bannerPromo || config.bannerImage)) {
     dynamicSlides[0] = {
       ...dynamicSlides[0],
       title: config.bannerTitle || dynamicSlides[0].title,

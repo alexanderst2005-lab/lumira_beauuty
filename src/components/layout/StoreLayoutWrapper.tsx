@@ -13,7 +13,7 @@ import FavoritesDrawer from "@/components/favorites/FavoritesDrawer";
 import WhatsAppButton from "@/components/layout/WhatsAppButton";
 import PromotionalPopup from "@/components/common/PromotionalPopup";
 import { CampaignPromotionsProvider } from "@/context/CampaignPromotionsContext";
-import { ChristmasProvider } from "@/context/ChristmasContext";
+import { ChristmasProvider, useChristmas } from "@/context/ChristmasContext";
 import ChristmasSeasonEffects from "@/components/christmas/ChristmasSeasonEffects";
 import { Toaster } from "sonner";
 
@@ -55,6 +55,38 @@ function ScrollRestorer({ isAdmin }: { isAdmin: boolean }) {
   }, [pathname, searchParams, isAdmin]);
 
   return null;
+}
+
+function StoreContentWrapper({
+  children,
+  isAdmin,
+  isHome,
+  config,
+  toasterOptions,
+}: {
+  children: React.ReactNode;
+  isAdmin: boolean;
+  isHome: boolean;
+  config?: any;
+  toasterOptions: any;
+}) {
+  const { isChristmasActive } = useChristmas();
+
+  return (
+    <div className={`min-h-screen transition-colors duration-500 ${isChristmasActive ? 'christmas-mode' : ''}`}>
+      <Suspense fallback={null}><ScrollRestorer isAdmin={isAdmin} /></Suspense>
+      {isHome && <MarqueeBanner />}
+      <Header config={config} />
+      <ChristmasSeasonEffects />
+      <main className={`min-h-screen overflow-x-clip ${!isHome ? 'pt-16 sm:pt-20' : ''}`}>{children}</main>
+      <Footer config={config} />
+      <CartDrawer />
+      <FavoritesDrawer />
+      <WhatsAppButton config={config} />
+      <PromotionalPopup />
+      <Toaster {...toasterOptions} />
+    </div>
+  );
 }
 
 export default function StoreLayoutWrapper({ children, config }: { children: React.ReactNode, config?: any }) {
@@ -99,17 +131,14 @@ export default function StoreLayoutWrapper({ children, config }: { children: Rea
       <CampaignPromotionsProvider>
         <FavoritesProvider>
           <CartProvider>
-            <Suspense fallback={null}><ScrollRestorer isAdmin={isAdmin} /></Suspense>
-            {isHome && <MarqueeBanner />}
-            <Header config={config} />
-            <ChristmasSeasonEffects />
-            <main className={`min-h-screen overflow-x-clip ${!isHome ? 'pt-16 sm:pt-20' : ''}`}>{children}</main>
-            <Footer config={config} />
-            <CartDrawer />
-            <FavoritesDrawer />
-            <WhatsAppButton config={config} />
-            <PromotionalPopup />
-            <Toaster {...toasterOptions} />
+            <StoreContentWrapper
+              isAdmin={isAdmin}
+              isHome={isHome}
+              config={config}
+              toasterOptions={toasterOptions}
+            >
+              {children}
+            </StoreContentWrapper>
           </CartProvider>
         </FavoritesProvider>
       </CampaignPromotionsProvider>

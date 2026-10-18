@@ -6,6 +6,7 @@ import { Product } from '@/types';
 import ProductCard from '@/components/catalog/ProductCard';
 import { preloadProductImages } from '@/utils/imagePreloader';
 import { getSavedScrollPosition } from '@/utils/scrollRestoration';
+import { useChristmas } from '@/context/ChristmasContext';
 
 const getFeaturedAndNewProducts = (productsList: Product[], count: number) => {
   // Primero tomamos los que están marcados explícitamente como "Nuevo" o "Destacado"
@@ -32,6 +33,7 @@ const getFeaturedAndNewProducts = (productsList: Product[], count: number) => {
 };
 
 export default function FeaturedProducts({ initialProducts }: { initialProducts: Product[] }) {
+  const { isChristmasActive } = useChristmas();
   const featured = getFeaturedAndNewProducts(initialProducts, 10);
 
   useEffect(() => {
@@ -67,10 +69,16 @@ export default function FeaturedProducts({ initialProducts }: { initialProducts:
           className="text-center mb-12"
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-medium text-txt mb-3">
-            Productos <span className="text-gradient italic">destacados</span>
+            {isChristmasActive ? (
+              <>Selección <span className="text-gradient italic">Navideña</span> ✨</>
+            ) : (
+              <>Productos <span className="text-gradient italic">destacados</span></>
+            )}
           </h2>
           <p className="text-txt-secondary text-sm sm:text-base max-w-md mx-auto font-sans">
-            Los favoritos de nuestras clientas
+            {isChristmasActive
+              ? 'Los consentidos y regalos ideales de esta mágica temporada'
+              : 'Los favoritos de nuestras clientas'}
           </p>
         </motion.div>
 

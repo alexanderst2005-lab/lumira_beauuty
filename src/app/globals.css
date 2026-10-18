@@ -246,3 +246,39 @@ body {
   overflow: hidden;
   line-height: 0;
 }
+
+/* ===== MODO NAVIDAD (CHRISTMAS MODE THEME) ===== */
+.christmas-mode {
+  background: linear-gradient(180deg, #FFFDFE 0%, #FFF5F9 12%, #FFFBF5 28%, #FFF4F8 48%, #FFFDF8 72%, #FFFFFF 100%);
+  --color-bg: #FFF8FA;
+  --color-border-light: #FCE6EE;
+}
+
+/* Transición suave y armonización de secciones en modo navideño */
+.christmas-mode section.bg-white {
+  background: transparent !important;
+}
+
+/* Títulos con gradiente festivo rosado, dorado y magenta */
+.christmas-mode .text-gradient {
+  background: linear-gradient(135deg, #D6336C 0%, #FF5C9D 40%, #E6A64C 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+/* Cabecera translúcida con borde festivo sutil */
+.christmas-mode header {
+  background: rgba(255, 255, 255, 0.95);
+  border-bottom: 1px solid rgba(247, 212, 229, 0.6) !important;
+}
+
+/* Tarjetas de categorías con toque festivo */
+.christmas-mode [id^="category-"] {
+  border-color: #F7D4E5;
+}
+
+.christmas-mode [id^="category-"]:hover {
+  border-color: #E5B56D;
+  box-shadow: 0 14px 32px rgba(230, 166, 76, 0.18);
+}

@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
 import { categories } from '@/data/products';
+import { useChristmas } from '@/context/ChristmasContext';
 
 // Fotografía asociada a cada categoría (por slug). Si falta alguna, la tarjeta
 // muestra un fondo suave con el nombre, sin romperse.
@@ -20,6 +21,8 @@ const categoryImages: Record<string, string> = {
 };
 
 export default function Categories() {
+  const { isChristmasActive } = useChristmas();
+
   return (
     <section className="py-14 sm:py-20 bg-white" id="categorias">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -34,7 +37,9 @@ export default function Categories() {
             Explora nuestras <span className="text-gradient italic">categorías</span>
           </h2>
           <p className="text-txt-secondary text-sm sm:text-base max-w-md mx-auto font-sans">
-            Encuentra todo lo que necesitas para tu rutina de belleza
+            {isChristmasActive
+              ? 'Encuentra el regalo perfecto o consiéntete en esta mágica temporada 🎁'
+              : 'Encuentra todo lo que necesitas para tu rutina de belleza'}
           </p>
         </motion.div>
 

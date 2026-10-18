@@ -85,14 +85,23 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
     <Link
       href={`/producto/${product.id}`}
       scroll={false}
-      className="block group flex flex-col h-full bg-white rounded-2xl border border-border-light shadow-[0_2px_12px_rgba(122,31,77,0.04)] overflow-hidden transition-all duration-300 hover:shadow-[0_12px_32px_rgba(122,31,77,0.10)] hover:-translate-y-0.5 hover:border-primary/20"
+      className={`block group flex flex-col h-full rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 ${
+        isChristmasActive
+          ? 'bg-gradient-to-b from-white via-[#FFF9FB] to-white border border-[#F7D4E5] shadow-[0_4px_16px_rgba(214,51,108,0.07)] hover:shadow-[0_12px_32px_rgba(230,166,76,0.22)] hover:border-[#E5B56D]'
+          : 'bg-white border border-border-light shadow-[0_2px_12px_rgba(122,31,77,0.04)] hover:shadow-[0_12px_32px_rgba(122,31,77,0.10)] hover:border-primary/20'
+      }`}
       id={`product-${product.id}`}
       onClick={() => {
         saveCurrentScrollPosition();
       }}
     >
+      {/* Línea sutil navideña en la parte superior de la tarjeta */}
+      {isChristmasActive && (
+        <div className="h-[2.5px] w-full bg-gradient-to-r from-[#FF5C9D] via-[#F5CB7D] to-[#D6336C]" />
+      )}
+
       {/* Imagen: contenedor uniforme, el producto se muestra completo sin recortes */}
-      <div className="product-image-container aspect-square relative !bg-white overflow-hidden [&>div]:!bg-transparent">
+      <div className={`product-image-container aspect-square relative overflow-hidden [&>div]:!bg-transparent ${isChristmasActive ? '!bg-[#FFFDFE]' : '!bg-white'}`}>
         <SafeImage
           src={product.image}
           alt={product.name}
@@ -116,13 +125,17 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
 
         {/* Badge de Oferta si tiene descuento activo */}
         {discountInfo.hasDiscount && !isOutOfStock && (
-          <span className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-20 bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1">
-            <span>Oferta</span>
+          <span className={`absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-20 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1 ${
+            isChristmasActive
+              ? 'bg-gradient-to-r from-rose-600 via-pink-600 to-amber-500 shadow-[0_2px_8px_rgba(230,166,76,0.35)]'
+              : 'bg-rose-500'
+          }`}>
+            <span>{isChristmasActive ? '🎁 Oferta' : 'Oferta'}</span>
             <span>-{discountInfo.discountPercent}%</span>
           </span>
         )}
 
-        {/* Nuevo (solo si el producto está marcado como nuevo y no tiene oferta activa para no sobrecargar) */}
+        {/* Nuevo (solo si el producto está marcado como nuevo y no tiene oferta activa) */}
         {product.isNew && !isOutOfStock && !discountInfo.hasDiscount && (
           <span className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-20 bg-primary text-white text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-[0.14em] shadow-sm">
             Nuevo
@@ -130,9 +143,9 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
         )}
 
         {/* Detalle Navideño Especial */}
-        {isChristmasActive && activeConfig?.extraDecor && !isOutOfStock && !discountInfo.hasDiscount && !product.isNew && (
-          <span className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-20 bg-gradient-to-r from-rose-500/90 to-amber-500/90 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1">
-            <span>🎁 Regalo</span>
+        {isChristmasActive && !isOutOfStock && !discountInfo.hasDiscount && !product.isNew && (
+          <span className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-20 bg-gradient-to-r from-[#D6336C] via-[#FF5C9D] to-[#E6A64C] text-white text-[9px] sm:text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1 shadow-[0_2px_8px_rgba(214,51,108,0.25)]">
+            <span>🎄 Especial Navidad</span>
           </span>
         )}
 
@@ -192,6 +205,8 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             className={`relative h-8 sm:h-9 px-3 sm:px-3.5 rounded-full flex items-center justify-center gap-1.5 text-xs font-semibold transition-all duration-300 ${
               isOutOfStock
                 ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : isChristmasActive
+                ? 'bg-gradient-to-r from-[#D6336C] via-[#FF5C9D] to-[#E6A64C] hover:from-[#B82558] hover:to-[#C98A33] text-white shadow-[0_2px_10px_rgba(230,166,76,0.28)] hover:shadow-[0_4px_14px_rgba(230,166,76,0.4)] active:scale-95'
                 : 'bg-primary hover:bg-primary-dark text-white shadow-sm hover:shadow-md active:scale-95'
             }`}
             aria-label={
