@@ -11,7 +11,7 @@ interface CheckoutModalProps {
 }
 
 export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
-  const { items, total } = useCart();
+  const { items, total, clearCart } = useCart();
   const [formData, setFormData] = useState({
     nombre: '',
     whatsapp: '',
@@ -22,6 +22,15 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     observaciones: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [clientToken, setClientToken] = useState<string>('');
+
+  // Generar token único por intento de compra para evitar reintentos duplicados
+  const getOrCreateClientToken = () => {
+    if (clientToken) return clientToken;
+    const newToken = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    setClientToken(newToken);
+    return newToken;
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -47,11 +56,34 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     if (isSubmitting) return;
 
     setIsSubmitting(true);
+    const token = getOrCreateClientToken();
 
-    const STORE_NUMBER = '573011675661'; // Este número se configurará posteriormente
-    
-    let text = `Hola, quiero realizar el siguiente pedido:\n`;
-    text += `Productos:\n`;
+    const STORE_NUMBER = '573011675661'; // Número de atención de Lumira Beauty
+    let assignedOrderNumber = '';
+
+    try {
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ formData, items, total, clientToken: token })
+      });
+      if (response.ok) {
+        const resData = await response.json();
+        if (resData.orderNumber) {
+          assignedOrderNumber = resData.orderNumber;
+        }
+      }
+    } catch (error) {
+      console.error('Error saving order to Notion:', error);
+    }
+
+    const orderHeader = assignedOrderNumber ? `🛍️ *PEDIDO ${assignedOrderNumber}*` : `🛍️ *NUEVO PEDIDO*`;
+    let text = `${orderHeader}\n\n`;
+    text += assignedOrderNumber
+      ? `Hola Lumira Beauty, quiero confirmar mi pedido *${assignedOrderNumber}*:\n\n`
+      : `Hola Lumira Beauty, quiero realizar el siguiente pedido:\n\n`;
+
+    text += `*PRODUCTOS:*\n`;
     items.forEach((item) => {
       text += `• ${item.product.name}\n`;
       if (item.selectedTone) {
@@ -66,30 +98,22 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
       text += `  - Precio: ${formatPrice(item.product.price * item.quantity)}\n`;
     });
     
-    text += `Total del pedido: ${formatPrice(total)}\n`;
-    text += `Datos del cliente:\n`;
-    text += `Nombre: ${formData.nombre}\n`;
-    text += `WhatsApp: ${formData.whatsapp}\n`;
-    text += `Ciudad: ${formData.ciudad}\n`;
-    text += `Dirección: ${formData.direccion}\n`;
-    if (formData.barrio) text += `Barrio: ${formData.barrio}\n`;
-    if (formData.referencia) text += `Referencia: ${formData.referencia}\n`;
-    if (formData.observaciones) text += `Observaciones: ${formData.observaciones}\n`;
+    text += `\n*TOTAL A PAGAR: ${formatPrice(total)}*\n\n`;
+    text += `*DATOS DE ENVÍO:*\n`;
+    text += `• Nombre: ${formData.nombre}\n`;
+    text += `• WhatsApp: ${formData.whatsapp}\n`;
+    text += `• Ciudad: ${formData.ciudad}\n`;
+    text += `• Dirección: ${formData.direccion}\n`;
+    if (formData.barrio) text += `• Barrio: ${formData.barrio}\n`;
+    if (formData.referencia) text += `• Referencia: ${formData.referencia}\n`;
+    if (formData.observaciones) text += `• Observaciones: ${formData.observaciones}\n`;
 
     const encodedText = encodeURIComponent(text);
     const url = `https://wa.me/${STORE_NUMBER}?text=${encodedText}`;
     
-    try {
-      await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ formData, items, total })
-      });
-    } catch (error) {
-      console.error('Error saving order to Notion:', error);
-    }
-    
     setIsSubmitting(false);
+    clearCart();
+    onClose();
     window.location.href = url;
   };
 

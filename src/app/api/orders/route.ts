@@ -1,5 +1,12 @@
 import { NextResponse } from 'next/server';
 import { validateItemPrice } from '@/data/campaignsManager';
+import {
+  allocateUniqueOrderNumber,
+  releaseOrderReservation,
+  computeOrderIdempotencyKey,
+  checkRecentIdempotency,
+  recordOrderIdempotency
+} from '@/utils/orderNumber';
 
 const TOKEN = process.env.NOTION_SECRET;
 const ORDERS_DB_ID = process.env.NOTION_ORDERS_DB;
@@ -11,10 +18,14 @@ export async function POST(request: Request) {
 
   try {
     const data = await request.json();
-    const { formData, items, total } = data;
+    const { formData, items, total, clientToken } = data;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: 'No items in order' }, { status: 400 });
+    }
+
+    if (!formData?.nombre || !formData?.whatsapp) {
+      return NextResponse.json({ error: 'Missing required customer details' }, { status: 400 });
     }
 
     // Validación segura de precios en el servidor según campañas activas
@@ -33,6 +44,25 @@ export async function POST(request: Request) {
       };
     });
 
+    // Protección de Idempotencia: si el cliente reintenta o hace doble clic rápido,
+    // retornamos el pedido ya creado sin duplicar en la base de datos
+    const idempotencyKey = computeOrderIdempotencyKey({
+      formData,
+      total: backendCalculatedTotal,
+      items: validatedItems,
+      clientToken
+    });
+
+    const existingOrder = checkRecentIdempotency(idempotencyKey);
+    if (existingOrder) {
+      return NextResponse.json({
+        success: true,
+        orderNumber: existingOrder.orderNumber,
+        orderId: existingOrder.orderId,
+        isDuplicate: true
+      });
+    }
+
     // Crear string de productos consolidado con sus variantes en la misma línea
     const productsString = validatedItems.map((item: any) => {
       const productName = item.product?.name || item.name || 'Producto';
@@ -49,7 +79,6 @@ export async function POST(request: Request) {
       return `${item.quantity}x ${productName}${variantText}`;
     }).join('\n');
 
-
     // Mantener también tonesString para la columna Tones si es necesaria
     const tonesString = items.map((item: any) => {
       const variants: string[] = [];
@@ -63,13 +92,15 @@ export async function POST(request: Request) {
       return null;
     }).filter(Boolean).join('\n');
 
-    // Generate Order Number
     const today = new Date();
-    const todayStr = today.toISOString().split('T')[0]; // YYYY-MM-DD
-    
-    let todaysOrders = 0;
+
+    // Asignación segura y única de número de pedido: LB-XXXX
+    // Bloquea concurrencia, comprueba en la base de datos Notion y reintenta si existiera
+    const orderNumber = await allocateUniqueOrderNumber(TOKEN, ORDERS_DB_ID);
+
+    let pageResult: any = null;
     try {
-      const countResponse = await fetch(`https://api.notion.com/v1/databases/${ORDERS_DB_ID}/query`, {
+      const response = await fetch('https://api.notion.com/v1/pages', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${TOKEN}`,
@@ -77,57 +108,45 @@ export async function POST(request: Request) {
           'Notion-Version': '2022-06-28'
         },
         body: JSON.stringify({
-          filter: {
-            property: 'Date',
-            date: {
-              on_or_after: todayStr
-            }
+          parent: { database_id: ORDERS_DB_ID },
+          properties: {
+            Name: { title: [{ text: { content: formData.nombre } }] },
+            WhatsApp: { phone_number: formData.whatsapp },
+            City: { rich_text: [{ text: { content: formData.ciudad || '' } }] },
+            Address: { rich_text: [{ text: { content: formData.direccion || '' } }] },
+            Neighborhood: { rich_text: [{ text: { content: formData.barrio || '' } }] },
+            Products: { rich_text: [{ text: { content: productsString } }] },
+            Tones: { rich_text: [{ text: { content: tonesString } }] },
+            Total: { number: backendCalculatedTotal },
+            Status: { select: { name: 'Pendiente' } },
+            Date: { date: { start: today.toISOString() } },
+            OrderNumber: { rich_text: [{ text: { content: orderNumber } }] }
           }
         })
       });
-      if (countResponse.ok) {
-        const countData = await countResponse.json();
-        todaysOrders = countData.results.length;
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error inserting order into Notion');
       }
-    } catch (err) {
-      console.error('Error counting today orders:', err);
+
+      pageResult = await response.json();
+    } catch (dbError) {
+      // Si la inserción falló, liberar la reserva de memoria para permitir su uso posterior
+      releaseOrderReservation(orderNumber);
+      throw dbError;
     }
 
-    const nextNumber = (todaysOrders + 1).toString().padStart(3, '0');
-    const orderNumber = `LUM-${todayStr.replace(/-/g, '')}-${nextNumber}`;
+    const orderId = pageResult?.id || '';
 
-    const response = await fetch('https://api.notion.com/v1/pages', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${TOKEN}`,
-        'Content-Type': 'application/json',
-        'Notion-Version': '2022-06-28'
-      },
-      body: JSON.stringify({
-        parent: { database_id: ORDERS_DB_ID },
-        properties: {
-          Name: { title: [{ text: { content: formData.nombre } }] },
-          WhatsApp: { phone_number: formData.whatsapp },
-          City: { rich_text: [{ text: { content: formData.ciudad } }] },
-          Address: { rich_text: [{ text: { content: formData.direccion } }] },
-          Neighborhood: { rich_text: [{ text: { content: formData.barrio || '' } }] },
-          Products: { rich_text: [{ text: { content: productsString } }] },
-          Tones: { rich_text: [{ text: { content: tonesString } }] },
-          Total: { number: backendCalculatedTotal },
+    // Registrar en caché de idempotencia
+    recordOrderIdempotency(idempotencyKey, orderNumber, orderId);
 
-          Status: { select: { name: 'Pendiente' } },
-          Date: { date: { start: today.toISOString() } },
-          OrderNumber: { rich_text: [{ text: { content: orderNumber } }] }
-        }
-      })
+    return NextResponse.json({
+      success: true,
+      orderNumber,
+      orderId
     });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Error inserting order');
-    }
-
-    return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('Error creating order in Notion:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

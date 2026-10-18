@@ -287,7 +287,9 @@ export default function PedidosClient({ initialOrders, products }: { initialOrde
               {/* Header */}
               <div className="bg-gray-50/80 border-b border-gray-100 p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <div className="text-xs font-mono text-pink-600 font-bold mb-1">PEDIDO #{order.orderNumber}</div>
+                  <div className="text-xs font-mono text-pink-600 font-bold mb-1">
+                    PEDIDO {order.orderNumber?.startsWith('LB-') ? order.orderNumber : `#${order.orderNumber}`}
+                  </div>
                   <div className="text-sm font-medium text-gray-900 flex flex-wrap items-center gap-1.5">
                     <span>{order.name}</span>
                     <span className="text-gray-400">·</span>
