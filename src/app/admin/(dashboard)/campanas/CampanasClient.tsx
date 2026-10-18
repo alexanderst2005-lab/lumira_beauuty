@@ -112,7 +112,10 @@ export default function CampanasClient({ initialCampaigns, availableProducts = [
   const fetchCampaigns = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/campaigns');
+      const res = await fetch('/api/admin/campaigns', {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
+      });
       if (!res.ok) throw new Error('Error al recargar campañas');
       const data = await res.json();
       setCampaigns(data.campaigns || []);

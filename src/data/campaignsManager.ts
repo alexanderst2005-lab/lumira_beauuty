@@ -2,8 +2,10 @@ import fs from 'fs';
 import path from 'path';
 import { PromotionalCampaign, CampaignStatus, CampaignProductDiscount } from '@/types/campaign';
 
+import os from 'os';
+
 const PRIMARY_DATA_FILE = path.join(process.cwd(), 'src', 'data', 'campaigns.json');
-const TMP_DATA_FILE = path.join('/tmp', 'lumira_campaigns.json');
+const TMP_DATA_FILE = path.join(os.tmpdir(), 'lumira_campaigns.json');
 
 let inMemoryCampaigns: PromotionalCampaign[] | null = null;
 
@@ -33,25 +35,29 @@ export function readCampaigns(): PromotionalCampaign[] {
   try {
     let raw: string | null = null;
 
-    // 1. Revisar si hay copia en memoria
-    if (inMemoryCampaigns !== null) {
-      const now = new Date();
-      return inMemoryCampaigns.map(camp => ({
-        ...camp,
-        status: evaluateCampaignStatus(camp, now)
-      }));
+    // 1. Siempre dar prioridad al archivo principal del repositorio
+    if (fs.existsSync(PRIMARY_DATA_FILE)) {
+      try {
+        raw = fs.readFileSync(PRIMARY_DATA_FILE, 'utf-8');
+      } catch (err) {
+        console.warn('Could not read PRIMARY_DATA_FILE, trying temp fallback:', err);
+      }
     }
 
-    // 2. Intentar leer de /tmp (si estamos en serverless y se modificó)
-    if (fs.existsSync(TMP_DATA_FILE)) {
+    // 2. Si no hay archivo principal o falló, intentar de tmpdir
+    if (!raw && fs.existsSync(TMP_DATA_FILE)) {
       try {
         raw = fs.readFileSync(TMP_DATA_FILE, 'utf-8');
       } catch {}
     }
 
-    // 3. Si no hay en /tmp, leer de archivo principal
-    if (!raw && fs.existsSync(PRIMARY_DATA_FILE)) {
-      raw = fs.readFileSync(PRIMARY_DATA_FILE, 'utf-8');
+    // 3. Si no hay archivos, revisar si existe copia en memoria
+    if (!raw && inMemoryCampaigns !== null) {
+      const now = new Date();
+      return inMemoryCampaigns.map(camp => ({
+        ...camp,
+        status: evaluateCampaignStatus(camp, now)
+      }));
     }
 
     if (!raw) {
@@ -87,7 +93,7 @@ export function writeCampaigns(campaigns: PromotionalCampaign[]): boolean {
     }
     fs.writeFileSync(PRIMARY_DATA_FILE, JSON.stringify(campaigns, null, 2), 'utf-8');
   } catch (primaryErr) {
-    // Modo serverless / lectura única
+    console.warn('Could not write to PRIMARY_DATA_FILE (e.g. read-only env):', primaryErr);
   }
 
   try {
@@ -97,7 +103,7 @@ export function writeCampaigns(campaigns: PromotionalCampaign[]): boolean {
     }
     fs.writeFileSync(TMP_DATA_FILE, JSON.stringify(campaigns, null, 2), 'utf-8');
   } catch (tmpErr) {
-    // Si /tmp falla, aún conservamos inMemoryCampaigns
+    // Si temp falla, conservamos inMemoryCampaigns
   }
 
   return true;

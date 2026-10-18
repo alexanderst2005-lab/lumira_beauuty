@@ -26,6 +26,9 @@ function sanitizeUrl(url?: string): string {
   return `/${trimmed}`;
 }
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
   const isAuth = await checkAdminAuth();
   if (!isAuth) {
@@ -34,7 +37,11 @@ export async function GET() {
 
   try {
     const campaigns = readCampaigns();
-    return NextResponse.json({ campaigns });
+    return NextResponse.json({ campaigns }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate'
+      }
+    });
   } catch (error) {
     console.error('Error fetching admin campaigns:', error);
     return NextResponse.json({ error: 'Error al obtener campañas' }, { status: 500 });
@@ -90,7 +97,8 @@ export async function POST(request: Request) {
         frequency,
         enabled: Boolean(data.enabled),
         startDate: data.startDate || '',
-        endDate: data.endDate || ''
+        endDate: data.endDate || '',
+        products: Array.isArray(data.products) ? data.products : []
       };
 
       const saved = saveCampaign(campaignPayload);

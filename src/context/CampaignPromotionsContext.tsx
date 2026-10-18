@@ -53,14 +53,21 @@ export function CampaignPromotionsProvider({ children }: { children: React.React
   const fetchActivePromotions = useCallback(async () => {
     try {
       const res = await fetch('/api/campaigns/active', {
-        headers: { 'Cache-Control': 'no-cache' }
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
       });
-      if (!res.ok) return;
+      if (!res.ok) {
+        setActiveCampaign(null);
+        setActiveDiscounts({});
+        return;
+      }
       const data = await res.json();
       setActiveCampaign(data.campaign || null);
       setActiveDiscounts(data.discounts || {});
     } catch (err) {
       console.error('Error fetching campaign promotions context:', err);
+      setActiveCampaign(null);
+      setActiveDiscounts({});
     } finally {
       setIsLoading(false);
     }

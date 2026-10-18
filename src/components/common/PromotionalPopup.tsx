@@ -75,9 +75,16 @@ export default function PromotionalPopup({
     async function fetchActiveCampaign() {
       try {
         const res = await fetch('/api/campaigns/active', {
-          headers: { 'Cache-Control': 'no-cache' }
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
         });
-        if (!res.ok) return;
+        if (!res.ok) {
+          if (isMounted) {
+            setCampaign(null);
+            setIsOpen(false);
+          }
+          return;
+        }
         const data = await res.json();
         if (data.campaign && isMounted) {
           if (shouldShowCampaign(data.campaign)) {
@@ -87,10 +94,20 @@ export default function PromotionalPopup({
               if (isMounted) setIsOpen(true);
             }, 600);
             return () => clearTimeout(timer);
+          } else {
+            setIsOpen(false);
           }
+        } else if (isMounted) {
+          // Si la campaña fue eliminada o no está activa, cerrar y limpiar inmediatamente
+          setCampaign(null);
+          setIsOpen(false);
         }
       } catch (err) {
         console.error('Error fetching promo campaign:', err);
+        if (isMounted) {
+          setCampaign(null);
+          setIsOpen(false);
+        }
       } finally {
         if (isMounted) setHasChecked(true);
       }
