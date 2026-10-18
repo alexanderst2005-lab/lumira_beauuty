@@ -94,11 +94,11 @@ export default function Footer({ config }: { config?: any }) {
             <ul className="space-y-3">
               <li>
                 <a
-                  href="mailto:contacto@lumirabeauty.com"
+                  href="mailto:lumirabeauty26@gmail.com"
                   className="text-sm text-txt-secondary hover:text-primary transition-colors duration-200 inline-flex items-center gap-2 font-sans break-all"
                 >
                   <Mail className="w-4 h-4 text-primary shrink-0" />
-                  <span>contacto@lumirabeauty.com</span>
+                  <span>lumirabeauty26@gmail.com</span>
                 </a>
               </li>
               <li>

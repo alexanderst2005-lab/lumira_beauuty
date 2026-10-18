@@ -74,17 +74,17 @@ export default function ContactoPage() {
 
         {/* Email */}
         <motion.a
-          href="mailto:contacto@lumirabeauty.com"
+          href="mailto:lumirabeauty26@gmail.com"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="group p-6 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200/50 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 transition-all duration-300"
+          className="group p-6 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200/50 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center"
         >
           <div className="w-12 h-12 rounded-xl bg-blue-500 text-white flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
             <Mail className="w-6 h-6" />
           </div>
           <h3 className="font-heading font-semibold text-lg text-text mb-1">Correo</h3>
-          <p className="text-sm text-text-light">contacto@lumirabeauty.com</p>
+          <p className="text-sm text-text-light">lumirabeauty26@gmail.com</p>
         </motion.a>
       </div>
 
