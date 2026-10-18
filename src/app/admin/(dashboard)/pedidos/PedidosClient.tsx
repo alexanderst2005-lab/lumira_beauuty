@@ -461,10 +461,10 @@ export default function PedidosClient({ initialOrders, products }: { initialOrde
                 </p>
               </div>
 
-              {/* Tarjeta 2: DETALLES DE ENVÍO Y PAGO */}
+              {/* Tarjeta 2: DETALLES DE ENVÍO */}
               <div className="bg-gray-50/70 border border-gray-100 rounded-xl p-4 space-y-1">
                 <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-2">
-                  DETALLES DE ENVÍO Y PAGO
+                  DETALLES DE ENVÍO
                 </p>
                 <p className="font-semibold text-gray-900 text-sm">
                   {selectedOrder.city}
@@ -472,11 +472,6 @@ export default function PedidosClient({ initialOrders, products }: { initialOrde
                 <p className="text-xs text-gray-500">
                   {selectedOrder.address} {selectedOrder.neighborhood ? `(${selectedOrder.neighborhood})` : ''}
                 </p>
-                <div className="pt-2">
-                  <span className="border border-emerald-300 bg-emerald-50 text-emerald-700 text-xs px-2.5 py-1 rounded-md font-semibold inline-block">
-                    Pago Contra Entrega
-                  </span>
-                </div>
               </div>
             </div>
 
