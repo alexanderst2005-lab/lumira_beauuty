@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { 
   X, 
   Laptop, 
@@ -14,7 +14,8 @@ import {
   Sparkles, 
   Gift, 
   Heart,
-  ExternalLink
+  CheckCircle2,
+  AlertTriangle
 } from 'lucide-react';
 import { ChristmasConfig } from '@/types/christmas';
 
@@ -40,18 +41,40 @@ export default function ChristmasPreviewModal({
   const [isLoadingIframe, setIsLoadingIframe] = useState(true);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
-  // Sincronizar cambios por postMessage directamente al iframe sin recargar
-  useEffect(() => {
+  // Función para enviar la configuración actual al iframe
+  const sendConfigToIframe = useCallback((cfg: ChristmasConfig) => {
     if (iframeRef.current && iframeRef.current.contentWindow) {
-      iframeRef.current.contentWindow.postMessage(
-        {
-          type: 'LUMIRA_CHRISTMAS_PREVIEW',
-          config
-        },
-        '*'
-      );
+      try {
+        iframeRef.current.contentWindow.postMessage(
+          {
+            type: 'LUMIRA_CHRISTMAS_PREVIEW',
+            config: cfg
+          },
+          '*'
+        );
+      } catch (err) {
+        console.error('Error posting message to iframe:', err);
+      }
     }
-  }, [config]);
+  }, []);
+
+  // Escuchar cuando el iframe se monta y solicita la configuración inicial
+  useEffect(() => {
+    const handleParentMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'LUMIRA_IFRAME_READY') {
+        setIsLoadingIframe(false);
+        sendConfigToIframe(config);
+      }
+    };
+
+    window.addEventListener('message', handleParentMessage);
+    return () => window.removeEventListener('message', handleParentMessage);
+  }, [config, sendConfigToIframe]);
+
+  // Sincronizar en tiempo real cuando el administrador cambia cualquier toggle
+  useEffect(() => {
+    sendConfigToIframe(config);
+  }, [config, sendConfigToIframe]);
 
   if (!isOpen) return null;
 
@@ -63,14 +86,14 @@ export default function ChristmasPreviewModal({
     onChangeConfig(updated);
   };
 
-  const previewUrl = `/?preview_christmas=1&enabled=${config.enabled}&snow=${config.snow}&lights=${config.lights}&sparkles=${config.sparkles}&giftSection=${config.giftSection}&extraDecor=${config.extraDecor}`;
+  const previewUrl = `/?preview_christmas=1&enabled=${config.enabled}&snow=${config.snow}&lights=${config.lights}&sparkles=${config.sparkles}&giftSection=${config.giftSection}&extraDecor=${config.extraDecor}&t=${iframeKey}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-      <div className="bg-[#12121A] rounded-2xl shadow-2xl flex flex-col w-full max-w-[96vw] h-[95vh] overflow-hidden border border-gray-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+      <div className="bg-[#12121A] rounded-2xl shadow-2xl flex flex-col w-full max-w-[98vw] h-[96vh] overflow-hidden border border-gray-800">
         
         {/* Barra superior de control de la vista previa */}
-        <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-[#1A1A24] text-white border-b border-gray-800">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-[#1A1A26] text-white border-b border-gray-800">
           
           {/* Identificador y título */}
           <div className="flex items-center gap-3">
@@ -79,13 +102,13 @@ export default function ChristmasPreviewModal({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-sm sm:text-base text-white">Vista Previa Real de la Tienda</h3>
+                <h3 className="font-semibold text-sm sm:text-base text-white">Vista Previa Real de Lumira Beauty</h3>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-pink-500/20 text-pink-300 border border-pink-500/30">
                   Simulación en Vivo
                 </span>
               </div>
               <p className="text-xs text-gray-400 hidden md:block">
-                Esta es la página principal real de Lumira Beauty. Los cambios que pruebes aquí no afectan a tus visitantes hasta que guardes.
+                La tienda principal real. Prueba los efectos activando o desactivando en vivo.
               </p>
             </div>
           </div>
@@ -148,7 +171,7 @@ export default function ChristmasPreviewModal({
               type="button"
               onClick={onSaveAndPublish}
               disabled={saving}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-xs sm:text-sm font-semibold transition-all shadow-md shadow-pink-600/30 active:scale-95 disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white text-xs sm:text-sm font-semibold transition-all shadow-md shadow-pink-600/30 active:scale-95 disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
               <span>{saving ? 'Guardando...' : 'Guardar y Publicar'}</span>
@@ -166,34 +189,37 @@ export default function ChristmasPreviewModal({
         </div>
 
         {/* Barra interactiva de interruptores en tiempo real */}
-        <div className="bg-[#161622] border-b border-gray-800/80 px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="bg-[#161624] border-b border-gray-800 px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-gray-400 font-medium mr-1">Probar efectos en vivo:</span>
+            <span className="text-gray-400 font-semibold mr-1">Interruptores en vivo:</span>
 
-            {/* Interruptor Maestro */}
+            {/* INTERRUPTOR PRINCIPAL: NAVIDAD ACTIVADA / DESACTIVADA */}
             <button
               type="button"
               onClick={() => toggleOption('enabled')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-xs transition-all shadow-sm ${
+              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full font-bold text-xs transition-all shadow-sm ${
                 config.enabled
-                  ? 'bg-emerald-500 text-white shadow-emerald-500/20'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  ? 'bg-emerald-500 hover:bg-emerald-400 text-white ring-2 ring-emerald-400/30'
+                  : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700'
               }`}
             >
-              <span>{config.enabled ? '🎄 Navidad: ACTIVADA' : '○ Navidad: DESACTIVADA'}</span>
+              <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+              <span>{config.enabled ? '🎄 Navidad: ACTIVADA' : '○ Navidad: DESACTIVADA (Clic para Activar)'}</span>
             </button>
+
+            <div className="h-4 w-[1px] bg-gray-700 mx-1 hidden sm:block" />
 
             {/* Switch Nieve */}
             <button
               type="button"
               onClick={() => toggleOption('snow')}
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition-colors ${
-                config.snow && config.enabled
-                  ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
-                  : 'bg-gray-800 text-gray-400 hover:text-gray-300 border border-gray-700'
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                config.enabled && config.snow
+                  ? 'bg-blue-500/25 text-blue-200 border border-blue-400/40 ring-1 ring-blue-500/20'
+                  : 'bg-gray-800/80 text-gray-400 hover:text-gray-200 border border-gray-700/60'
               }`}
             >
-              <Snowflake className="w-3.5 h-3.5" />
+              <Snowflake className="w-3.5 h-3.5 text-blue-400" />
               <span>Nieve: {config.snow ? 'ON' : 'OFF'}</span>
             </button>
 
@@ -201,13 +227,13 @@ export default function ChristmasPreviewModal({
             <button
               type="button"
               onClick={() => toggleOption('lights')}
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition-colors ${
-                config.lights && config.enabled
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                  : 'bg-gray-800 text-gray-400 hover:text-gray-300 border border-gray-700'
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                config.enabled && config.lights
+                  ? 'bg-amber-500/25 text-amber-200 border border-amber-400/40 ring-1 ring-amber-500/20'
+                  : 'bg-gray-800/80 text-gray-400 hover:text-gray-200 border border-gray-700/60'
               }`}
             >
-              <Lightbulb className="w-3.5 h-3.5" />
+              <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
               <span>Luces: {config.lights ? 'ON' : 'OFF'}</span>
             </button>
 
@@ -215,13 +241,13 @@ export default function ChristmasPreviewModal({
             <button
               type="button"
               onClick={() => toggleOption('sparkles')}
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition-colors ${
-                config.sparkles && config.enabled
-                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
-                  : 'bg-gray-800 text-gray-400 hover:text-gray-300 border border-gray-700'
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                config.enabled && config.sparkles
+                  ? 'bg-purple-500/25 text-purple-200 border border-purple-400/40 ring-1 ring-purple-500/20'
+                  : 'bg-gray-800/80 text-gray-400 hover:text-gray-200 border border-gray-700/60'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5" />
+              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
               <span>Destellos: {config.sparkles ? 'ON' : 'OFF'}</span>
             </button>
 
@@ -229,13 +255,13 @@ export default function ChristmasPreviewModal({
             <button
               type="button"
               onClick={() => toggleOption('giftSection')}
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition-colors ${
-                config.giftSection && config.enabled
-                  ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                  : 'bg-gray-800 text-gray-400 hover:text-gray-300 border border-gray-700'
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                config.enabled && config.giftSection
+                  ? 'bg-rose-500/25 text-rose-200 border border-rose-400/40 ring-1 ring-rose-500/20'
+                  : 'bg-gray-800/80 text-gray-400 hover:text-gray-200 border border-gray-700/60'
               }`}
             >
-              <Gift className="w-3.5 h-3.5" />
+              <Gift className="w-3.5 h-3.5 text-rose-400" />
               <span>Regala Belleza: {config.giftSection ? 'ON' : 'OFF'}</span>
             </button>
 
@@ -243,28 +269,36 @@ export default function ChristmasPreviewModal({
             <button
               type="button"
               onClick={() => toggleOption('extraDecor')}
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition-colors ${
-                config.extraDecor && config.enabled
-                  ? 'bg-pink-500/20 text-pink-300 border border-pink-500/40'
-                  : 'bg-gray-800 text-gray-400 hover:text-gray-300 border border-gray-700'
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                config.enabled && config.extraDecor
+                  ? 'bg-pink-500/25 text-pink-200 border border-pink-400/40 ring-1 ring-pink-500/20'
+                  : 'bg-gray-800/80 text-gray-400 hover:text-gray-200 border border-gray-700/60'
               }`}
             >
-              <Heart className="w-3.5 h-3.5" />
+              <Heart className="w-3.5 h-3.5 text-pink-400" />
               <span>Detalles: {config.extraDecor ? 'ON' : 'OFF'}</span>
             </button>
           </div>
 
-          <div className="text-gray-400 text-[11px] hidden lg:block">
-            {config.enabled 
-              ? '✨ Modo navideño activado en la simulación.' 
-              : '🤍 Navidad desactivada; la tienda se muestra con su aspecto original.'}
+          <div className="flex items-center gap-2 text-xs">
+            {config.enabled ? (
+              <span className="inline-flex items-center gap-1.5 text-emerald-400 font-medium bg-emerald-950/40 px-3 py-1 rounded-full border border-emerald-800/40">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Ambientación navideña visible en vivo</span>
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-amber-300 font-medium bg-amber-950/40 px-3 py-1 rounded-full border border-amber-800/40">
+                <AlertTriangle className="w-3.5 h-3.5" />
+                <span>Navidad apagada: Tienda en diseño original</span>
+              </span>
+            )}
           </div>
         </div>
 
-        {/* Área del iframe con el tamaño del dispositivo seleccionado */}
+        {/* Área del iframe de la tienda real */}
         <div className="flex-1 overflow-hidden bg-[#0A0A0F] p-2 sm:p-4 flex items-center justify-center relative">
           {isLoadingIframe && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0A0A0F]/80 z-20 gap-3 text-gray-400">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0A0A0F]/90 z-20 gap-3 text-gray-400">
               <RefreshCw className="w-8 h-8 text-pink-500 animate-spin" />
               <span className="text-sm font-medium">Cargando la tienda real de Lumira Beauty...</span>
             </div>
@@ -288,16 +322,7 @@ export default function ChristmasPreviewModal({
                 className="w-full h-full border-0 bg-white"
                 onLoad={() => {
                   setIsLoadingIframe(false);
-                  // Enviar estado actual tras cargar
-                  if (iframeRef.current && iframeRef.current.contentWindow) {
-                    iframeRef.current.contentWindow.postMessage(
-                      {
-                        type: 'LUMIRA_CHRISTMAS_PREVIEW',
-                        config
-                      },
-                      '*'
-                    );
-                  }
+                  sendConfigToIframe(config);
                 }}
               />
             </div>
@@ -305,14 +330,16 @@ export default function ChristmasPreviewModal({
         </div>
 
         {/* Pie del modal */}
-        <div className="px-6 py-3 bg-[#1A1A24] border-t border-gray-800 flex items-center justify-between">
-          <span className="text-xs text-gray-400 flex items-center gap-2">
-            <span>Puedes navegar e interactuar con la tienda tal cual como la ven tus clientes.</span>
+        <div className="px-6 py-2.5 bg-[#1A1A26] border-t border-gray-800 flex items-center justify-between text-xs">
+          <span className="text-gray-400">
+            {config.enabled
+              ? '✨ Nieve, luces y decoraciones activas sobre la portada. Haz scroll para ver la sección «Regala belleza».'
+              : '🤍 Navidad apagada. Pulsa «🎄 Navidad: ACTIVADA» arriba para encender los efectos en vivo.'}
           </span>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-300 bg-gray-800 hover:bg-gray-700 transition-colors"
+            className="px-4 py-1.5 rounded-xl font-semibold text-gray-300 bg-gray-800 hover:bg-gray-700 transition-colors"
           >
             Cerrar Vista Previa
           </button>

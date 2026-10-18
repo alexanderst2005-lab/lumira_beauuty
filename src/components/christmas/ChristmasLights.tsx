@@ -1,43 +1,54 @@
 'use client';
 
 import React from 'react';
+import { usePathname } from 'next/navigation';
 
 export default function ChristmasLights() {
-  // Colores sofisticados en la paleta Lumira: Champagne dorado, Rosa cálido, Blanco aperlado
+  const pathname = usePathname();
+  const isHome = !pathname || pathname === '/' || pathname === '';
+
+  // Paleta oficial Lumira Beauty: Champagne dorado, Rosa cálido, Blanco aperlado
   const lightColors = [
-    { base: 'bg-[#FEEA9A]', glow: 'rgba(254, 234, 154, 0.75)', delay: '0s' },
-    { base: 'bg-[#FFB7D5]', glow: 'rgba(255, 183, 213, 0.75)', delay: '0.8s' },
-    { base: 'bg-[#FFF9E6]', glow: 'rgba(255, 249, 230, 0.85)', delay: '1.6s' },
-    { base: 'bg-[#FAD082]', glow: 'rgba(250, 208, 130, 0.75)', delay: '0.4s' },
-    { base: 'bg-[#FF94C2]', glow: 'rgba(255, 148, 194, 0.75)', delay: '1.2s' },
-    { base: 'bg-[#FFF2B2]', glow: 'rgba(255, 242, 178, 0.8)', delay: '2.0s' }
+    { base: 'bg-[#FFE27A]', glow: 'rgba(255, 226, 122, 0.9)', delay: '0s' },
+    { base: 'bg-[#FF9EC5]', glow: 'rgba(255, 158, 197, 0.9)', delay: '0.8s' },
+    { base: 'bg-[#FFFBF0]', glow: 'rgba(255, 251, 240, 0.95)', delay: '1.6s' },
+    { base: 'bg-[#FBC462]', glow: 'rgba(251, 196, 98, 0.9)', delay: '0.4s' },
+    { base: 'bg-[#FF75B0]', glow: 'rgba(255, 117, 176, 0.9)', delay: '1.2s' },
+    { base: 'bg-[#FFF3B8]', glow: 'rgba(255, 243, 184, 0.95)', delay: '2.0s' }
   ];
 
   return (
     <div
-      className="fixed top-0 inset-x-0 pointer-events-none z-[45] overflow-hidden select-none"
+      className={`fixed inset-x-0 pointer-events-none z-[70] select-none ${
+        isHome ? 'top-[2.05rem] sm:top-[2.1rem]' : 'top-0'
+      }`}
       aria-hidden="true"
     >
-      {/* Hilo dorado sutil y elegante */}
-      <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-[#E8C88B]/40 to-transparent" />
+      {/* Hilo festivo dorado sutil */}
+      <div className="w-full h-[1.5px] bg-gradient-to-r from-transparent via-[#E5BF7D]/70 to-transparent shadow-sm" />
 
-      {/* Cadena de luces delicadas distribuidas suavemente */}
-      <div className="w-full flex items-center justify-between px-2 sm:px-6 py-1">
-        {Array.from({ length: 28 }).map((_, idx) => {
+      {/* Cadena de luces delicadas distribuidas a lo ancho de la pantalla */}
+      <div className="w-full flex items-start justify-between px-2 sm:px-6">
+        {Array.from({ length: 32 }).map((_, idx) => {
           const color = lightColors[idx % lightColors.length];
+          const isOffset = idx % 2 === 1;
           return (
             <div
               key={idx}
-              className="flex flex-col items-center justify-start relative -top-[1px]"
+              className={`flex flex-col items-center justify-start ${
+                isOffset ? 'mt-1 sm:mt-1.5' : 'mt-0'
+              }`}
             >
-              {/* Casquillo micro de oro rosa/champán */}
-              <div className="w-[3px] h-[3px] bg-[#CBB184] rounded-t-[1px]" />
-              {/* Bombillita delicada */}
+              {/* Alambre micro de suspensión */}
+              <div className="w-[1px] h-[3px] sm:h-[4px] bg-[#C8A970]" />
+              {/* Casquillo de oro rosa/champán */}
+              <div className="w-[4px] h-[3px] bg-[#9C7D47] rounded-t-[1px]" />
+              {/* Bombillita navideña delicada */}
               <div
-                className={`w-[6px] h-[8px] sm:w-[7px] sm:h-[9px] rounded-full ${color.base} transition-transform duration-700`}
+                className={`w-[8px] h-[11px] sm:w-[9px] sm:h-[13px] rounded-full ${color.base}`}
                 style={{
-                  boxShadow: `0 0 8px 2px ${color.glow}, 0 0 16px 4px ${color.glow}`,
-                  animation: `lumiraLightBreathe 2.8s ease-in-out infinite`,
+                  boxShadow: `0 0 10px 3px ${color.glow}, 0 0 20px 5px ${color.glow}`,
+                  animation: `lumiraLightBreathe 2.6s ease-in-out infinite`,
                   animationDelay: color.delay
                 }}
               />
@@ -49,8 +60,8 @@ export default function ChristmasLights() {
       <style jsx>{`
         @keyframes lumiraLightBreathe {
           0%, 100% {
-            opacity: 0.55;
-            transform: scale(0.92);
+            opacity: 0.6;
+            transform: scale(0.94);
           }
           50% {
             opacity: 1;

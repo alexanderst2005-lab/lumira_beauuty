@@ -64,15 +64,15 @@ export default function ChristmasCanvasEffects({
 
     // Cantidad equilibrada según tamaño de pantalla
     const isMobile = width < 768;
-    const flakeCount = showSnow ? (isMobile ? 24 : 50) : 0;
-    const sparkleCount = showSparkles ? (isMobile ? 8 : 16) : 0;
+    const flakeCount = showSnow ? (isMobile ? 30 : 60) : 0;
+    const sparkleCount = showSparkles ? (isMobile ? 10 : 20) : 0;
 
-    // Paleta Lumira Beauty: Blanco puro, rosa suave empolvado, champán delicado
+    // Paleta Lumira Beauty: Blanco nieve luminoso, rosa suave empolvado, champán delicado
     const flakeColors = [
       'rgba(255, 255, 255,',
-      'rgba(255, 240, 245,',
-      'rgba(255, 225, 235,',
-      'rgba(250, 244, 232,'
+      'rgba(255, 245, 250,',
+      'rgba(255, 230, 240,',
+      'rgba(254, 248, 235,'
     ];
 
     const flakes: Flake[] = [];
@@ -80,26 +80,26 @@ export default function ChristmasCanvasEffects({
       flakes.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        radius: Math.random() * 2.2 + 0.8,
-        speed: Math.random() * 0.9 + 0.5,
+        radius: Math.random() * 2.4 + 1.0,
+        speed: Math.random() * 1.1 + 0.6,
         drift: Math.random() * Math.PI * 2,
-        driftSpeed: Math.random() * 0.015 + 0.005,
-        opacity: Math.random() * 0.5 + 0.35,
+        driftSpeed: Math.random() * 0.016 + 0.006,
+        opacity: Math.random() * 0.45 + 0.5,
         color: flakeColors[Math.floor(Math.random() * flakeColors.length)]
       });
     }
 
-    const sparkleColors = ['#FFFFFF', '#FDF6E2', '#FFEBF2', '#F7DDB2'];
+    const sparkleColors = ['#FFFFFF', '#FDF8E8', '#FFEBF4', '#F9E2B8'];
     const sparkles: Sparkle[] = [];
     for (let i = 0; i < sparkleCount; i++) {
       sparkles.push({
         x: Math.random() * width,
         y: Math.random() * height,
         size: 0,
-        maxSize: Math.random() * 4 + 3,
+        maxSize: Math.random() * 4.5 + 3.5,
         alpha: 0,
         phase: Math.random() * Math.PI * 2,
-        speed: Math.random() * 0.02 + 0.01,
+        speed: Math.random() * 0.022 + 0.012,
         color: sparkleColors[Math.floor(Math.random() * sparkleColors.length)]
       });
     }
@@ -117,10 +117,9 @@ export default function ChristmasCanvasEffects({
       context.globalAlpha = Math.max(0, Math.min(1, alpha));
       context.fillStyle = color;
       context.shadowColor = color;
-      context.shadowBlur = 4;
+      context.shadowBlur = 6;
 
       context.beginPath();
-      // Dibujar estrella suave de 4 puntas delicada
       const arm = size;
       const inner = size * 0.22;
       context.moveTo(0, -arm);
@@ -130,9 +129,9 @@ export default function ChristmasCanvasEffects({
       context.quadraticCurveTo(0, -inner, 0, -arm);
       context.fill();
 
-      // Centro luminoso
+      // Centro blanco brillante
       context.beginPath();
-      context.arc(0, 0, inner * 0.8, 0, Math.PI * 2);
+      context.arc(0, 0, inner * 0.9, 0, Math.PI * 2);
       context.fillStyle = '#FFFFFF';
       context.fill();
 
@@ -154,7 +153,7 @@ export default function ChristmasCanvasEffects({
             const f = flakes[i];
             f.y += f.speed;
             f.drift += f.driftSpeed;
-            f.x += Math.sin(f.drift) * 0.6;
+            f.x += Math.sin(f.drift) * 0.7;
 
             // Re-envolver al salir del viewport
             if (f.y > height + 10) {
@@ -170,8 +169,8 @@ export default function ChristmasCanvasEffects({
             ctx.beginPath();
             ctx.arc(f.x, f.y, f.radius, 0, Math.PI * 2);
             ctx.fillStyle = `${f.color} ${f.opacity})`;
-            ctx.shadowColor = 'rgba(255, 255, 255, 0.4)';
-            ctx.shadowBlur = f.radius > 2 ? 3 : 1;
+            ctx.shadowColor = 'rgba(255, 255, 255, 0.6)';
+            ctx.shadowBlur = f.radius > 2 ? 4 : 1.5;
             ctx.fill();
           }
         }
@@ -181,12 +180,10 @@ export default function ChristmasCanvasEffects({
           for (let i = 0; i < sparkles.length; i++) {
             const s = sparkles[i];
             s.phase += s.speed;
-            // Oscilación suave con seno
             const sinVal = Math.sin(s.phase);
-            s.alpha = Math.max(0, sinVal * 0.85);
+            s.alpha = Math.max(0, sinVal * 0.9);
             s.size = Math.max(0, sinVal * s.maxSize);
 
-            // Reubicar cuando el destello se apaga por completo
             if (s.phase > Math.PI * 2) {
               s.phase = 0;
               s.x = Math.random() * width;
@@ -220,7 +217,7 @@ export default function ChristmasCanvasEffects({
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-30 w-full h-full"
+      className="fixed inset-0 pointer-events-none z-[65] w-full h-full"
       style={{ pointerEvents: 'none' }}
       aria-hidden="true"
     />

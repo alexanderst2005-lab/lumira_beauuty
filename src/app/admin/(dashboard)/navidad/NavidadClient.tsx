@@ -94,7 +94,12 @@ export default function NavidadClient({ initialConfig }: NavidadClientProps) {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => setIsPreviewOpen(true)}
+            onClick={() => {
+              if (!formData.enabled) {
+                setFormData(prev => ({ ...prev, enabled: true }));
+              }
+              setIsPreviewOpen(true);
+            }}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-pink-200 bg-pink-50/50 hover:bg-pink-50 text-pink-700 text-sm font-semibold transition-all hover:border-pink-300 shadow-sm active:scale-95"
           >
             <Eye className="w-4 h-4" />
