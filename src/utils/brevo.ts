@@ -14,7 +14,11 @@ export async function sendBrevoEmail({ toEmail, toName, subject, htmlContent }: 
   // En Brevo, el remitente debe ser un correo verificado de la cuenta para que el relay no lo rechace en cola.
   // alexanderst2005@gmail.com es el remitente verificado y muestra el nombre oficial "Lumira Beauty".
   const envSender = process.env.BREVO_SENDER_EMAIL?.trim();
-  const senderEmail = envSender || 'lumirabeauty26@gmail.com';
+  // Sanitizar si en variables de entorno se escribió 'lumirabeauty266' por error tipográfico
+  let senderEmail = envSender || 'lumirabeauty26@gmail.com';
+  if (senderEmail.includes('lumirabeauty266')) {
+    senderEmail = 'lumirabeauty26@gmail.com';
+  }
   const senderName = process.env.BREVO_SENDER_NAME || 'Lumira Beauty';
 
   if (!apiKey) {
@@ -55,35 +59,34 @@ export async function sendBrevoEmail({ toEmail, toName, subject, htmlContent }: 
       const errBody = await res.text();
       console.warn('[Brevo Warning] Falló primer intento con', senderEmail, errBody);
 
-      // Si falló por validación de remitente, reintentar con el correo verificado de la cuenta
-      if (senderEmail !== 'alexanderst2005@gmail.com') {
-        const retryRes = await fetch('https://api.brevo.com/v3/smtp/email', {
-          method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'api-key': apiKey
+      // Si falló por validación de remitente, reintentar con lumirabeauty26@gmail.com o alexanderst2005@gmail.com
+      const fallbackSender = senderEmail === 'lumirabeauty26@gmail.com' ? 'alexanderst2005@gmail.com' : 'lumirabeauty26@gmail.com';
+      const retryRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'api-key': apiKey
+        },
+        body: JSON.stringify({
+          sender: {
+            name: senderName,
+            email: fallbackSender
           },
-          body: JSON.stringify({
-            sender: {
-              name: senderName,
-              email: 'alexanderst2005@gmail.com'
-            },
-            to: [
-              {
-                email: toEmail.trim(),
-                name: toName?.trim() || toEmail.split('@')[0]
-              }
-            ],
-            subject: subject,
-            htmlContent: htmlContent
-          })
-        });
+          to: [
+            {
+              email: toEmail.trim(),
+              name: toName?.trim() || toEmail.split('@')[0]
+            }
+          ],
+          subject: subject,
+          htmlContent: htmlContent
+        })
+      });
 
-        if (retryRes.ok) {
-          const retryData = await retryRes.json();
-          return { success: true, messageId: retryData.messageId };
-        }
+      if (retryRes.ok) {
+        const retryData = await retryRes.json();
+        return { success: true, messageId: retryData.messageId };
       }
 
       return { success: false, error: `Error Brevo: ${res.status} ${errBody}` };
@@ -242,12 +245,25 @@ export async function sendOrderConfirmationEmail(params: {
     </html>
   `;
 
-  return sendBrevoEmail({
+  const result = await sendBrevoEmail({
     toEmail: customerEmail,
     toName: customerName,
     subject: `🛍️ Confirmación de tu Pedido #${orderNumber} - Lumira Beauty`,
     htmlContent
   });
+
+  // Enviar copia informativa a la tienda (lumirabeauty26@gmail.com) si el cliente es otro correo
+  const storeEmail = 'lumirabeauty26@gmail.com';
+  if (customerEmail.trim().toLowerCase() !== storeEmail) {
+    sendBrevoEmail({
+      toEmail: storeEmail,
+      toName: 'Administración Lumira Beauty',
+      subject: `🔔 [Nuevo Pedido Recibido] #${orderNumber} - ${customerName}`,
+      htmlContent
+    }).catch(err => console.warn('[Brevo] No se pudo enviar copia a administración:', err));
+  }
+
+  return result;
 }
 
 /**
