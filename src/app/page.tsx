@@ -1,5 +1,6 @@
 import HeroBanner from '@/components/home/HeroBanner';
 import Categories from '@/components/home/Categories';
+import ChristmasGiftSection from '@/components/christmas/ChristmasGiftSection';
 import SaleFavoritesSection from '@/components/home/SaleFavoritesSection';
 import EditorialSection from '@/components/home/EditorialSection';
 import FeaturedProducts from '@/components/home/FeaturedProducts';
@@ -19,6 +20,7 @@ export default async function Home() {
     <>
       <HeroBanner config={config} />
       <Categories />
+      <ChristmasGiftSection />
       <SaleFavoritesSection initialProducts={products} />
       <EditorialSection />
       <FeaturedProducts initialProducts={products} />

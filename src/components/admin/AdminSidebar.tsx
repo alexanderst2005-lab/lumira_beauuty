@@ -10,7 +10,8 @@ import {
   LogOut,
   X,
   Trash2,
-  Megaphone
+  Megaphone,
+  Sparkles
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -24,6 +25,7 @@ const navItems = [
   { name: 'Pedidos', href: '/admin/pedidos', icon: ShoppingBag },
   { name: 'Productos', href: '/admin/productos', icon: Package },
   { name: 'Campañas', href: '/admin/campanas', icon: Megaphone },
+  { name: 'Temporada Navideña', href: '/admin/navidad', icon: Sparkles },
   { name: 'Clientes', href: '/admin/clientes', icon: Users },
   { name: 'Papelera', href: '/admin/papelera', icon: Trash2 },
 ];

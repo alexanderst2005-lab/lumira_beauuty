@@ -13,6 +13,8 @@ import FavoritesDrawer from "@/components/favorites/FavoritesDrawer";
 import WhatsAppButton from "@/components/layout/WhatsAppButton";
 import PromotionalPopup from "@/components/common/PromotionalPopup";
 import { CampaignPromotionsProvider } from "@/context/CampaignPromotionsContext";
+import { ChristmasProvider } from "@/context/ChristmasContext";
+import ChristmasSeasonEffects from "@/components/christmas/ChristmasSeasonEffects";
 import { Toaster } from "sonner";
 
 
@@ -93,22 +95,24 @@ export default function StoreLayoutWrapper({ children, config }: { children: Rea
   const isHome = !pathname || pathname === '/' || pathname === '';
 
   return (
-    <CampaignPromotionsProvider>
-      <FavoritesProvider>
-        <CartProvider>
-          <Suspense fallback={null}><ScrollRestorer isAdmin={isAdmin} /></Suspense>
-          {isHome && <MarqueeBanner />}
-          <Header config={config} />
-          <main className={`min-h-screen overflow-x-clip ${!isHome ? 'pt-16 sm:pt-20' : ''}`}>{children}</main>
-          <Footer config={config} />
-          <CartDrawer />
-          <FavoritesDrawer />
-          <WhatsAppButton config={config} />
-          <PromotionalPopup />
-          <Toaster {...toasterOptions} />
-        </CartProvider>
-      </FavoritesProvider>
-    </CampaignPromotionsProvider>
+    <ChristmasProvider initialConfig={config?.christmasConfig}>
+      <CampaignPromotionsProvider>
+        <FavoritesProvider>
+          <CartProvider>
+            <Suspense fallback={null}><ScrollRestorer isAdmin={isAdmin} /></Suspense>
+            {isHome && <MarqueeBanner />}
+            <Header config={config} />
+            <ChristmasSeasonEffects />
+            <main className={`min-h-screen overflow-x-clip ${!isHome ? 'pt-16 sm:pt-20' : ''}`}>{children}</main>
+            <Footer config={config} />
+            <CartDrawer />
+            <FavoritesDrawer />
+            <WhatsAppButton config={config} />
+            <PromotionalPopup />
+            <Toaster {...toasterOptions} />
+          </CartProvider>
+        </FavoritesProvider>
+      </CampaignPromotionsProvider>
+    </ChristmasProvider>
   );
-
 }
