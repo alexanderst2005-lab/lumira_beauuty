@@ -125,12 +125,8 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
 
         {/* Badge de Oferta si tiene descuento activo */}
         {discountInfo.hasDiscount && !isOutOfStock && (
-          <span className={`absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-20 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1 ${
-            isChristmasActive
-              ? 'bg-gradient-to-r from-rose-600 via-pink-600 to-amber-500 shadow-[0_2px_8px_rgba(230,166,76,0.35)]'
-              : 'bg-rose-500'
-          }`}>
-            <span>{isChristmasActive ? '🎁 Oferta' : 'Oferta'}</span>
+          <span className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-20 bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1">
+            <span>Oferta</span>
             <span>-{discountInfo.discountPercent}%</span>
           </span>
         )}
@@ -139,13 +135,6 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
         {product.isNew && !isOutOfStock && !discountInfo.hasDiscount && (
           <span className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-20 bg-primary text-white text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-[0.14em] shadow-sm">
             Nuevo
-          </span>
-        )}
-
-        {/* Detalle Navideño Especial */}
-        {isChristmasActive && !isOutOfStock && !discountInfo.hasDiscount && !product.isNew && (
-          <span className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-20 bg-gradient-to-r from-[#D6336C] via-[#FF5C9D] to-[#E6A64C] text-white text-[9px] sm:text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1 shadow-[0_2px_8px_rgba(214,51,108,0.25)]">
-            <span>🎄 Especial Navidad</span>
           </span>
         )}
 
