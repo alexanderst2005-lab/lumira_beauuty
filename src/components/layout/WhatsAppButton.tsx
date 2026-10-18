@@ -3,9 +3,11 @@
 import { motion } from 'framer-motion';
 import { MessageCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useChristmas } from '@/context/ChristmasContext';
 
 export default function WhatsAppButton({ config }: { config?: any }) {
   const [isVisible, setIsVisible] = useState(false);
+  const { isChristmasActive } = useChristmas();
   const STORE_NUMBER = '573011675661';
   const DEFAULT_MESSAGE = '¡Hola! Me gustaría recibir más información sobre sus productos en Lumira Beauty. ✨';
 
@@ -30,6 +32,12 @@ export default function WhatsAppButton({ config }: { config?: any }) {
       className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-[54px] h-[54px] sm:w-[60px] sm:h-[60px] bg-[#25D366] text-white rounded-full shadow-xl hover:shadow-2xl hover:shadow-[#25D366]/40 cursor-pointer"
       aria-label="Contactar por WhatsApp"
     >
+      {/* Gorrito navideño súper chévere */}
+      {isChristmasActive && (
+        <span className="absolute -top-3.5 -left-1 text-2xl select-none pointer-events-none drop-shadow -rotate-12 animate-bounce">
+          🎅
+        </span>
+      )}
       {/* Usamos un ícono SVG nativo de WhatsApp para mayor fidelidad visual, 
           o el de lucide-react si prefieren mantener la librería de íconos unificada */}
       <svg

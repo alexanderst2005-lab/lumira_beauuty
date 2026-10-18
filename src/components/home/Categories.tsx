@@ -71,6 +71,15 @@ export default function Categories() {
                       className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
                     />
                   )}
+                  {isChristmasActive && (
+                    <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-[#FF5C9D] via-[#F5CB7D] to-[#D6336C] z-20" />
+                  )}
+                  {isChristmasActive && (
+                    <span className="absolute top-2.5 left-2.5 z-20 px-2 py-0.5 rounded-full bg-white/90 backdrop-blur-md text-[9px] font-bold text-[#C2185B] border border-rose-200/80 shadow-sm flex items-center gap-1">
+                      <span>🎁</span>
+                      <span>Navidad</span>
+                    </span>
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#4a0f2e]/75 via-[#4a0f2e]/10 to-transparent" />
                   <div className="absolute inset-x-0 bottom-0 p-3 sm:p-5 flex items-end justify-between gap-2">
                     <h3 className="text-white font-display text-lg sm:text-2xl font-medium leading-tight [text-wrap:balance] drop-shadow">

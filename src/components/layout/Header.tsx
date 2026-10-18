@@ -54,7 +54,7 @@ export default function Header({ config }: { config?: any }) {
             ? `fixed inset-x-0 z-50 ${
                 isScrolled
                   ? 'top-0 bg-white/95 backdrop-blur-md shadow-md border-b border-[#F0E6DE]'
-                  : 'top-[2.1rem] bg-transparent'
+                  : 'top-[2.1rem] !bg-transparent !shadow-none !border-transparent'
               }`
             : 'fixed inset-x-0 top-0 z-50 bg-white shadow-sm border-b border-[#E5E5E5]'
         } transition-all duration-300`}
@@ -85,10 +85,15 @@ export default function Header({ config }: { config?: any }) {
                 }`}
                 priority
               />
-              {isChristmasActive && activeConfig?.extraDecor && (
-                <span className="absolute -top-1 -right-2 text-xs select-none pointer-events-none drop-shadow-sm animate-pulse">
-                  ✨
-                </span>
+              {isChristmasActive && (
+                <>
+                  <span className="absolute -top-3.5 sm:-top-4 -left-1.5 text-xl sm:text-2xl select-none pointer-events-none drop-shadow-md -rotate-12">
+                    🎅
+                  </span>
+                  <span className="absolute -top-1 -right-2 text-xs select-none pointer-events-none drop-shadow-sm animate-pulse">
+                    ✨
+                  </span>
+                </>
               )}
             </Link>
 

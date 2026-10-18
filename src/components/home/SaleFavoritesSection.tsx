@@ -7,6 +7,7 @@ import { Sparkles, ArrowRight, Flame } from 'lucide-react';
 import { Product } from '@/types';
 import ProductCard from '@/components/catalog/ProductCard';
 import { useCampaignPromotions } from '@/context/CampaignPromotionsContext';
+import { useChristmas } from '@/context/ChristmasContext';
 import { preloadProductImages } from '@/utils/imagePreloader';
 
 interface SaleFavoritesSectionProps {
@@ -15,6 +16,7 @@ interface SaleFavoritesSectionProps {
 
 export default function SaleFavoritesSection({ initialProducts }: SaleFavoritesSectionProps) {
   const { activeDiscounts, getProductDiscount } = useCampaignPromotions();
+  const { isChristmasActive } = useChristmas();
 
   // Filtrar exclusivamente productos que tienen un descuento real y vigente (campaña o individual)
   const saleProducts = useMemo(() => {
@@ -81,16 +83,31 @@ export default function SaleFavoritesSection({ initialProducts }: SaleFavoritesS
         >
           {/* Badge pill */}
           <div className="inline-flex items-center gap-1.5 px-3.5 py-1 mb-3.5 rounded-full bg-gradient-to-r from-rose-500/10 via-pink-500/10 to-rose-500/10 border border-rose-200/60 text-rose-600 text-[11px] sm:text-xs font-bold tracking-wider uppercase">
-            <Flame className="w-3.5 h-3.5 text-rose-500 fill-rose-500 animate-pulse" />
-            <span>Precios Especiales de Temporada</span>
+            {isChristmasActive ? (
+              <>
+                <span>🎁</span>
+                <span>Ofertas Especiales de Navidad</span>
+              </>
+            ) : (
+              <>
+                <Flame className="w-3.5 h-3.5 text-rose-500 fill-rose-500 animate-pulse" />
+                <span>Precios Especiales de Temporada</span>
+              </>
+            )}
           </div>
 
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-medium text-txt mb-3 tracking-tight">
-            Nuestros favoritos en <span className="text-gradient italic">oferta</span>
+            {isChristmasActive ? (
+              <>Regalos & Favoritos en <span className="text-gradient italic">Oferta</span> ✨</>
+            ) : (
+              <>Nuestros favoritos en <span className="text-gradient italic">oferta</span></>
+            )}
           </h2>
           
           <p className="text-txt-secondary text-sm sm:text-base max-w-lg mx-auto font-sans leading-relaxed">
-            Aprovecha descuentos exclusivos por tiempo limitado en los productos más amados de nuestro catálogo.
+            {isChristmasActive
+              ? 'Aprovecha descuentos festivos por tiempo limitado para regalar y brillar esta Navidad.'
+              : 'Aprovecha descuentos exclusivos por tiempo limitado en los productos más amados de nuestro catálogo.'}
           </p>
         </motion.div>
 

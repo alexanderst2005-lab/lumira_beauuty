@@ -249,36 +249,47 @@ body {
 
 /* ===== MODO NAVIDAD (CHRISTMAS MODE THEME) ===== */
 .christmas-mode {
-  background: linear-gradient(180deg, #FFFDFE 0%, #FFF5F9 12%, #FFFBF5 28%, #FFF4F8 48%, #FFFDF8 72%, #FFFFFF 100%);
-  --color-bg: #FFF8FA;
-  --color-border-light: #FCE6EE;
+  background: linear-gradient(180deg, #FFFDFE 0%, #FFF2F7 8%, #FFF9FC 20%, #FFF0F6 40%, #FFFDF8 65%, #FFF5F9 85%, #FFFFFF 100%);
+  --color-bg: #FFF5F8;
+  --color-border-light: #FAD4E5;
 }
 
-/* Transición suave y armonización de secciones en modo navideño */
-.christmas-mode section.bg-white {
-  background: transparent !important;
+/* Transición suave y armonización de todas las secciones en modo navideño */
+.christmas-mode section {
+  background-color: transparent !important;
 }
 
 /* Títulos con gradiente festivo rosado, dorado y magenta */
 .christmas-mode .text-gradient {
-  background: linear-gradient(135deg, #D6336C 0%, #FF5C9D 40%, #E6A64C 100%) !important;
+  background: linear-gradient(135deg, #C2185B 0%, #FF5C9D 45%, #E5A852 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   background-clip: text !important;
 }
 
-/* Cabecera translúcida con borde festivo sutil */
-.christmas-mode header {
-  background: rgba(255, 255, 255, 0.95);
-  border-bottom: 1px solid rgba(247, 212, 229, 0.6) !important;
+/* Cuando el header tiene scroll, aplicamos fondo de cristal esmerilado festivo */
+.christmas-mode header.bg-white\/95 {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border-bottom: 1px solid rgba(247, 212, 229, 0.7) !important;
 }
 
 /* Tarjetas de categorías con toque festivo */
 .christmas-mode [id^="category-"] {
   border-color: #F7D4E5;
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .christmas-mode [id^="category-"]:hover {
-  border-color: #E5B56D;
-  box-shadow: 0 14px 32px rgba(230, 166, 76, 0.18);
+  border-color: #E5A852;
+  box-shadow: 0 14px 32px rgba(229, 168, 82, 0.22);
+}
+
+/* Botones principales con brillo festivo */
+.christmas-mode .btn-primary {
+  background: linear-gradient(135deg, #C2185B 0%, #E91E63 50%, #E5A852 100%);
+  color: white;
+}
+.christmas-mode .btn-primary:hover {
+  background: linear-gradient(135deg, #AD1457 0%, #D81B60 50%, #D49339 100%);
+  box-shadow: 0 4px 16px rgba(229, 168, 82, 0.35);
 }

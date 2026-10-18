@@ -7,9 +7,9 @@ import { Sparkles, Gift, ArrowRight, Truck, Heart } from 'lucide-react';
 import { useChristmas } from '@/context/ChristmasContext';
 
 export default function ChristmasGiftSection() {
-  const { isChristmasActive, activeConfig } = useChristmas();
+  const { isChristmasActive } = useChristmas();
 
-  if (!isChristmasActive || !activeConfig.giftSection) {
+  if (!isChristmasActive) {
     return null;
   }
 
