@@ -1,9 +1,11 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { useChristmas } from '@/context/ChristmasContext';
 
 export default function MarqueeBanner() {
   const pathname = usePathname();
+  const { isChristmasActive, activeConfig } = useChristmas();
   const isHome = !pathname || pathname === '/' || pathname === '';
 
   // La barra tipo marquesina es exclusiva de la portada principal sobre el Hero
@@ -11,12 +13,22 @@ export default function MarqueeBanner() {
     return null;
   }
 
-  const messages = [
+  const defaultMessages = [
     "ENVÍOS A TODO EL PAÍS",
     "PAGO CONTRA ENTREGA",
     "CALIDAD PREMIUM",
     "ATENCIÓN PERSONALIZADA"
   ];
+
+  const christmasMessages = [
+    "🎄 EDICIÓN NAVIDEÑA LUMIRA",
+    "✨ ESTA NAVIDAD, REGALA BELLEZA",
+    "🎁 EL REGALO PERFECTO ESTÁ AQUÍ",
+    "💖 ENVÍOS A TODO EL PAÍS",
+    "✨ ATENCIÓN PERSONALIZADA"
+  ];
+
+  const messages = isChristmasActive && activeConfig?.extraDecor ? christmasMessages : defaultMessages;
 
   // Double the messages for seamless loop
   const allMessages = [...messages, ...messages, ...messages, ...messages];

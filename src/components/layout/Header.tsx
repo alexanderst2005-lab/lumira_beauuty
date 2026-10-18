@@ -7,11 +7,13 @@ import { ShoppingCart, Menu, Search, X, Heart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useFavorites } from '@/context/FavoritesContext';
 import { usePathname, useRouter } from 'next/navigation';
+import { useChristmas } from '@/context/ChristmasContext';
 import MobileMenu from './MobileMenu';
 
 export default function Header({ config }: { config?: any }) {
   const { itemCount, setIsCartOpen } = useCart();
   const { favoritesCount, setIsFavoritesOpen } = useFavorites();
+  const { isChristmasActive, activeConfig } = useChristmas();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -72,7 +74,7 @@ export default function Header({ config }: { config?: any }) {
             </div>
 
             {/* Center: Logo */}
-            <Link href="/" className="flex-none transition-transform duration-300 hover:scale-105">
+            <Link href="/" className="flex-none transition-transform duration-300 hover:scale-105 relative">
               <Image
                 src="/images/logo-transparent.png"
                 alt={config?.storeName || "Lumira Beauty"}
@@ -83,6 +85,11 @@ export default function Header({ config }: { config?: any }) {
                 }`}
                 priority
               />
+              {isChristmasActive && activeConfig?.extraDecor && (
+                <span className="absolute -top-1 -right-2 text-xs select-none pointer-events-none drop-shadow-sm animate-pulse">
+                  ✨
+                </span>
+              )}
             </Link>
 
             {/* Right: Actions */}

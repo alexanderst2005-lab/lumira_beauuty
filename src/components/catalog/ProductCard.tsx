@@ -8,6 +8,7 @@ import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { useFavorites } from '@/context/FavoritesContext';
 import { useCampaignPromotions } from '@/context/CampaignPromotionsContext';
+import { useChristmas } from '@/context/ChristmasContext';
 import { formatPrice } from '@/utils/whatsapp';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -24,6 +25,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
   const { addToCart, items } = useCart();
   const { toggleFavorite, isFavorite } = useFavorites();
   const { getProductDiscount } = useCampaignPromotions();
+  const { isChristmasActive, activeConfig } = useChristmas();
   const [isAdding, setIsAdding] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
@@ -124,6 +126,13 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
         {product.isNew && !isOutOfStock && !discountInfo.hasDiscount && (
           <span className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-20 bg-primary text-white text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-[0.14em] shadow-sm">
             Nuevo
+          </span>
+        )}
+
+        {/* Detalle Navideño Especial */}
+        {isChristmasActive && activeConfig?.extraDecor && !isOutOfStock && !discountInfo.hasDiscount && !product.isNew && (
+          <span className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-20 bg-gradient-to-r from-rose-500/90 to-amber-500/90 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1">
+            <span>🎁 Regalo</span>
           </span>
         )}
 

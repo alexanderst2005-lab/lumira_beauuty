@@ -62,16 +62,16 @@ export default function ChristmasCanvasEffects({
     };
     window.addEventListener('resize', handleResize);
 
-    // Cantidad equilibrada según tamaño de pantalla
+    // Cantidad equilibrada y visible según pantalla
     const isMobile = width < 768;
-    const flakeCount = showSnow ? (isMobile ? 30 : 60) : 0;
-    const sparkleCount = showSparkles ? (isMobile ? 10 : 20) : 0;
+    const flakeCount = showSnow ? (isMobile ? 35 : 70) : 0;
+    const sparkleCount = showSparkles ? (isMobile ? 12 : 24) : 0;
 
-    // Paleta Lumira Beauty: Blanco nieve luminoso, rosa suave empolvado, champán delicado
+    // Paleta Lumira Beauty: Blanco puro, rosa suave empolvado, champán delicado
     const flakeColors = [
       'rgba(255, 255, 255,',
-      'rgba(255, 245, 250,',
-      'rgba(255, 230, 240,',
+      'rgba(255, 245, 252,',
+      'rgba(255, 230, 242,',
       'rgba(254, 248, 235,'
     ];
 
@@ -80,26 +80,26 @@ export default function ChristmasCanvasEffects({
       flakes.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        radius: Math.random() * 2.4 + 1.0,
-        speed: Math.random() * 1.1 + 0.6,
+        radius: Math.random() * 2.8 + 1.2,
+        speed: Math.random() * 1.2 + 0.6,
         drift: Math.random() * Math.PI * 2,
-        driftSpeed: Math.random() * 0.016 + 0.006,
-        opacity: Math.random() * 0.45 + 0.5,
+        driftSpeed: Math.random() * 0.018 + 0.006,
+        opacity: Math.random() * 0.4 + 0.6,
         color: flakeColors[Math.floor(Math.random() * flakeColors.length)]
       });
     }
 
-    const sparkleColors = ['#FFFFFF', '#FDF8E8', '#FFEBF4', '#F9E2B8'];
+    const sparkleColors = ['#FFFFFF', '#FDF8E8', '#FFEBF4', '#F9E2B8', '#FFD1E6'];
     const sparkles: Sparkle[] = [];
     for (let i = 0; i < sparkleCount; i++) {
       sparkles.push({
         x: Math.random() * width,
         y: Math.random() * height,
         size: 0,
-        maxSize: Math.random() * 4.5 + 3.5,
+        maxSize: Math.random() * 5 + 4,
         alpha: 0,
         phase: Math.random() * Math.PI * 2,
-        speed: Math.random() * 0.022 + 0.012,
+        speed: Math.random() * 0.024 + 0.012,
         color: sparkleColors[Math.floor(Math.random() * sparkleColors.length)]
       });
     }
@@ -116,8 +116,8 @@ export default function ChristmasCanvasEffects({
       context.translate(cx, cy);
       context.globalAlpha = Math.max(0, Math.min(1, alpha));
       context.fillStyle = color;
-      context.shadowColor = color;
-      context.shadowBlur = 6;
+      context.shadowColor = '#FF94C2';
+      context.shadowBlur = 8;
 
       context.beginPath();
       const arm = size;
@@ -129,7 +129,7 @@ export default function ChristmasCanvasEffects({
       context.quadraticCurveTo(0, -inner, 0, -arm);
       context.fill();
 
-      // Centro blanco brillante
+      // Centro blanco brillante luminoso
       context.beginPath();
       context.arc(0, 0, inner * 0.9, 0, Math.PI * 2);
       context.fillStyle = '#FFFFFF';
@@ -153,7 +153,7 @@ export default function ChristmasCanvasEffects({
             const f = flakes[i];
             f.y += f.speed;
             f.drift += f.driftSpeed;
-            f.x += Math.sin(f.drift) * 0.7;
+            f.x += Math.sin(f.drift) * 0.75;
 
             // Re-envolver al salir del viewport
             if (f.y > height + 10) {
@@ -169,8 +169,9 @@ export default function ChristmasCanvasEffects({
             ctx.beginPath();
             ctx.arc(f.x, f.y, f.radius, 0, Math.PI * 2);
             ctx.fillStyle = `${f.color} ${f.opacity})`;
-            ctx.shadowColor = 'rgba(255, 255, 255, 0.6)';
-            ctx.shadowBlur = f.radius > 2 ? 4 : 1.5;
+            // Sombra suave en rosa para que contraste tanto en fondos blancos como oscuros
+            ctx.shadowColor = 'rgba(214, 51, 108, 0.4)';
+            ctx.shadowBlur = f.radius > 2.5 ? 4 : 2;
             ctx.fill();
           }
         }
@@ -181,7 +182,7 @@ export default function ChristmasCanvasEffects({
             const s = sparkles[i];
             s.phase += s.speed;
             const sinVal = Math.sin(s.phase);
-            s.alpha = Math.max(0, sinVal * 0.9);
+            s.alpha = Math.max(0, sinVal * 0.95);
             s.size = Math.max(0, sinVal * s.maxSize);
 
             if (s.phase > Math.PI * 2) {
