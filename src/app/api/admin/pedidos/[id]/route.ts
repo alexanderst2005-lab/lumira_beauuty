@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { sendOrderStatusEmail } from '@/utils/brevo';
 
 const TOKEN = process.env.NOTION_SECRET;
 
@@ -38,6 +39,32 @@ export async function PATCH(
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || 'Error updating order');
+    }
+
+    const pageData = await response.json();
+
+    // Enviar notificación por correo con Brevo ante cambio de estado
+    if (status !== undefined) {
+      const customerEmail = pageData.properties?.Email?.email;
+      const customerName = pageData.properties?.Name?.title?.[0]?.plain_text || 'Cliente';
+      const orderNumber = pageData.properties?.OrderNumber?.rich_text?.[0]?.plain_text || id.slice(0, 8);
+      const total = pageData.properties?.Total?.number || 0;
+      const sCompany = shippingCompany !== undefined ? shippingCompany : (pageData.properties?.ShippingCompany?.rich_text?.[0]?.plain_text || '');
+      const tNumber = trackingNumber !== undefined ? trackingNumber : (pageData.properties?.TrackingNumber?.rich_text?.[0]?.plain_text || '');
+
+      if (customerEmail) {
+        sendOrderStatusEmail({
+          orderNumber,
+          customerName,
+          customerEmail,
+          status,
+          shippingCompany: sCompany,
+          trackingNumber: tNumber,
+          total
+        }).catch(err => {
+          console.error('[Brevo Error] No se pudo enviar el correo de cambio de estado:', err);
+        });
+      }
     }
 
     return NextResponse.json({ success: true });

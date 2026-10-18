@@ -14,6 +14,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const { items, total, clearCart } = useCart();
   const [formData, setFormData] = useState({
     nombre: '',
+    email: '',
     whatsapp: '',
     ciudad: '',
     direccion: '',
@@ -49,7 +50,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     e.preventDefault();
 
     // Validar requeridos básicos en caso de que HTML5 falle por alguna razón
-    if (!formData.nombre || !formData.whatsapp || !formData.ciudad || !formData.direccion) {
+    if (!formData.nombre || !formData.whatsapp || !formData.email || !formData.ciudad || !formData.direccion) {
       return;
     }
 
@@ -181,6 +182,24 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                     className="w-full px-4 py-2.5 rounded-xl border border-border bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none font-sans"
                     placeholder="Ej. 3001234567"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-txt mb-1">
+                    Correo electrónico <span className="text-primary">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2.5 rounded-xl border border-border bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none font-sans"
+                    placeholder="Ej. maria@ejemplo.com"
+                  />
+                  <p className="text-[11px] text-txt-secondary mt-1">
+                    Te enviaremos la confirmación y el seguimiento de tu pedido a este correo.
+                  </p>
                 </div>
 
                 <div>

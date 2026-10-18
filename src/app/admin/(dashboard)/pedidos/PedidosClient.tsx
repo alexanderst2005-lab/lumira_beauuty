@@ -460,7 +460,7 @@ export default function PedidosClient({ initialOrders, products }: { initialOrde
                   {selectedOrder.whatsapp}
                 </p>
                 <p className="text-xs text-gray-500 truncate" title={selectedOrder.email}>
-                  {selectedOrder.email || (selectedOrder.name.toLowerCase().replace(/\s+/g, '') + '@gmail.com')}
+                  {selectedOrder.email || 'Sin correo registrado'}
                 </p>
               </div>
 

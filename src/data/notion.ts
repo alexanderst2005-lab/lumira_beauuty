@@ -163,6 +163,7 @@ export async function getAllOrdersFromNotion(includeTrash = false) {
         inTrash: props['En Papelera']?.checkbox ?? false,
         shippingCompany: props.ShippingCompany?.rich_text?.[0]?.plain_text || "",
         trackingNumber: props.TrackingNumber?.rich_text?.[0]?.plain_text || "",
+        email: props.Email?.email || "",
       };
     }).filter(o => includeTrash ? true : !o.inTrash);
   } catch (error) {

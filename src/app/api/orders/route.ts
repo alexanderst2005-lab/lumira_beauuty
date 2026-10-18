@@ -7,6 +7,7 @@ import {
   checkRecentIdempotency,
   recordOrderIdempotency
 } from '@/utils/orderNumber';
+import { sendOrderConfirmationEmail } from '@/utils/brevo';
 
 const TOKEN = process.env.NOTION_SECRET;
 const ORDERS_DB_ID = process.env.NOTION_ORDERS_DB;
@@ -120,7 +121,8 @@ export async function POST(request: Request) {
             Total: { number: backendCalculatedTotal },
             Status: { select: { name: 'Pendiente' } },
             Date: { date: { start: today.toISOString() } },
-            OrderNumber: { rich_text: [{ text: { content: orderNumber } }] }
+            OrderNumber: { rich_text: [{ text: { content: orderNumber } }] },
+            ...(formData.email ? { Email: { email: formData.email.trim() } } : {})
           }
         })
       });
@@ -141,6 +143,28 @@ export async function POST(request: Request) {
 
     // Registrar en caché de idempotencia
     recordOrderIdempotency(idempotencyKey, orderNumber, orderId);
+
+    // Enviar correo de confirmación de pedido vía Brevo de forma asíncrona
+    if (formData.email) {
+      sendOrderConfirmationEmail({
+        orderNumber,
+        customerName: formData.nombre,
+        customerEmail: formData.email,
+        customerPhone: formData.whatsapp,
+        city: formData.ciudad || '',
+        address: formData.direccion || '',
+        neighborhood: formData.barrio || '',
+        items: validatedItems.map((item: any) => ({
+          name: item.product?.name || item.name || 'Producto',
+          quantity: item.quantity,
+          price: item.finalPrice || item.price || 0,
+          variant: item.selectedTone?.name || item.selectedTone || (item.selectedOptions ? Object.values(item.selectedOptions).map((v: any) => v?.name || v).join(', ') : undefined)
+        })),
+        total: backendCalculatedTotal
+      }).catch(emailErr => {
+        console.error('[Brevo Error] No se pudo enviar el correo de confirmación:', emailErr);
+      });
+    }
 
     return NextResponse.json({
       success: true,
