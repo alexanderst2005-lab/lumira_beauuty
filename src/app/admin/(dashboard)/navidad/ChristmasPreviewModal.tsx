@@ -89,32 +89,34 @@ export default function ChristmasPreviewModal({
   const previewUrl = `/?preview_christmas=1&enabled=${config.enabled}&snow=${config.snow}&lights=${config.lights}&sparkles=${config.sparkles}&giftSection=${config.giftSection}&extraDecor=${config.extraDecor}&t=${iframeKey}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
-      <div className="bg-[#12121A] rounded-2xl shadow-2xl flex flex-col w-full max-w-[98vw] h-[96vh] overflow-hidden border border-gray-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+      <div className="bg-[#12121A] rounded-none sm:rounded-2xl shadow-2xl flex flex-col w-full sm:max-w-[98vw] h-full sm:h-[96vh] overflow-hidden border-0 sm:border border-gray-800">
         
-        {/* Barra superior de control de la vista previa */}
-        <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-[#1A1A26] text-white border-b border-gray-800">
+        {/* Barra superior de control de la vista previa (Optimizada para móvil y desktop) */}
+        <div className="flex items-center justify-between gap-2 px-3 sm:px-6 py-2.5 sm:py-3 bg-[#1A1A26] text-white border-b border-gray-800 flex-shrink-0">
           
           {/* Identificador y título */}
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-pink-500/20 border border-pink-500/40 flex items-center justify-center text-pink-400">
-              <Eye className="w-4 h-4" />
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-pink-500/20 border border-pink-500/40 flex items-center justify-center text-pink-400 flex-shrink-0">
+              <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-sm sm:text-base text-white">Vista Previa Real de Lumira Beauty</h3>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-pink-500/20 text-pink-300 border border-pink-500/30">
-                  Simulación en Vivo
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <h3 className="font-semibold text-xs sm:text-base text-white truncate">
+                  Vista Previa Lumira
+                </h3>
+                <span className="px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold tracking-wider uppercase bg-pink-500/20 text-pink-300 border border-pink-500/30 flex-shrink-0">
+                  En Vivo
                 </span>
               </div>
               <p className="text-xs text-gray-400 hidden md:block">
-                La tienda principal real. Prueba los efectos activando o desactivando en vivo.
+                Tienda real. Modifica los interruptores y observa el cambio en 0 ms.
               </p>
             </div>
           </div>
 
-          {/* Selector de Dispositivo */}
-          <div className="flex items-center gap-1 bg-[#12121A] p-1 rounded-xl border border-gray-800">
+          {/* Selector de Dispositivo (Solo visible en pantallas medianas y grandes, en cel ya estás en móvil) */}
+          <div className="hidden md:flex items-center gap-1 bg-[#12121A] p-1 rounded-xl border border-gray-800">
             <button
               type="button"
               onClick={() => setDevice('desktop')}
@@ -125,7 +127,7 @@ export default function ChristmasPreviewModal({
               }`}
             >
               <Laptop className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Escritorio</span>
+              <span>Escritorio</span>
             </button>
             <button
               type="button"
@@ -137,7 +139,7 @@ export default function ChristmasPreviewModal({
               }`}
             >
               <Tablet className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Tablet</span>
+              <span>Tablet</span>
             </button>
             <button
               type="button"
@@ -149,12 +151,12 @@ export default function ChristmasPreviewModal({
               }`}
             >
               <Smartphone className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Móvil</span>
+              <span>Móvil</span>
             </button>
           </div>
 
-          {/* Acciones principales */}
-          <div className="flex items-center gap-2">
+          {/* Acciones principales compactas */}
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
             <button
               type="button"
               onClick={() => {
@@ -162,58 +164,56 @@ export default function ChristmasPreviewModal({
                 setIframeKey((prev) => prev + 1);
               }}
               title="Recargar vista previa"
-              className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+              className="p-1.5 sm:p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoadingIframe ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isLoadingIframe ? 'animate-spin' : ''}`} />
             </button>
 
             <button
               type="button"
               onClick={onSaveAndPublish}
               disabled={saving}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white text-xs sm:text-sm font-semibold transition-all shadow-md shadow-pink-600/30 active:scale-95 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white text-xs sm:text-sm font-semibold transition-all shadow-md shadow-pink-600/30 active:scale-95 disabled:opacity-50"
             >
-              <Save className="w-4 h-4" />
-              <span>{saving ? 'Guardando...' : 'Guardar y Publicar'}</span>
+              <Save className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span>{saving ? 'Guardando...' : 'Publicar'}</span>
             </button>
 
             <button
               type="button"
               onClick={onClose}
-              className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+              className="p-1.5 sm:p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
               aria-label="Cerrar vista previa"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
 
-        {/* Barra interactiva de interruptores en tiempo real */}
-        <div className="bg-[#161624] border-b border-gray-800 px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-gray-400 font-semibold mr-1">Interruptores en vivo:</span>
-
-            {/* INTERRUPTOR PRINCIPAL: NAVIDAD ACTIVADA / DESACTIVADA */}
+        {/* Barra interactiva de interruptores: Con scroll horizontal suave en móvil (no apeñuscado) */}
+        <div className="bg-[#161624] border-b border-gray-800 px-3 sm:px-6 py-2 flex items-center justify-between gap-3 text-xs overflow-x-auto scrollbar-none flex-shrink-0">
+          <div className="flex items-center gap-2 flex-nowrap sm:flex-wrap flex-shrink-0">
+            {/* INTERRUPTOR PRINCIPAL */}
             <button
               type="button"
               onClick={() => toggleOption('enabled')}
-              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full font-bold text-xs transition-all shadow-sm ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-xs transition-all shadow-sm flex-shrink-0 whitespace-nowrap ${
                 config.enabled
                   ? 'bg-emerald-500 hover:bg-emerald-400 text-white ring-2 ring-emerald-400/30'
                   : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700'
               }`}
             >
               <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-              <span>{config.enabled ? '🎄 Navidad: ACTIVADA' : '○ Navidad: DESACTIVADA (Clic para Activar)'}</span>
+              <span>{config.enabled ? '🎄 Navidad: ON' : '○ Navidad: OFF'}</span>
             </button>
 
-            <div className="h-4 w-[1px] bg-gray-700 mx-1 hidden sm:block" />
+            <div className="h-4 w-[1px] bg-gray-700 mx-0.5 flex-shrink-0" />
 
             {/* Switch Nieve */}
             <button
               type="button"
               onClick={() => toggleOption('snow')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all flex-shrink-0 whitespace-nowrap ${
                 config.enabled && config.snow
                   ? 'bg-blue-500/25 text-blue-200 border border-blue-400/40 ring-1 ring-blue-500/20'
                   : 'bg-gray-800/80 text-gray-400 hover:text-gray-200 border border-gray-700/60'
@@ -227,7 +227,7 @@ export default function ChristmasPreviewModal({
             <button
               type="button"
               onClick={() => toggleOption('lights')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all flex-shrink-0 whitespace-nowrap ${
                 config.enabled && config.lights
                   ? 'bg-amber-500/25 text-amber-200 border border-amber-400/40 ring-1 ring-amber-500/20'
                   : 'bg-gray-800/80 text-gray-400 hover:text-gray-200 border border-gray-700/60'
@@ -241,7 +241,7 @@ export default function ChristmasPreviewModal({
             <button
               type="button"
               onClick={() => toggleOption('sparkles')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all flex-shrink-0 whitespace-nowrap ${
                 config.enabled && config.sparkles
                   ? 'bg-purple-500/25 text-purple-200 border border-purple-400/40 ring-1 ring-purple-500/20'
                   : 'bg-gray-800/80 text-gray-400 hover:text-gray-200 border border-gray-700/60'
@@ -255,21 +255,21 @@ export default function ChristmasPreviewModal({
             <button
               type="button"
               onClick={() => toggleOption('giftSection')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all flex-shrink-0 whitespace-nowrap ${
                 config.enabled && config.giftSection
                   ? 'bg-rose-500/25 text-rose-200 border border-rose-400/40 ring-1 ring-rose-500/20'
                   : 'bg-gray-800/80 text-gray-400 hover:text-gray-200 border border-gray-700/60'
               }`}
             >
               <Gift className="w-3.5 h-3.5 text-rose-400" />
-              <span>Regala Belleza: {config.giftSection ? 'ON' : 'OFF'}</span>
+              <span>Regalos: {config.giftSection ? 'ON' : 'OFF'}</span>
             </button>
 
             {/* Switch Decoración Extra */}
             <button
               type="button"
               onClick={() => toggleOption('extraDecor')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all flex-shrink-0 whitespace-nowrap ${
                 config.enabled && config.extraDecor
                   ? 'bg-pink-500/25 text-pink-200 border border-pink-400/40 ring-1 ring-pink-500/20'
                   : 'bg-gray-800/80 text-gray-400 hover:text-gray-200 border border-gray-700/60'
@@ -280,40 +280,40 @@ export default function ChristmasPreviewModal({
             </button>
           </div>
 
-          <div className="flex items-center gap-2 text-xs">
+          <div className="hidden lg:flex items-center gap-2 text-xs flex-shrink-0">
             {config.enabled ? (
               <span className="inline-flex items-center gap-1.5 text-emerald-400 font-medium bg-emerald-950/40 px-3 py-1 rounded-full border border-emerald-800/40">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Ambientación navideña visible en vivo</span>
+                <span>Navidad activa en vivo</span>
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5 text-amber-300 font-medium bg-amber-950/40 px-3 py-1 rounded-full border border-amber-800/40">
                 <AlertTriangle className="w-3.5 h-3.5" />
-                <span>Navidad apagada: Tienda en diseño original</span>
+                <span>Tienda original</span>
               </span>
             )}
           </div>
         </div>
 
-        {/* Área del iframe de la tienda real */}
-        <div className="flex-1 overflow-hidden bg-[#0A0A0F] p-2 sm:p-4 flex items-center justify-center relative">
+        {/* Área del iframe de la tienda real: 100% fluida y limpia */}
+        <div className="flex-1 overflow-hidden bg-[#0A0A0F] p-0 sm:p-3 flex items-center justify-center relative">
           {isLoadingIframe && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0A0A0F]/90 z-20 gap-3 text-gray-400">
-              <RefreshCw className="w-8 h-8 text-pink-500 animate-spin" />
-              <span className="text-sm font-medium">Cargando la tienda real de Lumira Beauty...</span>
+              <RefreshCw className="w-7 h-7 sm:w-8 sm:h-8 text-pink-500 animate-spin" />
+              <span className="text-xs sm:text-sm font-medium">Cargando tienda Lumira Beauty...</span>
             </div>
           )}
 
           <div
-            className={`transition-all duration-300 h-full flex flex-col items-center justify-center ${
+            className={`transition-all duration-300 h-full flex flex-col items-center justify-center w-full ${
               device === 'mobile'
-                ? 'w-[390px]'
+                ? 'sm:max-w-[400px]'
                 : device === 'tablet'
-                ? 'w-[768px]'
+                ? 'sm:max-w-[768px]'
                 : 'w-full'
             }`}
           >
-            <div className="w-full h-full bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-800 relative">
+            <div className="w-full h-full bg-white rounded-none sm:rounded-xl shadow-2xl overflow-hidden border-0 sm:border border-gray-800 relative">
               <iframe
                 key={iframeKey}
                 ref={iframeRef}
@@ -329,19 +329,22 @@ export default function ChristmasPreviewModal({
           </div>
         </div>
 
-        {/* Pie del modal */}
-        <div className="px-6 py-2.5 bg-[#1A1A26] border-t border-gray-800 flex items-center justify-between text-xs">
-          <span className="text-gray-400">
+        {/* Pie del modal compacto */}
+        <div className="px-3 sm:px-6 py-2 sm:py-2.5 bg-[#1A1A26] border-t border-gray-800 flex items-center justify-between text-xs flex-shrink-0">
+          <span className="text-gray-400 hidden sm:inline">
             {config.enabled
-              ? '✨ Nieve, luces y decoraciones activas sobre la portada. Haz scroll para ver la sección «Regala belleza».'
-              : '🤍 Navidad apagada. Pulsa «🎄 Navidad: ACTIVADA» arriba para encender los efectos en vivo.'}
+              ? '✨ Nieve, luces y banners activos en vivo. Desliza para explorar la tienda completa.'
+              : '🤍 Navidad apagada. Pulsa «🎄 Navidad: ON» arriba para encender los efectos.'}
+          </span>
+          <span className="text-gray-400 sm:hidden text-[11px]">
+            {config.enabled ? '✨ Navidad Activa' : '🤍 Diseño Normal'}
           </span>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-1.5 rounded-xl font-semibold text-gray-300 bg-gray-800 hover:bg-gray-700 transition-colors"
+            className="px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg font-semibold text-gray-300 bg-gray-800 hover:bg-gray-700 transition-colors text-xs"
           >
-            Cerrar Vista Previa
+            Cerrar
           </button>
         </div>
       </div>

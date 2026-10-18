@@ -91,7 +91,7 @@ export default function NavidadClient({ initialConfig }: NavidadClientProps) {
         </div>
 
         {/* Botones de acción principales */}
-        <div className="flex items-center gap-3">
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
           <button
             type="button"
             onClick={() => {
@@ -100,17 +100,17 @@ export default function NavidadClient({ initialConfig }: NavidadClientProps) {
               }
               setIsPreviewOpen(true);
             }}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-pink-200 bg-pink-50/50 hover:bg-pink-50 text-pink-700 text-sm font-semibold transition-all hover:border-pink-300 shadow-sm active:scale-95"
+            className="w-full sm:w-auto justify-center inline-flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl border border-pink-200 bg-pink-50/50 hover:bg-pink-50 text-pink-700 text-xs sm:text-sm font-semibold transition-all hover:border-pink-300 shadow-sm active:scale-95"
           >
-            <Eye className="w-4 h-4" />
-            <span>Vista previa</span>
+            <Eye className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">Vista previa</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleSaveChanges()}
             disabled={isSaving || !hasUnsavedChanges}
-            className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm ${
+            className={`w-full sm:w-auto justify-center inline-flex items-center gap-2 px-3 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm ${
               hasUnsavedChanges
                 ? 'bg-pink-600 hover:bg-pink-700 text-white shadow-pink-600/20 active:scale-95'
                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
@@ -118,13 +118,13 @@ export default function NavidadClient({ initialConfig }: NavidadClientProps) {
           >
             {isSaving ? (
               <>
-                <RefreshCw className="w-4 h-4 animate-spin" />
-                <span>Guardando...</span>
+                <RefreshCw className="w-4 h-4 animate-spin flex-shrink-0" />
+                <span className="truncate">Guardando...</span>
               </>
             ) : (
               <>
-                <Save className="w-4 h-4" />
-                <span>Guardar cambios</span>
+                <Save className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate">Guardar</span>
               </>
             )}
           </button>
