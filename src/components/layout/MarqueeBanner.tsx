@@ -5,6 +5,12 @@ import { usePathname } from 'next/navigation';
 export default function MarqueeBanner() {
   const pathname = usePathname();
   const isHome = !pathname || pathname === '/' || pathname === '';
+
+  // La barra tipo marquesina es exclusiva de la portada principal sobre el Hero
+  if (!isHome) {
+    return null;
+  }
+
   const messages = [
     "ENVÍOS A TODO EL PAÍS",
     "PAGO CONTRA ENTREGA",
@@ -16,26 +22,21 @@ export default function MarqueeBanner() {
   const allMessages = [...messages, ...messages, ...messages, ...messages];
 
   return (
-    <div className={isHome ? 'absolute top-0 inset-x-0 z-[60] h-[2.1rem] pointer-events-none' : ''}>
-    <div
-      className={`marquee-container ${
-        isHome
-          ? 'absolute inset-x-0 top-0 h-[2.1rem] flex items-center bg-transparent pointer-events-none'
-          : 'py-2 bg-primary'
-      }`}
-    >
-      <div className="marquee-content">
-        {allMessages.map((msg, index) => (
-          <span
-            key={index}
-            className="inline-flex items-center gap-6 mx-6 text-[11px] sm:text-xs font-semibold text-white tracking-[0.2em]"
-          >
-            <span>{msg}</span>
-            <span className="text-white/60 text-[8px]">•</span>
-          </span>
-        ))}
+    <div className="absolute top-0 inset-x-0 z-[60] h-[2.1rem] pointer-events-none">
+      <div className="marquee-container absolute inset-x-0 top-0 h-[2.1rem] flex items-center bg-transparent pointer-events-none">
+        <div className="marquee-content">
+          {allMessages.map((msg, index) => (
+            <span
+              key={index}
+              className="inline-flex items-center gap-6 mx-6 text-[11px] sm:text-xs font-semibold text-white tracking-[0.2em]"
+            >
+              <span>{msg}</span>
+              <span className="text-white/60 text-[8px]">•</span>
+            </span>
+          ))}
+        </div>
       </div>
-    </div>
     </div>
   );
 }
+

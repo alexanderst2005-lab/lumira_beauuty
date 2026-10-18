@@ -97,7 +97,7 @@ export default function StoreLayoutWrapper({ children, config }: { children: Rea
       <FavoritesProvider>
         <CartProvider>
           <Suspense fallback={null}><ScrollRestorer isAdmin={isAdmin} /></Suspense>
-          <MarqueeBanner />
+          {isHome && <MarqueeBanner />}
           <Header config={config} />
           <main className={`min-h-screen overflow-x-clip ${!isHome ? 'pt-16 sm:pt-20' : ''}`}>{children}</main>
           <Footer config={config} />
