@@ -454,9 +454,6 @@ export default function PedidosClient({ initialOrders, products }: { initialOrde
                 </p>
                 <p className="font-bold text-gray-900 text-sm">{selectedOrder.name}</p>
                 <p className="text-xs text-gray-500">
-                  CC: {selectedOrder.document || selectedOrder.id?.slice(0, 8)}
-                </p>
-                <p className="text-xs text-gray-500">
                   {selectedOrder.whatsapp}
                 </p>
                 <p className="text-xs text-gray-500 truncate" title={selectedOrder.email}>
