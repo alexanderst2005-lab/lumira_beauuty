@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { readCampaigns } from '@/data/campaignsManager';
+import { getCampaignsAsync } from '@/data/campaignsManager';
 import { getAllProductsFromNotion } from '@/data/notion';
 import CampanasClient from './CampanasClient';
 
@@ -13,7 +13,7 @@ export const revalidate = 0;
 
 export default async function CampanasPage() {
   const [initialCampaigns, availableProducts] = await Promise.all([
-    Promise.resolve(readCampaigns()),
+    getCampaignsAsync(),
     getAllProductsFromNotion()
   ]);
 

@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { 
-  readCampaigns, 
-  saveCampaign, 
-  deleteCampaign, 
-  toggleCampaign 
+  getCampaignsAsync, 
+  saveCampaignAsync, 
+  deleteCampaignAsync, 
+  toggleCampaignAsync 
 } from '@/data/campaignsManager';
 import { PromotionalCampaign, CampaignFrequency } from '@/types/campaign';
 
@@ -36,7 +36,7 @@ export async function GET() {
   }
 
   try {
-    const campaigns = readCampaigns();
+    const campaigns = await getCampaignsAsync();
     return NextResponse.json({ campaigns }, {
       headers: {
         'Cache-Control': 'no-store, no-cache, must-revalidate'
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     const { action, data, id } = body;
 
     if (action === 'toggle' && id) {
-      const updated = toggleCampaign(id);
+      const updated = await toggleCampaignAsync(id);
       if (!updated) {
         return NextResponse.json({ error: 'Campaña no encontrada' }, { status: 404 });
       }
@@ -67,10 +67,9 @@ export async function POST(request: Request) {
     }
 
     if (action === 'delete' && id) {
-      deleteCampaign(id);
+      await deleteCampaignAsync(id);
       return NextResponse.json({ success: true });
     }
-
 
     if (action === 'save' && data) {
       // Validaciones
@@ -101,7 +100,7 @@ export async function POST(request: Request) {
         products: Array.isArray(data.products) ? data.products : []
       };
 
-      const saved = saveCampaign(campaignPayload);
+      const saved = await saveCampaignAsync(campaignPayload);
       return NextResponse.json({ success: true, campaign: saved });
     }
 

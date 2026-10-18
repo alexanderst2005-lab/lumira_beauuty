@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getActiveCampaign, readCampaigns, getActiveDiscountsMap } from '@/data/campaignsManager';
+import { getActiveCampaignAsync, getCampaignsAsync, getActiveDiscountsMapAsync } from '@/data/campaignsManager';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -10,7 +10,7 @@ export async function GET(request: Request) {
     const previewId = searchParams.get('preview');
 
     if (previewId) {
-      const all = readCampaigns();
+      const all = await getCampaignsAsync();
       const target = all.find(c => c.id === previewId);
       if (target) {
         const previewDiscounts: Record<string, any> = {};
@@ -35,8 +35,8 @@ export async function GET(request: Request) {
       }
     }
 
-    const active = getActiveCampaign();
-    const discounts = getActiveDiscountsMap();
+    const active = await getActiveCampaignAsync();
+    const discounts = await getActiveDiscountsMapAsync();
 
     return NextResponse.json({
       campaign: active,
